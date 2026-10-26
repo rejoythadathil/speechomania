@@ -20,13 +20,13 @@ Local is the development environment. It uses no cloud resource that prod uses, 
 ## Steps
 1. Start the local services:
    ```bash
-   cd deploy.dccd/dev
+   cd deploy.speechomania/dev
    cp .env.example .env
    docker compose up -d --build
    ```
 2. Start the API (first terminal):
    ```bash
-   cd api.dccd
+   cd api.speechomania
    cp .env.example .env
    bun install
    bun run migrate
@@ -35,31 +35,31 @@ Local is the development environment. It uses no cloud resource that prod uses, 
    ```
 3. Start the frontend (second terminal):
    ```bash
-   cd app.dccd
+   cd app.speechomania
    bun install
    bun run dev
    ```
-4. Open http://localhost:5173 and sign in. Every seed account uses the password `dccd-local-123`:
+4. Open http://localhost:5173 and sign in. Every seed account uses the password `speechomania-local-123`:
 
    | Email | Role |
    |---|---|
-   | `admin@dccd.local` | Admin |
-   | `mentor.rahul@dccd.local` | Mentor (Aarav, Diya) |
-   | `mentor.fathima@dccd.local` | Mentor (Ethan) |
-   | `parent.priya@dccd.local` | Parent (Aarav, Diya) |
-   | `parent.joseph@dccd.local` | Parent (Ethan) |
-   | `parent.lakshmi@dccd.local` | Parent (Meera, no mentor yet) |
+   | `admin@speechomania.local` | Admin |
+   | `mentor.rahul@speechomania.local` | Mentor (Aarav, Diya) |
+   | `mentor.fathima@speechomania.local` | Mentor (Ethan) |
+   | `parent.priya@speechomania.local` | Parent (Aarav, Diya) |
+   | `parent.joseph@speechomania.local` | Parent (Ethan) |
+   | `parent.lakshmi@speechomania.local` | Parent (Meera, no mentor yet) |
 
 ## Checks before a pull request
 ```bash
-cd api.dccd && bun run lint && bun test
-cd app.dccd && bun run lint && bun run build
+cd api.speechomania && bun run lint && bun test
+cd app.speechomania && bun run lint && bun run build
 ```
-The API tests create their own `dccd_test` database and sign in through the emulator, so the local stack must be running.
+The API tests create their own `speechomania_test` database and sign in through the emulator, so the local stack must be running.
 
 ## Adding a BoardUI component
 ```bash
-cd app.dccd
+cd app.speechomania
 bun run boardui:add select
 bun run boardui:jsx
 ```
@@ -71,8 +71,8 @@ Only use components from BoardUI's free list. The second command converts the ne
 
 ## Reset
 ```bash
-cd deploy.dccd/dev
+cd deploy.speechomania/dev
 docker compose down -v
 docker compose up -d
-cd ../../api.dccd && bun run migrate && bun run seed
+cd ../../api.speechomania && bun run migrate && bun run seed
 ```

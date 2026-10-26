@@ -1,0 +1,69 @@
+name: speechomania-dev
+
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: speechomania-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PG_DB_NAME}
+      POSTGRES_USER: ${PG_ADMIN_USER}
+      POSTGRES_PASSWORD: ${PG_ADMIN_PASSWORD}
+      PG_APP_USER: ${PG_APP_USER}
+      PG_APP_PASSWORD: ${PG_APP_PASSWORD}
+      TZ: ${TZ}
+    ports:
+      - "127.0.0.1:${PG_HOST_PORT}:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_ADMIN_USER} -d ${PG_DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  valkey:
+    image: valkey/valkey:9.0.3-alpine
+    container_name: speechomania-dev-valkey
+    restart: unless-stopped
+    command: ["valkey-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction", "--requirepass", "${VALKEY_PASSWORD}"]
+    ports:
+      - "127.0.0.1:${VALKEY_HOST_PORT}:6379"
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a ${VALKEY_PASSWORD} --no-auth-warning ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  storage:
+    image: rustfs/rustfs:1.0.3
+    container_name: speechomania-dev-storage
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY_ID}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_ACCESS_KEY}
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "127.0.0.1:${S3_HOST_PORT}:9000"
+      - "127.0.0.1:${S3_CONSOLE_HOST_PORT}:9001"
+    volumes:
+      - storage-data:/data
+
+  auth:
+    build: ./firebase
+    container_name: speechomania-dev-auth
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FIREBASE_AUTH_HOST_PORT}:9099"
+      - "127.0.0.1:${FIREBASE_UI_HOST_PORT}:4000"
+    volumes:
+      - auth-data:/srv/data
+
+volumes:
+  pg-data:
+  valkey-data:
+  storage-data:
+  auth-data:

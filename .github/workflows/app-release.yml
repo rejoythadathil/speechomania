@@ -3,11 +3,11 @@ name: app-release
 on:
   push:
     branches: [main]
-    paths: ['app.dccd/**', '.github/workflows/app-*.yml']
+    paths: ['app.speechomania/**', '.github/workflows/app-*.yml']
 
 defaults:
   run:
-    working-directory: app.dccd
+    working-directory: app.speechomania
 
 jobs:
   deploy:
@@ -33,4 +33,4 @@ jobs:
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
           RELEASE=$(git rev-parse --short=12 HEAD)
           scp app-dist.tar.gz "deploy@$SSH_HOST:/tmp/app-$RELEASE.tar.gz"
-          ssh "deploy@$SSH_HOST" "sudo sh /opt/dccd/deploy.dccd/scripts/deploy-app.sh /tmp/app-$RELEASE.tar.gz $RELEASE && rm /tmp/app-$RELEASE.tar.gz"
+          ssh "deploy@$SSH_HOST" "sudo sh /opt/speechomania/deploy.speechomania/scripts/deploy-app.sh /tmp/app-$RELEASE.tar.gz $RELEASE && rm /tmp/app-$RELEASE.tar.gz"

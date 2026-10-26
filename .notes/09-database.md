@@ -1,5 +1,5 @@
 # Database schema
-The schema is defined in `api.dccd/prisma/schema.prisma`; the first migration (`prisma/migrations/20261025000000_init`) is the SQL in [`schema.sql`](schema.sql). It has **7 tables**; anything a column, the queue, S3 or the audit log can hold does not get its own table.
+The schema is defined in `api.speechomania/prisma/schema.prisma`; the first migration (`prisma/migrations/20261025000000_init`) is the SQL in [`schema.sql`](schema.sql). It has **7 tables**; anything a column, the queue, S3 or the audit log can hold does not get its own table.
 
 | Table | Holds | Replaces |
 |-------|-------|----------|
@@ -18,7 +18,7 @@ Not in the database:
 
 Rules:
 - **IDs:** UUID v7 (`uuidv7()`, built into Postgres 18), so IDs are time-ordered and index-friendly.
-- **App DB role:** the API connects as `dccd_app` (not the table owner) and cannot update or delete `audit_logs`. Migrations run as a separate owner role.
+- **App DB role:** the API connects as `speechomania_app` (not the table owner) and cannot update or delete `audit_logs`. Migrations run as a separate owner role.
 - **`metadata` column:** every table has `metadata jsonb NOT NULL DEFAULT '{}'` for extra values that don't have a column yet (imports, migrations, data transfer). Anything that is filtered, joined or must be valid gets a real column instead. Joi validates what goes into it, and personal data is not dumped there.
 - **Soft delete:** `deleted_at` on users, children and remarks. Hard delete only through the erasure action.
 - **Total stars** for a child are `SUM(attempts.stars)`; badges are computed from attempts, not stored.

@@ -112,6 +112,6 @@ CREATE TABLE audit_logs (
 CREATE INDEX audit_logs_entity_idx ON audit_logs (entity_type, entity_id, created_at DESC);
 CREATE INDEX audit_logs_actor_idx ON audit_logs (actor_id, created_at DESC);
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO dccd_app;
-GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO dccd_app;
-REVOKE UPDATE, DELETE ON audit_logs FROM dccd_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO speechomania_app;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO speechomania_app;
+REVOKE UPDATE, DELETE ON audit_logs FROM speechomania_app;

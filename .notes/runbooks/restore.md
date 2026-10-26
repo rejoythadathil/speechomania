@@ -13,7 +13,7 @@ Use when data is lost or corrupted, or the VM is gone.
 3. **Get a VM:** the existing one, or a fresh one set up with [prod-first-setup.md](prod-first-setup.md) steps 1–5.
 4. **Restore:**
    ```bash
-   sudo sh /opt/dccd/deploy.dccd/backup/scripts/restore-pitr.sh --time "2026-11-02 10:41:00+00"
+   sudo sh /opt/speechomania/deploy.speechomania/backup/scripts/restore-pitr.sh --time "2026-11-02 10:41:00+00"
    ```
 5. **Verify** before opening traffic:
    - [ ] row counts for `users`, `children`, `attempts`, `remarks` look right

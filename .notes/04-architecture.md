@@ -5,7 +5,7 @@
   - Spike these on Bun before committing (phase 0): `firebase-admin` token verification, BullMQ, Playwright PDF rendering. If Playwright misbehaves, only the report worker runs on Node.
   - `Bun.sql` behind PgBouncer (transaction mode) must have prepared statements turned off.
 - **Language:** JavaScript, not TypeScript.
-- **Database:** Postgres 18 + PgBouncer. Schema and migrations are managed by **Prisma Migrate** (7.10.1): `api.dccd/prisma/schema.prisma` is the source of truth, `prisma/migrations/` holds comment-free SQL, and Prisma records what ran in `_prisma_migrations` (the app role cannot read or write it). Queries do not use Prisma Client; they stay on Bun.sql.
+- **Database:** Postgres 18 + PgBouncer. Schema and migrations are managed by **Prisma Migrate** (7.10.1): `api.speechomania/prisma/schema.prisma` is the source of truth, `prisma/migrations/` holds comment-free SQL, and Prisma records what ran in `_prisma_migrations` (the app role cannot read or write it). Queries do not use Prisma Client; they stay on Bun.sql.
 - **Bun's Postgres client (`Bun.sql`) rules**, learned while building:
   - `prepare: false`, so it works behind PgBouncer in transaction mode.
   - Pass JSON as text and cast it: `${JSON.stringify(value)}::jsonb`. Plain objects, arrays and `Date` values are not sent correctly as parameters.

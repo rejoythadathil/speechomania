@@ -5,11 +5,11 @@ coverage/
 .env.*
 !.env.example
 !.env.production.example
-!app.dccd/.env.development
-!app.dccd/.env.production
+!app.speechomania/.env.development
+!app.speechomania/.env.production
 .DS_Store
 *.log
 firebase.json
 .firebase/
-deploy.dccd/monitoring/dozzle-users.yml
-deploy.dccd/nginx/sites-rendered/
+deploy.speechomania/monitoring/dozzle-users.yml
+deploy.speechomania/nginx/sites-rendered/

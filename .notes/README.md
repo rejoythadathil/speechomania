@@ -1,9 +1,9 @@
-# DCCD platform notes
+# Speechomania platform notes
 
-The plan and runbooks for the DCCD autism learning platform. The codebase has zero comments, so this folder is where decisions, flows and procedures live.
+The plan and runbooks for the Speechomania autism learning platform. The codebase has zero comments, so this folder is where decisions, flows and procedures live.
 
 ## Built so far (2026-10-25)
-- **Foundation:** one repo, github.com/rejoyt/autismsynergies, holding `api.dccd`, `app.dccd` and `deploy.dccd`, with a root Git hook and CI workflows.
+- **Foundation:** one repo, github.com/rejoyt/autismsynergies, holding `api.speechomania`, `app.speechomania` and `deploy.speechomania`, with a root Git hook and CI workflows.
 - **Docker:** local stack (Postgres 18, Valkey, RustFS, Firebase Auth Emulator) and the prod layout (database with pgBackRest, PgBouncer, Valkey, monitoring, nginx reverse proxy and load balancer, backup and deploy scripts).
 - **Role-based access with full create, read, update and delete:** people, children, lessons with versions, remarks, change requests, audit log. Backend and frontend, with 25 API integration tests.
 - **Not built yet:** child mode, audio and report workers, media uploads, invite emails. See [10-folder-structure.md](10-folder-structure.md#not-built-yet-next-phases).

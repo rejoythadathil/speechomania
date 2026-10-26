@@ -2,14 +2,14 @@ name: app-ci
 
 on:
   pull_request:
-    paths: ['app.dccd/**', '.github/workflows/app-*.yml']
+    paths: ['app.speechomania/**', '.github/workflows/app-*.yml']
   push:
     branches: [main]
-    paths: ['app.dccd/**', '.github/workflows/app-*.yml']
+    paths: ['app.speechomania/**', '.github/workflows/app-*.yml']
 
 defaults:
   run:
-    working-directory: app.dccd
+    working-directory: app.speechomania
 
 jobs:
   build:

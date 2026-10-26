@@ -10,13 +10,13 @@
          host nginx: TLS, reverse proxy, load balancer
           │                 │                    │
    app.<domain>        api.<domain>       logs / stats.<domain>
-   static SPA from     upstream dccd_api   Dozzle, Beszel
+   static SPA from     upstream speechomania_api   Dozzle, Beszel
    /var/www            least_conn          (behind auth)
                       ┌────┴────┐
                    api-1      api-2       worker (later: audio, reports)
                    :4001      :4002       (no port)
                       └────┬────┘            │
-                 docker network: dccd-network
+                 docker network: speechomania-network
               ┌────────────┼─────────────┐
           PgBouncer ──► Postgres 18     Valkey
 ```
@@ -31,7 +31,7 @@
 - Containers bind to `127.0.0.1` only. Docker-published ports bypass UFW, so nothing binds to `0.0.0.0`.
 
 **Load balancer**
-- nginx `upstream dccd_api` with `least_conn` across two API containers (`api-1`, `api-2`), `max_fails=3 fail_timeout=10s`, keep-alive connections to the upstream.
+- nginx `upstream speechomania_api` with `least_conn` across two API containers (`api-1`, `api-2`), `max_fails=3 fail_timeout=10s`, keep-alive connections to the upstream.
 - Two replicas use more than one CPU core (Bun runs one main thread per process), and one replica keeps serving while the other restarts.
 - **Rolling deploy:** recreate `api-1`, wait for `/health`, then recreate `api-2`. No downtime.
 - nginx `limit_req` on `/v1/auth/*` as a first rate-limit layer, before the app's Valkey limiter.
@@ -41,7 +41,7 @@
 
 | Subdomain | Behind | Access |
 |---|---|---|
-| `api` | `upstream dccd_api` (api-1, api-2) | public |
+| `api` | `upstream speechomania_api` (api-1, api-2) | public |
 | `app` | static SPA in `/var/www/app.<domain>` | public |
 | `www` | static landing page | public |
 | `logs` | Dozzle | Dozzle auth |

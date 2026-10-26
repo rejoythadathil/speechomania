@@ -1,5 +1,5 @@
 # Product idea
-We are building an autism learning platform for DCCD (https://dccdglobal.com/), a client of deadend-engineers. It has 3 roles (RBAC): Admin, Mentor and Parent (who manages one or more Child profiles). Lessons are designed for autistic learners: every chapter or lesson is visual and creative, with audio. Audio is generated with ElevenLabs and stored. The MVP in `/Users/nijeesh/codes/dccd-mvp` shows the intended experience; run it before starting.
+We are building an autism learning platform called **Speechomania**, published by the company **Autism Synergies** and going live on the Speechomania website. It is not DCCD Global's product: the founder confirmed this on 2026-10-26. The client relationship is with deadend-engineers. It has 3 roles (RBAC): Admin, Mentor and Parent (who manages one or more Child profiles). Lessons are designed for autistic learners: every chapter or lesson is visual and creative, with audio. Audio is generated with ElevenLabs and stored. The MVP in `/Users/nijeesh/codes/dccd-mvp` shows the intended experience; run it before starting.
 
 # Open decisions (settle before writing code)
 | # | Decision | Proposed default |
@@ -10,9 +10,9 @@ We are building an autism learning platform for DCCD (https://dccdglobal.com/), 
 | 4 | Mentor performance metrics | Remarks per child per week, child progress rate, change requests raised/approved. |
 
 # Members
-One organisation (DCCD), three roles. This is role-based access control only; there is no multi-tenancy.
+One organisation (Speechomania), three roles. This is role-based access control only; there is no multi-tenancy.
 
-- ***Admin***: Owners of the DCCD organisation. Full access.
+- ***Admin***: Owners of the Speechomania organisation. Full access.
 - ***Mentor***: Each mentor is assigned N children. A mentor sees only their assigned children.
 - ***Parent***: A parent account owns one or more ***Child*** profiles. The child does not have their own login; the child enters "learning mode" from the parent's session using a simple picture/PIN switch. Settings, progress and remarks stay behind the parent view.
 

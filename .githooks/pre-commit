@@ -2,7 +2,7 @@
 set -eu
 staged=$(git diff --cached --name-only --diff-filter=ACM)
 [ -z "$staged" ] && exit 0
-blocked=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env' | grep -Ev '\.example$|^app\.dccd/\.env\.(development|production)$' || true)
+blocked=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env' | grep -Ev '\.example$|^app\.speechomania/\.env\.(development|production)$' || true)
 if [ -n "$blocked" ]; then
   printf 'Refusing to commit env files:\n%s\n' "$blocked"
   exit 1
@@ -25,7 +25,7 @@ if ! command -v gitleaks >/dev/null 2>&1; then
   exit 1
 fi
 gitleaks git --pre-commit --staged --redact --no-banner
-for app in api.dccd app.dccd; do
+for app in api.speechomania app.speechomania; do
   if printf '%s\n' "$staged" | grep -q "^$app/"; then
     (cd "$app" && bunx eslint .)
   fi

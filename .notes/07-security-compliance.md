@@ -19,9 +19,9 @@
 - **Children's data:** child records are personal data about minors and include health information (diagnosis). Access is need-to-know only.
 
 # Compliance
-DCCD operates in India, so the Digital Personal Data Protection Act 2023 applies:
+Speechomania operates in India, so the Digital Personal Data Protection Act 2023 applies:
 - Verifiable parental consent before any child data is stored. Consent is recorded with timestamp and version.
 - No behavioural tracking, profiling or targeted ads on children.
 - Parents can export their child's data and request erasure.
 - A defined retention period for archived children, after which data is deleted.
-- Confirm with DCCD whether they also serve users outside India (GDPR/COPPA would then apply).
+- Confirm with Speechomania whether they also serve users outside India (GDPR/COPPA would then apply).

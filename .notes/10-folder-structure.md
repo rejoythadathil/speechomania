@@ -1,14 +1,14 @@
 # Folder / codebase structure
 One repository (github.com/rejoyt/autismsynergies) with the three apps side by side, these notes, a root `.githooks/pre-commit` (env files, comments in CSS/SQL/Prisma/configs, gitleaks, eslint for the app that changed) and root `.github/workflows/` (`api-ci`, `api-release`, `app-ci`, `app-release`; each runs only when its folder changes, and deploy jobs run only when the repository variable `DEPLOY_ENABLED` is `true`). Feature folders use the feature name as the file prefix, for example `children/children.service.js`. A `.constant.js` file exists only when a feature has constants.
 
-## api.dccd (Bun + Hono)
+## api.speechomania (Bun + Hono)
 ```
-api.dccd/
+api.speechomania/
   package.json                   #scripts: dev, start, migrate, migrate:new, migrate:check, migrate:status, seed, test, lint, check-env
   bunfig.toml                    #bun test preloads test/setup.js
   eslint.config.js               #includes the no-comments rule
   Dockerfile                     #bun alpine image, runs as the bun user, health check on /health
-  docker-compose.yml             #prod: api-1 (:4001), api-2 (:4002), migrate (one-shot profile); joins dccd-network
+  docker-compose.yml             #prod: api-1 (:4001), api-2 (:4002), migrate (one-shot profile); joins speechomania-network
   .env.example                   #local values
   .env.production.example        #prod shape (APP_ENV=prod, pgbouncer, TRUST_PROXY=true)
   config/index.js                #reads env, validates with Joi, refuses prod/local mix-ups
@@ -50,9 +50,9 @@ api.dccd/
   test/                          #25 integration tests against Postgres and the Firebase emulator
 ```
 
-## app.dccd (Vite + React 19 + Tailwind v4 + BoardUI)
+## app.speechomania (Vite + React 19 + Tailwind v4 + BoardUI)
 ```
-app.dccd/
+app.speechomania/
   package.json                   #scripts: dev, build, lint, boardui:add, boardui:jsx
   vite.config.js                 #react + @tailwindcss/vite, @ alias to src
   eslint.config.js               #no-comments, react hooks, BoardUI / mochi-icons boundary
@@ -65,10 +65,10 @@ app.dccd/
     main.jsx                     #providers: direction, auth, toasts, router
     routes.jsx                   #RequireAuth and RequireRole guards
     index.css                    #BoardUI styles + brand.css
-    assets/dccd-mark.svg
+    assets/speechomania-mark.svg
     styles/
       globals.css, theme.css, typography.css   #BoardUI (comments stripped)
-      brand.css                  #DCCD colours and fonts on top of BoardUI tokens
+      brand.css                  #Speechomania colours and fonts on top of BoardUI tokens
     components/
       base/                      #BoardUI free components (JSX)
       foundations/               #BoardUI internals (direction, icons)
@@ -87,9 +87,9 @@ app.dccd/
       child/                     #(child mode, next phase)
 ```
 
-## deploy.dccd (same layout as xam-reloaded/server)
+## deploy.speechomania (same layout as xam-reloaded/server)
 ```
-deploy.dccd/
+deploy.speechomania/
   .env.example                   #prod VM env; setup.sh copies it and generates the passwords
   dev/                           #local: postgres 18, valkey, rustfs, firebase auth emulator (ports 7101–7106)
   database/
@@ -105,7 +105,7 @@ deploy.dccd/
     health-check.sh              #every 15 min: disk, WAL archiving, both API replicas
   monitoring/docker-compose.yml  #autoheal, dozzle, beszel hub + agent
   nginx/
-    conf.d/                      #websocket map; upstream dccd_api (least_conn, api-1 + api-2) and rate-limit zone
+    conf.d/                      #websocket map; upstream speechomania_api (least_conn, api-1 + api-2) and rate-limit zone
     snippets/                    #security headers, Cloudflare real IP, TLS
     templates/                   #http-redirect, api (load balanced), proxy (dozzle, beszel), static (SPA with CSP)
   scripts/
