@@ -1,0 +1,151 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../node_modules/.prisma-client"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model users {
+  id                String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  firebase_uid      String?           @unique
+  email             String            @unique @db.Citext
+  full_name         String
+  phone             String?
+  role              String
+  status            String            @default("invited")
+  metadata          Json              @default("{}")
+  created_at        DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime          @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime?         @db.Timestamptz(6)
+  children          children[]        @relation("child_parent")
+  mentoring         children[]        @relation("child_mentor")
+  lessons_created   lessons[]         @relation("lesson_creator")
+  lessons_published lessons[]         @relation("lesson_publisher")
+  remarks           remarks[]
+  requests_made     change_requests[] @relation("request_author")
+  requests_reviewed change_requests[] @relation("request_reviewer")
+  audit_logs        audit_logs[]
+}
+
+model children {
+  id               String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  parent_id        String     @db.Uuid
+  mentor_id        String?    @db.Uuid
+  display_name     String
+  date_of_birth    DateTime?  @db.Date
+  avatar_key       String?
+  pin_hash         String?
+  sensory_settings Json       @default("{}")
+  assigned_lessons Json       @default("[]")
+  consent_version  String
+  consent_at       DateTime   @default(now()) @db.Timestamptz(6)
+  status           String     @default("active")
+  metadata         Json       @default("{}")
+  created_at       DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime   @default(now()) @db.Timestamptz(6)
+  deleted_at       DateTime?  @db.Timestamptz(6)
+  parent           users      @relation("child_parent", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  mentor           users?     @relation("child_mentor", fields: [mentor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  attempts         attempts[]
+  remarks          remarks[]
+
+  @@index([parent_id], map: "children_parent_idx")
+  @@index([mentor_id], map: "children_mentor_idx")
+}
+
+model lessons {
+  id              String            @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  slug            String            @db.Citext
+  version         Int
+  title           String
+  content         Json
+  status          String            @default("draft")
+  created_by      String            @db.Uuid
+  published_by    String?           @db.Uuid
+  published_at    DateTime?         @db.Timestamptz(6)
+  metadata        Json              @default("{}")
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  creator         users             @relation("lesson_creator", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  publisher       users?            @relation("lesson_publisher", fields: [published_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  attempts        attempts[]
+  change_requests change_requests[]
+
+  @@unique([slug, version])
+  @@unique([slug], map: "lessons_one_draft", where: raw("(status = 'draft'::text)"))
+  @@unique([slug], map: "lessons_one_published", where: raw("(status = 'published'::text)"))
+}
+
+model attempts {
+  id              String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  child_id        String    @db.Uuid
+  lesson_id       String    @db.Uuid
+  status          String    @default("in_progress")
+  steps_total     Int
+  steps_completed Int       @default(0)
+  events          Json      @default("[]")
+  stars           Int       @default(0)
+  metadata        Json      @default("{}")
+  started_at      DateTime  @default(now()) @db.Timestamptz(6)
+  completed_at    DateTime? @db.Timestamptz(6)
+  child           children  @relation(fields: [child_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lesson          lessons   @relation(fields: [lesson_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([child_id, started_at(sort: Desc)], map: "attempts_child_idx")
+}
+
+model remarks {
+  id         String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  child_id   String    @db.Uuid
+  author_id  String    @db.Uuid
+  body       String
+  visibility String    @default("internal")
+  seen_at    DateTime? @db.Timestamptz(6)
+  metadata   Json      @default("{}")
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at DateTime? @db.Timestamptz(6)
+  child      children  @relation(fields: [child_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  author     users     @relation(fields: [author_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([child_id, created_at(sort: Desc)], map: "remarks_child_idx")
+  @@index([created_at], map: "remarks_unseen_idx", where: raw("(seen_at IS NULL)"))
+}
+
+model change_requests {
+  id              String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  lesson_id       String    @db.Uuid
+  requested_by    String    @db.Uuid
+  reason          String
+  proposed_change Json
+  status          String    @default("pending")
+  reviewed_by     String?   @db.Uuid
+  review_note     String?
+  reviewed_at     DateTime? @db.Timestamptz(6)
+  metadata        Json      @default("{}")
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  lesson          lessons   @relation(fields: [lesson_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  author          users     @relation("request_author", fields: [requested_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewer        users?    @relation("request_reviewer", fields: [reviewed_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([created_at], map: "change_requests_pending_idx", where: raw("(status = 'pending'::text)"))
+}
+
+model audit_logs {
+  id          BigInt   @id @default(autoincrement())
+  actor_id    String?  @db.Uuid
+  action      String
+  entity_type String
+  entity_id   String
+  diff        Json?
+  ip          String?  @db.Inet
+  request_id  String?
+  metadata    Json     @default("{}")
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  actor       users?   @relation(fields: [actor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([entity_type, entity_id, created_at(sort: Desc)], map: "audit_logs_entity_idx")
+  @@index([actor_id, created_at(sort: Desc)], map: "audit_logs_actor_idx")
+}

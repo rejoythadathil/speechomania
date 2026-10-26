@@ -1,0 +1,27 @@
+# Architecture
+- **Runtime:** Bun (API and worker), with Hono as the HTTP framework.
+  - Bun gives fast startup, a built-in test runner and built-in clients for Postgres (`Bun.sql`), S3 (`Bun.s3`) and Valkey/Redis (`Bun.redis`), so fewer dependencies.
+  - Hono is small, fast and runtime-agnostic. If Bun ever blocks us, the same routes run on Node.
+  - Spike these on Bun before committing (phase 0): `firebase-admin` token verification, BullMQ, Playwright PDF rendering. If Playwright misbehaves, only the report worker runs on Node.
+  - `Bun.sql` behind PgBouncer (transaction mode) must have prepared statements turned off.
+- **Language:** JavaScript, not TypeScript.
+- **Database:** Postgres 18 + PgBouncer. Schema and migrations are managed by **Prisma Migrate** (7.10.1): `api.dccd/prisma/schema.prisma` is the source of truth, `prisma/migrations/` holds comment-free SQL, and Prisma records what ran in `_prisma_migrations` (the app role cannot read or write it). Queries do not use Prisma Client; they stay on Bun.sql.
+- **Bun's Postgres client (`Bun.sql`) rules**, learned while building:
+  - `prepare: false`, so it works behind PgBouncer in transaction mode.
+  - Pass JSON as text and cast it: `${JSON.stringify(value)}::jsonb`. Plain objects, arrays and `Date` values are not sent correctly as parameters.
+  - Use `now()` in SQL instead of passing a JavaScript date.
+  - Postgres error codes are on `error.errno` (for example `23505` for a duplicate).
+- **Valkey:** queues (BullMQ), rate limiting and short-lived cache only. Lesson assets are not cached here; the CDN handles them.
+- **Frontend:** Vite + React 19 with Tailwind CSS v4 + CSS modules (`.module.css`). Components from BoardUI's free MIT set only; no Pro components. Landing page: static (Next.js only if it grows beyond a few pages).
+- **Validation:** Joi on every route (body, params, query).
+- **Reports:** EJS → Playwright PDF, through the queue.
+- **Media:** a private S3 bucket behind a CDN. Children get media through signed URLs/cookies. Admin uploads use presigned URLs with MIME type and size checks.
+- **Auth:** Firebase Authentication. Each user's role lives in Postgres, never in what the client sends.
+- **Logging and monitoring** (same stack as xam):
+  - structured JSON logs (pino), with no personal data in logs
+  - Dozzle for live container logs
+  - Beszel for host and per-container CPU, RAM and network history
+  - Autoheal restarts containers whose health check fails
+  - Sentry for errors
+  - Discord webhook for backup, restore-check and health alerts
+- **Hosting:** a single Ubuntu VM. See Deployment and Foundation: Backup & Recovery.

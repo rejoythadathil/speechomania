@@ -1,0 +1,24 @@
+name: app-ci
+
+on:
+  pull_request:
+    paths: ['app.dccd/**', '.github/workflows/app-*.yml']
+  push:
+    branches: [main]
+    paths: ['app.dccd/**', '.github/workflows/app-*.yml']
+
+defaults:
+  run:
+    working-directory: app.dccd
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run build

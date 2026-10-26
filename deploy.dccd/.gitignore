@@ -1,0 +1,3 @@
+.env
+monitoring/dozzle-users.yml
+nginx/sites-rendered/

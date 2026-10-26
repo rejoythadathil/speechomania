@@ -1,0 +1,46 @@
+name: dccd-api
+
+x-api: &api
+  image: dccd-api:current
+  restart: unless-stopped
+  env_file: .env
+  environment:
+    PORT: 4000
+    GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase-admin.json
+  volumes:
+    - /opt/dccd/secrets/firebase-admin.json:/run/secrets/firebase-admin.json:ro
+  networks:
+    - dccd-network
+  labels:
+    autoheal: "true"
+  logging:
+    driver: json-file
+    options:
+      max-size: 20m
+      max-file: "5"
+
+services:
+  api-1:
+    <<: *api
+    container_name: dccd-api-1
+    ports:
+      - "127.0.0.1:4001:4000"
+
+  api-2:
+    <<: *api
+    container_name: dccd-api-2
+    ports:
+      - "127.0.0.1:4002:4000"
+
+  migrate:
+    image: dccd-api:current
+    profiles: ["migrate"]
+    env_file: .env
+    command: ["bun", "run", "migrate"]
+    networks:
+      - dccd-network
+
+networks:
+  dccd-network:
+    name: dccd-network
+    external: true

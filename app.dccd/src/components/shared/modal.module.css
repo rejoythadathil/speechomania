@@ -1,0 +1,83 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8vh 16px 16px;
+  overflow-y: auto;
+  background: rgb(22 22 62 / 0.38);
+  backdrop-filter: blur(2px);
+}
+
+.overlay[data-entering] {
+  animation: fade 160ms ease-out;
+}
+
+.modal {
+  width: 100%;
+  max-width: 520px;
+  outline: none;
+}
+
+.wide {
+  max-width: 760px;
+}
+
+.modal[data-entering] {
+  animation: rise 180ms ease-out;
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background: var(--color-background-primary-default);
+  box-shadow: 0 24px 64px rgb(22 22 62 / 0.18);
+  outline: none;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 0;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 20px 20px;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-separator-border);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay[data-entering],
+  .modal[data-entering] {
+    animation: none;
+  }
+}

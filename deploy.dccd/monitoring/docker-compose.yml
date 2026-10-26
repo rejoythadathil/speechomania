@@ -1,0 +1,48 @@
+name: dccd-monitoring
+
+services:
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    container_name: dccd-autoheal
+    restart: unless-stopped
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: autoheal
+      AUTOHEAL_INTERVAL: 10
+      WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  dozzle:
+    image: amir20/dozzle:v10.5.1
+    container_name: dccd-dozzle
+    restart: unless-stopped
+    environment:
+      DOZZLE_AUTH_PROVIDER: simple
+      DOZZLE_NO_ANALYTICS: "true"
+    ports:
+      - "127.0.0.1:${DOZZLE_PORT}:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./dozzle-users.yml:/data/users.yml:ro
+
+  beszel:
+    image: henrygd/beszel:0.18.7
+    container_name: dccd-beszel
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${BESZEL_PORT}:8090"
+    volumes:
+      - beszel-data:/beszel_data
+
+  beszel-agent:
+    image: henrygd/beszel-agent:0.18.7-alpine
+    container_name: dccd-beszel-agent
+    restart: unless-stopped
+    environment:
+      LISTEN: ${BESZEL_AGENT_PORT}
+      KEY: ${BESZEL_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  beszel-data:

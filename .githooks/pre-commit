@@ -1,0 +1,32 @@
+#!/bin/sh
+set -eu
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+blocked=$(printf '%s\n' "$staged" | grep -E '(^|/)\.env' | grep -Ev '\.example$|^app\.dccd/\.env\.(development|production)$' || true)
+if [ -n "$blocked" ]; then
+  printf 'Refusing to commit env files:\n%s\n' "$blocked"
+  exit 1
+fi
+pick() { printf '%s\n' "$staged" | grep -E "$1" || true; }
+commented=$(
+  {
+    files=$(pick '\.css$'); [ -n "$files" ] && printf '%s\n' "$files" | xargs grep -lE '/\*'
+    files=$(pick '\.sql$'); [ -n "$files" ] && printf '%s\n' "$files" | xargs grep -lE '^[[:space:]]*--'
+    files=$(pick '\.prisma$'); [ -n "$files" ] && printf '%s\n' "$files" | xargs grep -lE '^[[:space:]]*//'
+    files=$(pick '\.(sh|ya?ml|conf|tmpl|ini|toml)$|(^|/)Dockerfile$|(^|/)pre-commit$'); [ -n "$files" ] && printf '%s\n' "$files" | xargs grep -lE '^[[:space:]]*#([^!]|$)'
+  } 2>/dev/null || true
+)
+if [ -n "$commented" ]; then
+  printf 'Comments are not allowed. Put the reason in .notes instead:\n%s\n' "$commented"
+  exit 1
+fi
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo 'gitleaks is required for the secret scan. Install it: brew install gitleaks'
+  exit 1
+fi
+gitleaks git --pre-commit --staged --redact --no-banner
+for app in api.dccd app.dccd; do
+  if printf '%s\n' "$staged" | grep -q "^$app/"; then
+    (cd "$app" && bunx eslint .)
+  fi
+done

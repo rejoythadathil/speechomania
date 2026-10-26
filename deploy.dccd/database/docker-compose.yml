@@ -1,0 +1,91 @@
+name: dccd-database
+
+services:
+  db:
+    build: ./postgres
+    image: dccd-postgres:18
+    container_name: dccd-db
+    restart: unless-stopped
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    environment:
+      POSTGRES_DB: ${PG_DB_NAME}
+      POSTGRES_USER: ${PG_ADMIN_USER}
+      POSTGRES_PASSWORD: ${PG_ADMIN_PASSWORD}
+      PG_APP_USER: ${PG_APP_USER}
+      PG_APP_PASSWORD: ${PG_APP_PASSWORD}
+      TZ: ${TZ}
+      PGBACKREST_REPO1_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT}
+      PGBACKREST_REPO1_S3_REGION: ${BACKUP_S3_REGION}
+      PGBACKREST_REPO1_S3_BUCKET: ${BACKUP_S3_BUCKET}
+      PGBACKREST_REPO1_S3_KEY: ${BACKUP_S3_ACCESS_KEY_ID}
+      PGBACKREST_REPO1_S3_KEY_SECRET: ${BACKUP_S3_SECRET_ACCESS_KEY}
+      PGBACKREST_REPO1_CIPHER_PASS: ${BACKUP_ENCRYPTION_PASSPHRASE}
+    ports:
+      - "127.0.0.1:${PG_HOST_PORT}:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql
+      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./config/profiles/${SERVER_PROFILE}.conf:/etc/postgresql/conf.d/profile.conf:ro
+      - ./config/pgbackrest.conf:/etc/pgbackrest/pgbackrest.conf:ro
+      - ./config/init:/docker-entrypoint-initdb.d:ro
+    shm_size: 256mb
+    networks:
+      - dccd-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_ADMIN_USER} -d ${PG_DB_NAME}"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    labels:
+      autoheal: "true"
+
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.25.1-p0
+    container_name: dccd-pgbouncer
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${PG_APP_USER}
+      DB_PASSWORD: ${PG_APP_PASSWORD}
+      DB_NAME: ${PG_DB_NAME}
+      AUTH_TYPE: scram-sha-256
+      POOL_MODE: transaction
+      DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE}
+      RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE}
+      MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN}
+      SERVER_RESET_QUERY: DISCARD ALL
+    ports:
+      - "127.0.0.1:${PGBOUNCER_HOST_PORT}:5432"
+    networks:
+      - dccd-network
+
+  valkey:
+    image: valkey/valkey:9.0.3-alpine
+    container_name: dccd-valkey
+    restart: unless-stopped
+    command: ["valkey-server", "--appendonly", "yes", "--maxmemory", "${VALKEY_MAX_MEMORY}", "--maxmemory-policy", "noeviction", "--requirepass", "${VALKEY_PASSWORD}"]
+    volumes:
+      - valkey-data:/data
+    networks:
+      - dccd-network
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a $$VALKEY_PASSWORD --no-auth-warning ping | grep PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    environment:
+      VALKEY_PASSWORD: ${VALKEY_PASSWORD}
+
+volumes:
+  pg-data:
+  valkey-data:
+
+networks:
+  dccd-network:
+    name: dccd-network
+    external: true

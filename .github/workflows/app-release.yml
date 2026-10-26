@@ -1,0 +1,36 @@
+name: app-release
+
+on:
+  push:
+    branches: [main]
+    paths: ['app.dccd/**', '.github/workflows/app-*.yml']
+
+defaults:
+  run:
+    working-directory: app.dccd
+
+jobs:
+  deploy:
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: tar -czf app-dist.tar.gz -C dist .
+      - name: Upload and switch the release on the prod VM
+        env:
+          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          RELEASE=$(git rev-parse --short=12 HEAD)
+          scp app-dist.tar.gz "deploy@$SSH_HOST:/tmp/app-$RELEASE.tar.gz"
+          ssh "deploy@$SSH_HOST" "sudo sh /opt/dccd/deploy.dccd/scripts/deploy-app.sh /tmp/app-$RELEASE.tar.gz $RELEASE && rm /tmp/app-$RELEASE.tar.gz"
