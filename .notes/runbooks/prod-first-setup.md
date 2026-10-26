@@ -15,7 +15,7 @@ One-time setup of the prod VM, following the `xam-reloaded/server` pattern. See 
 1. Clone the repo (it holds `deploy.speechomania` and `api.speechomania`, so the paths below match):
    ```bash
    sudo mkdir -p /opt/speechomania && sudo chown deploy:deploy /opt/speechomania
-   git clone https://github.com/rejoyt/autismsynergies.git /opt/speechomania
+   git clone https://github.com/rejoythadathil/speechomania.git /opt/speechomania
    cd /opt/speechomania/deploy.speechomania
    ```
 2. Install packages, generate `.env` with fresh passwords, create the Dozzle login and turn on the firewall (22, 80, 443 only):

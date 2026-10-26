@@ -1,6 +1,6 @@
 # Speechomania platform
 
-One repo (github.com/rejoyt/autismsynergies) with three apps: `api.speechomania` (Bun + Hono), `app.speechomania` (React 19 + Vite + Tailwind v4 + BoardUI free), `deploy.speechomania` (Docker, nginx, backups). Plans and runbooks live in `.notes/`. The pre-commit hook is `.githooks/pre-commit` at the root (`git config core.hooksPath .githooks`); CI is `.github/workflows/` at the root, one CI and one release workflow per app.
+One repo (github.com/rejoythadathil/speechomania) with three apps: `api.speechomania` (Bun + Hono), `app.speechomania` (React 19 + Vite + Tailwind v4 + BoardUI free), `deploy.speechomania` (Docker, nginx, backups). Plans and runbooks live in `.notes/`. The pre-commit hook is `.githooks/pre-commit` at the root (`git config core.hooksPath .githooks`); CI is `.github/workflows/` at the root, one CI and one release workflow per app.
 
 ## Commits
 - Commits and pull requests carry no AI co-author or "generated with" lines.

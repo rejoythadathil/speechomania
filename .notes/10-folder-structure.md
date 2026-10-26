@@ -1,5 +1,5 @@
 # Folder / codebase structure
-One repository (github.com/rejoyt/autismsynergies) with the three apps side by side, these notes, a root `.githooks/pre-commit` (env files, comments in CSS/SQL/Prisma/configs, gitleaks, eslint for the app that changed) and root `.github/workflows/` (`api-ci`, `api-release`, `app-ci`, `app-release`; each runs only when its folder changes, and deploy jobs run only when the repository variable `DEPLOY_ENABLED` is `true`). Feature folders use the feature name as the file prefix, for example `children/children.service.js`. A `.constant.js` file exists only when a feature has constants.
+One repository (github.com/rejoythadathil/speechomania) with the three apps side by side, these notes, a root `.githooks/pre-commit` (env files, comments in CSS/SQL/Prisma/configs, gitleaks, eslint for the app that changed) and root `.github/workflows/` (`api-ci`, `api-release`, `app-ci`, `app-release`; each runs only when its folder changes, and deploy jobs run only when the repository variable `DEPLOY_ENABLED` is `true`). Feature folders use the feature name as the file prefix, for example `children/children.service.js`. A `.constant.js` file exists only when a feature has constants.
 
 ## api.speechomania (Bun + Hono)
 ```
