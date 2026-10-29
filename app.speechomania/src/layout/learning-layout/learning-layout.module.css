@@ -1,0 +1,74 @@
+.root {
+  --child-ink: #1b2a38;
+  --child-ink-soft: #3a5064;
+  --child-ink-muted: #607487;
+  --child-blue-50: #eaf3fa;
+  --child-blue-100: #d4e7f4;
+  --child-blue-500: #3a8fc4;
+  --child-blue-700: #1d5a80;
+  --child-blue-900: #123c57;
+  --child-coral: #e2674f;
+  --child-coral-50: #fdeee9;
+  --child-coral-ink: #9c3a26;
+  --child-amber: #f2b93b;
+  --child-amber-soft: #fff4d8;
+  --child-lift: 0 2px 0 rgba(27, 42, 56, 0.06), 0 14px 34px -12px rgba(27, 42, 56, 0.22);
+  --child-ground: 19%;
+  --child-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --child-t: 420ms;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #dcefff;
+  color: var(--child-ink);
+  font-family: "Lexend", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.root[data-motion='off'] {
+  --child-t: 0ms;
+}
+
+.root[data-colour='low'] {
+  filter: saturate(0.85);
+}
+
+:where(.root) button {
+  cursor: pointer;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+:where(.root) :focus-visible {
+  outline: 3px solid var(--child-blue-700);
+  outline-offset: 4px;
+}
+
+.state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 18px;
+  padding: 24px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.back {
+  height: 64px;
+  padding: 0 28px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: var(--child-lift);
+}
+
+@media (max-width: 860px) {
+  .root {
+    --child-ground: 26%;
+  }
+}

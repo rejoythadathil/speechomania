@@ -1,5 +1,5 @@
 import { getConnInfo } from 'hono/bun'
-import { logger } from '../../common-service/logger/index.js'
+import { logger } from '../../common-service/logger/service/index.js'
 import { config } from '../../config/index.js'
 
 function remoteAddress(c) {

@@ -1,10 +1,10 @@
-import { HttpError } from '../../utils.js'
+import { invalidFields, invalidJson } from '../../common-service/http/exception/index.js'
 
 async function readBody(c) {
   try {
     return await c.req.json()
   } catch {
-    throw new HttpError(400, 'The request body must be valid JSON')
+    throw invalidJson()
   }
 }
 
@@ -22,7 +22,7 @@ export function validate(schemas) {
       const { value, error } = schemas[part].validate(await readPart(c, part), { abortEarly: false, convert: true })
       if (error) {
         const details = error.details.map((detail) => ({ field: detail.path.join('.'), message: detail.message.replaceAll('"', '') }))
-        throw new HttpError(400, 'Some fields need attention', details)
+        throw invalidFields(details)
       }
       valid[part] = value
     }

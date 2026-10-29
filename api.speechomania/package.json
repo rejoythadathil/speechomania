@@ -13,7 +13,8 @@
     "prepare": "git config core.hooksPath .githooks",
     "migrate:new": "bun scripts/migration-new.js",
     "migrate:check": "bun --bun prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
-    "migrate:status": "bun --bun prisma migrate status"
+    "migrate:status": "bun --bun prisma migrate status",
+    "audio": "bun scripts/lesson-audio.js"
   },
   "dependencies": {
     "firebase-admin": "14.5.0",

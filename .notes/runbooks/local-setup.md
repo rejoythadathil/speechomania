@@ -39,14 +39,15 @@ Local is the development environment. It uses no cloud resource that prod uses, 
    bun install
    bun run dev
    ```
-4. Open http://localhost:5173 and sign in. Every seed account uses the password `speechomania-local-123`:
+4. Optional, lesson voice: put your ElevenLabs key in `api.speechomania/.env` (`ELEVENLABS_API_KEY`), run `bun run audio can-and-cant`, then sign in as the admin, open Lessons → Can and can’t → the new draft, and Publish. Without it, child mode reads with the browser's voice.
+5. Open http://localhost:5173 and sign in. Every seed account uses the password `speechomania-local-123`:
 
    | Email | Role |
    |---|---|
    | `admin@speechomania.local` | Admin |
    | `mentor.rahul@speechomania.local` | Mentor (Aarav, Diya) |
    | `mentor.fathima@speechomania.local` | Mentor (Ethan) |
-   | `parent.priya@speechomania.local` | Parent (Aarav, Diya) |
+   | `parent.priya@speechomania.local` | Parent (Aarav, Diya). Child mode: My children → Aarav → Start learning |
    | `parent.joseph@speechomania.local` | Parent (Ethan) |
    | `parent.lakshmi@speechomania.local` | Parent (Meera, no mentor yet) |
 

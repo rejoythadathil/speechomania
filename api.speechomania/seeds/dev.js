@@ -1,8 +1,8 @@
 import { getAuth } from 'firebase-admin/auth'
 import { getApps, initializeApp } from 'firebase-admin/app'
-import { sql } from '../common-service/db/index.js'
+import { sql } from '../common-service/db/service/index.js'
 import { config } from '../config/index.js'
-import { json } from '../utils.js'
+import { json } from '../common-service/http/utils/index.js'
 
 if (config.APP_ENV !== 'local') {
   console.error('Seeding is only allowed with APP_ENV=local')
@@ -65,17 +65,52 @@ const admin = ids['admin@speechomania.local']
 const mentors = staff.filter(([, , role]) => role === 'mentor').map(([email]) => ids[email])
 const parents = people.filter(([, , role]) => role === 'parent').map(([email]) => ids[email])
 
+const line = (text) => ({ text })
+const cant = 'can’t'
+const canAndCant = {
+  player: 'pick',
+  contrast: cant,
+  lines: {
+    intro: line('Let’s read together.'),
+    quiz: line('Now, show me.'),
+    retry: line('Let’s look again.'),
+    skip: line('Let’s try another.'),
+    outro: line('The end. Great reading!'),
+    reward: line('You earned a sticker!')
+  },
+  steps: [
+    ['swim', 'baby', 'swimmer', 'swim'],
+    ['walk', 'snake', 'dog', 'walk'],
+    ['fly', 'snake', 'bird', 'fly'],
+    ['bark', 'cat', 'dog', 'bark'],
+    ['climb a tree', 'lion', 'monkey', 'climb'],
+    ['ride a bike', 'cat', 'boy', 'ride'],
+    ['see in the morning', 'bat', 'swimmer', 'morning'],
+    ['sing', 'lion', 'bird', 'sing'],
+    ['go to school', 'monkey', 'toddler', 'school'],
+    ['roar', 'monkey', 'lion', 'roar']
+  ].map(([verb, cannot, can, act], index) => ({
+    text: `Who ${cant} ${verb}?`,
+    choices: index % 2 ? [can, cannot] : [cannot, can],
+    answer: cannot,
+    actor: can,
+    act,
+    praise: line(`Yes! The ${cannot} ${cant} ${verb}.`),
+    teach: line(`The ${cannot} ${cant} ${verb}. The ${can} can ${verb}.`)
+  }))
+}
+const story = (...texts) => ({ player: 'story', steps: texts.map(line) })
 const lessons = [
-  ['can-and-cant', 'Can and can’t', ['A bird can fly.', 'A fish can’t walk.', 'Who can fly?'], 'published'],
-  ['colours', 'Colours around us', ['This apple is red.', 'The sky is blue.', 'Find something green.'], 'published'],
-  ['feelings', 'How do I feel?', ['This face is happy.', 'This face is sad.', 'Show me happy.'], 'published'],
-  ['morning-routine', 'My morning routine', ['First, I wake up.', 'Then, I brush my teeth.'], 'draft']
+  ['can-and-cant', 'Can and can’t', canAndCant, 'published'],
+  ['colours', 'Colours around us', story('This apple is red.', 'The sky is blue.', 'Find something green.'), 'published'],
+  ['feelings', 'How do I feel?', story('This face is happy.', 'This face is sad.', 'Show me happy.'), 'published'],
+  ['morning-routine', 'My morning routine', story('First, I wake up.', 'Then, I brush my teeth.'), 'draft']
 ]
 const lessonIds = {}
-for (const [slug, title, steps, status] of lessons) {
+for (const [slug, title, content, status] of lessons) {
   const [{ id }] = await sql`
     INSERT INTO lessons (slug, version, title, content, status, created_by, published_by, published_at, created_at)
-    VALUES (${slug}, 1, ${title}, ${json({ steps: steps.map((text) => ({ text })) })}::jsonb, ${status}, ${admin},
+    VALUES (${slug}, 1, ${title}, ${json(content)}::jsonb, ${status}, ${admin},
       ${status === 'published' ? admin : null}, CASE WHEN ${status} = 'published' THEN now() - interval '300 days' END, now() - interval '320 days')
     RETURNING id
   `

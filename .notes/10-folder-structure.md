@@ -1,10 +1,24 @@
 # Folder / codebase structure
-One repository (github.com/rejoythadathil/speechomania) with the three apps side by side, these notes, a root `.githooks/pre-commit` (env files, comments in CSS/SQL/Prisma/configs, gitleaks, eslint for the app that changed) and root `.github/workflows/` (`api-ci`, `api-release`, `app-ci`, `app-release`; each runs only when its folder changes, and deploy jobs run only when the repository variable `DEPLOY_ENABLED` is `true`). Feature folders use the feature name as the file prefix, for example `children/children.service.js`. A `.constant.js` file exists only when a feature has constants.
+One repository (github.com/rejoythadathil/speechomania) with the three apps side by side, these notes, a root `.githooks/pre-commit` (env files, comments in CSS/SQL/Prisma/configs, gitleaks, eslint for the app that changed) and root `.github/workflows/` (`api-ci`, `api-release`, `app-ci`, `app-release`; each runs only when its folder changes, and deploy jobs run only when the repository variable `DEPLOY_ENABLED` is `true`). Every API module (each `common-service/<name>/` and each `src/routes/v1/<feature>/`) keeps one concern per file, each kind in its own sub-folder as an `index.js` (tests are `tests/index.test.js` so `bun test` finds them, docs are `docs/index.md`):
+
+| Sub-folder / file | Holds |
+|---|---|
+| `route/index.js` | Hono routes, roles (`allow`) and validation wiring (features only) |
+| `controller/index.js` | reads `c.get('valid')`, calls the service, shapes the response (features only) |
+| `service/index.js` | the work: SQL, transactions, audit calls, external APIs |
+| `validation/index.js` | Joi schemas for params, query and body |
+| `constants/index.js` | fixed values and lists (statuses, limits, weights) |
+| `exception/index.js` | named error factories (`lessonNotFound()`, `wrongPin()`), never inline `new HttpError` in services |
+| `utils/index.js` | pure helpers with no database or network, unit-tested directly |
+| `tests/index.test.js` | the module's tests, next to the code |
+| `docs/index.md` | what the module does, its endpoints or exports, scope and errors |
+
+A file exists only when it has content: common services have no routes or controllers, and a feature without constants has no `constants/`. Cross-feature tests (`scoping.test.js`) and the shared `setup.js` / `helpers.js` stay in `test/`.
 
 ## api.speechomania (Bun + Hono)
 ```
 api.speechomania/
-  package.json                   #scripts: dev, start, migrate, migrate:new, migrate:check, migrate:status, seed, test, lint, check-env
+  package.json                   #scripts: dev, start, migrate, migrate:new, migrate:check, migrate:status, seed, audio, test, lint, check-env
   bunfig.toml                    #bun test preloads test/setup.js
   eslint.config.js               #includes the no-comments rule
   Dockerfile                     #bun alpine image, runs as the bun user, health check on /health
@@ -19,15 +33,18 @@ api.speechomania/
   scripts/
     migration-new.js             #bun run migrate:new <name>: prisma migrate dev --create-only, then strips Prisma's comments
     check-env.js                 #used by deploy-images.sh before any restart
-  seeds/dev.js                   #local only: 6 accounts, 4 children, 3 lessons, remarks, a change request
+    lesson-audio.js              #bun run audio <slug>: ElevenLabs voice for every line, written into the lesson's draft
+  seeds/dev.js                   #local only: accounts, children, lessons ("Can and can't" is a pick lesson), remarks, a change request
   server.js                      #starts the HTTP server, graceful shutdown
-  utils.js                       #HttpError, json(), paging and search helpers
-  common-service/
-    db/                          #Bun.sql pool (prepare: false)
+  common-service/                #each module: service/ plus constants/ exception/ utils/ validation/ tests/ docs/ as needed
+    http/                        #HttpError and error factories, paging (pageQuery, pageOf, pageArray), json(), requestCtx()
+    db/                          #Bun.sql pool (prepare: false), Postgres error mapping
     cache/                       #Valkey client
     logger/                      #pino with personal data redacted
     firebase/                    #token verification, invites, disable accounts
     audit/                       #audit() helper used inside every write transaction
+    storage/                     #Bun.s3 media bucket, signed URLs, local bucket creation
+    voice/                       #ElevenLabs text to speech with word timings, cached in S3 by hash
   src/
     app.js                       #middleware order: request id, context, security headers, CORS, body limit, rate limit
     middleware/
@@ -37,17 +54,19 @@ api.speechomania/
       validate.js                #Joi for params, query and body
       rate-limit.js              #per-IP per-minute counter in Valkey
       error.js                   #maps errors and Postgres codes to clean JSON
-    routes/v1/
+    routes/v1/                   #each feature: route/ controller/ service/ validation/ plus constants/ exception/ utils/ tests/ docs/ as needed
       index.js                   #every route requires sign-in
-      auth/                      #GET /auth/me
+      auth/                      #GET and PATCH /auth/me
+      search/                    #global header search over the scoped list services
       dashboard/                 #role-aware counts
       users/                     #admin: invite, list, edit, remove mentors, parents, admins
       children/                  #scoped list and detail, create, edit, mentor, lessons, archive
       remarks/                   #per child; parents see shared only; unread inbox for admins
       lessons/                   #versions, publish, new draft, archive
       change-requests/           #mentor requests, admin review (approval creates a draft)
+      learning/                  #parent only, child mode: child, shelf, playable lesson, attempts, exit with PIN
       audit/                     #admin: read the audit log
-  test/                          #25 integration tests against Postgres and the Firebase emulator
+  test/                          #setup.js (fresh test database), helpers.js, and cross-feature scoping.test.js; module tests live beside their code
 ```
 
 ## app.speechomania (Vite + React 19 + Tailwind v4 + BoardUI)
@@ -73,10 +92,10 @@ app.speechomania/
       base/                      #BoardUI free components (JSX)
       foundations/               #BoardUI internals (direction, icons)
       shared/                    #ours for work views: modal, panel, stat card, toast, select field, status chip
-      child/                     #(child mode, next phase) our touch components with mochi-icons
+      child/                     #child mode: characters, scene, actor, read-along, voice hook, sheets, Mochi Icons (child-icons.jsx)
     layout/
       work-layout/               #sidebar shell for admin, mentor and parent; menu in navigation.js
-      learning-layout/           #(child mode, next phase)
+      learning-layout/           #child mode shell: learner, sensory settings, Break and Grown-ups sheets
     hooks/                       #use-auth, use-resource, use-debounced
     services/                    #api.js (fetch + Firebase token), firebase.js
     utils/                       #format.js (ours), cx.js and helpers (BoardUI)
@@ -84,7 +103,7 @@ app.speechomania/
       auth/login.jsx
       admin/                     #people (mentors, parents, admins), audit log
       shared/                    #dashboard, children, child detail, lessons, lesson editor, change requests
-      child/                     #(child mode, next phase)
+      child/                     #learn-home (shelf) and lesson-player
 ```
 
 ## deploy.speechomania (same layout as xam-reloaded/server)
@@ -118,7 +137,8 @@ deploy.speechomania/
 ```
 
 ## Not built yet (next phases)
-- Child mode: `learning-layout`, `views/child`, `components/child` with Mochi Icons, lesson player, attempts and rewards.
+- A lesson editor for `pick` pages (choosing pictures and the answer); today pick lessons come from the seed and only their text is editable.
+- Pictures for `story` lessons (`image_key` is in the schema; uploads are not built).
 - Worker and queue: ElevenLabs audio generation, EJS → PDF reports, daily remark digest email.
 - Media uploads to S3 through presigned URLs.
 - Email delivery for invites (today the admin copies the link).

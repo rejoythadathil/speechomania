@@ -8,7 +8,7 @@
 
 ## Lesson lifecycle
 1. An admin creates a lesson as a **draft**: visuals plus the script text.
-2. The admin requests audio generation. A job is queued; the worker calls ElevenLabs, stores the audio in S3 and puts the S3 key into the lesson content. The S3 key is a hash of (text + voice + settings), so before calling ElevenLabs the worker checks whether that file already exists; the same audio is never generated or paid for twice.
+2. The admin requests audio generation. A job is queued; the worker calls ElevenLabs, stores the audio in S3 and puts the S3 key into the lesson content. Until the worker exists, `bun run audio <slug>` in `api.speechomania` does the same into the lesson's draft. The S3 key is a hash of (text + voice + settings), so before calling ElevenLabs the worker checks whether that file already exists; the same audio is never generated or paid for twice.
 3. The admin previews and **publishes**. Each version is its own row in `lessons` (same `slug`, next `version`). A published row is never edited.
 4. A child's progress always points at the lesson version they took, so later edits never corrupt history.
 5. Editing a published lesson creates a new draft version. It goes live only when published.

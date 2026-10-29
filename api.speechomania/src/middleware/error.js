@@ -1,13 +1,7 @@
 import { HTTPException } from 'hono/http-exception'
-import { logger } from '../../common-service/logger/index.js'
-import { HttpError } from '../../utils.js'
-
-const PG_ERRORS = {
-  23505: [409, 'This already exists'],
-  23503: [409, 'This is still linked to other records'],
-  '22P02': [400, 'One of the values has the wrong format'],
-  42501: [403, 'This action is not allowed']
-}
+import { logger } from '../../common-service/logger/service/index.js'
+import { fromPostgres } from '../../common-service/db/exception/index.js'
+import { HttpError } from '../../common-service/http/exception/index.js'
 
 export function onError(error, c) {
   if (error instanceof HttpError) {
@@ -16,8 +10,8 @@ export function onError(error, c) {
   if (error instanceof HTTPException) {
     return c.json({ error: { message: error.message || 'Request rejected' } }, error.status)
   }
-  const known = PG_ERRORS[error.errno]
-  if (known) return c.json({ error: { message: known[1] } }, known[0])
+  const known = fromPostgres(error)
+  if (known) return c.json({ error: { message: known.message } }, known.status)
   logger.error({ err: error, requestId: c.get('requestId') }, 'unhandled error')
   return c.json({ error: { message: 'Something went wrong. Try again.' } }, 500)
 }

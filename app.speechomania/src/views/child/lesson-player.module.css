@@ -1,0 +1,73 @@
+.cover,
+.end {
+  position: absolute;
+  z-index: 5;
+  top: 104px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(560px, calc(100% - 28px));
+  padding: 24px 30px 28px;
+  text-align: center;
+  transform: translateX(-50%);
+  animation: rise var(--child-t) var(--child-ease) both;
+}
+
+.cover h1,
+.end h1 {
+  margin: 0;
+  font-size: clamp(32px, 4.4vw, 50px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.cover p,
+.end p {
+  margin: 0;
+  color: var(--child-ink-muted);
+  font-size: 18px;
+}
+
+.end p:first-of-type {
+  font-size: 22px;
+}
+
+.score {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.score i {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #e7eef3;
+}
+
+.score .scoreOn {
+  background: var(--child-blue-500);
+}
+
+.endActions {
+  display: flex;
+  gap: 12px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+@media (max-width: 860px) {
+  .cover,
+  .end {
+    top: 140px;
+    padding: 18px 18px 20px;
+  }
+}

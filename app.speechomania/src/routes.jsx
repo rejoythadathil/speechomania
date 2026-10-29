@@ -1,9 +1,12 @@
 import { Navigate, Outlet, createBrowserRouter } from 'react-router'
 import { useAuth } from '@/hooks/use-auth.jsx'
+import { LearningLayout } from '@/layout/learning-layout/learning-layout.jsx'
 import { WorkLayout } from '@/layout/work-layout/work-layout.jsx'
 import { AuditView } from '@/views/admin/audit.jsx'
 import { PeopleView } from '@/views/admin/people.jsx'
 import { LoginView } from '@/views/auth/login.jsx'
+import { LearnHomeView } from '@/views/child/learn-home.jsx'
+import { LessonPlayerView } from '@/views/child/lesson-player.jsx'
 import { ChangeRequestsView } from '@/views/shared/change-requests.jsx'
 import { ChildDetailView } from '@/views/shared/child-detail.jsx'
 import { ChildrenView } from '@/views/shared/children.jsx'
@@ -33,6 +36,16 @@ export const router = createBrowserRouter([
   {
     element: <RequireAuth />,
     children: [{
+      element: <RequireRole roles={['parent']} />,
+      children: [{
+        path: 'learn/:childId',
+        element: <LearningLayout />,
+        children: [
+          { index: true, element: <LearnHomeView /> },
+          { path: 'lessons/:lessonId', element: <LessonPlayerView /> }
+        ]
+      }]
+    }, {
       element: <WorkLayout />,
       children: [
         { index: true, element: <Navigate to="/dashboard" replace /> },

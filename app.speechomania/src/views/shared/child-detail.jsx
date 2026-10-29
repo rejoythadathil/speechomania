@@ -1,10 +1,11 @@
-import { RiArrowLeftLine, RiBookOpenLine, RiPencilLine } from '@remixicon/react'
+import { RiArrowLeftLine, RiBookOpenLine, RiLockLine, RiPencilLine, RiPlayLine } from '@remixicon/react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Avatar } from '@/components/base/avatar/avatar'
 import { Button } from '@/components/base/buttons/button'
 import { Checkbox } from '@/components/base/checkbox/checkbox'
 import { Chip } from '@/components/base/badges/chip'
+import { Input } from '@/components/base/input/input'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog.jsx'
 import { DataState } from '@/components/shared/data-state.jsx'
 import { EmptyState } from '@/components/shared/empty-state.jsx'
@@ -17,7 +18,7 @@ import { StatusChip } from '@/components/shared/status-chip.jsx'
 import { useToast } from '@/components/shared/toast.jsx'
 import { useAuth } from '@/hooks/use-auth.jsx'
 import { useResource } from '@/hooks/use-resource.js'
-import { api } from '@/services/api.js'
+import { api, fieldErrors } from '@/services/api.js'
 import { age, formatDate, initials, titleCase } from '@/utils/format'
 import { ChildFormModal } from './child-form.jsx'
 import { RemarksPanel } from './remarks-panel.jsx'
@@ -129,6 +130,56 @@ function LessonsModal({ child, published, isOpen, onOpenChange, onSaved }) {
   )
 }
 
+function PinModal({ child, isOpen, onOpenChange, onSaved }) {
+  const [pin, setPin] = useState('')
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState(null)
+  const errors = fieldErrors(error)
+
+  async function save(value) {
+    setPending(true)
+    setError(null)
+    try {
+      onSaved(await api(`/children/${child.id}`, { method: 'PATCH', body: { pin: value } }))
+      onOpenChange(false)
+    } catch (caught) {
+      setError(caught)
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      title="Learning PIN"
+      description={`${child.display_name} needs a grown-up to leave the learning app. With a PIN, leaving asks for it; without one, a grown-up presses and holds the lock button.`}
+      footer={(
+        <>
+          {child.has_pin ? <Button variant="secondary" onClick={() => save(null)} disabled={pending}>Remove PIN</Button> : null}
+          <Button variant="secondary" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={() => save(pin)} disabled={pending || pin.length !== 4}>{pending ? 'Saving…' : 'Save PIN'}</Button>
+        </>
+      )}
+    >
+      <FormAlert error={error && !Object.keys(errors).length ? error : null} />
+      <Input
+        label={child.has_pin ? 'New 4-digit PIN' : '4-digit PIN'}
+        type="password"
+        inputMode="numeric"
+        autoComplete="off"
+        maxLength={4}
+        value={pin}
+        onChange={(value) => setPin(value.replace(/\D/g, '').slice(0, 4))}
+        isInvalid={Boolean(errors.pin)}
+        hint={errors.pin ?? 'Only you should know it. It is stored hashed and never shown again.'}
+        autoFocus
+      />
+    </Modal>
+  )
+}
+
 export function ChildDetailView() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -174,7 +225,9 @@ export function ChildDetailView() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
+                {user.role === 'parent' && data.status === 'active' ? <Button leadingIcon={RiPlayLine} onClick={() => navigate(`/learn/${data.id}`)}>Start learning</Button> : null}
                 {canEditProfile ? <Button variant="secondary" leadingIcon={RiPencilLine} onClick={() => setModal('edit')}>Edit profile</Button> : null}
+                {user.role === 'parent' ? <Button variant="secondary" leadingIcon={RiLockLine} onClick={() => setModal('pin')}>{data.has_pin ? 'Change PIN' : 'Set PIN'}</Button> : null}
                 {user.role === 'admin' ? <Button variant="secondary" onClick={() => setModal('mentor')}>{data.mentor_id ? 'Change mentor' : 'Assign mentor'}</Button> : null}
                 {user.role === 'admin' && data.status !== 'archived' ? <Button variant="secondary" onClick={() => setModal('remove')}>Archive</Button> : null}
               </div>
@@ -216,6 +269,7 @@ export function ChildDetailView() {
               <RemarksPanel childId={data.id} />
             </div>
             {modal === 'edit' ? <ChildFormModal isOpen onOpenChange={() => setModal(null)} child={data} onSaved={saved('Profile updated')} /> : null}
+            {modal === 'pin' ? <PinModal isOpen onOpenChange={() => setModal(null)} child={data} onSaved={saved('PIN saved')} /> : null}
             {modal === 'mentor' ? <MentorModal isOpen onOpenChange={() => setModal(null)} child={data} onSaved={saved('Mentor updated')} /> : null}
             {modal === 'lessons' ? <LessonsModal isOpen onOpenChange={() => setModal(null)} child={data} published={published} onSaved={saved('Lessons updated')} /> : null}
             <ConfirmDialog
