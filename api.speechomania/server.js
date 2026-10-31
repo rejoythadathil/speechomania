@@ -1,5 +1,5 @@
-import { sql } from './common-service/db/index.js'
-import { logger } from './common-service/logger/index.js'
+import { sql } from './common-service/db/service/index.js'
+import { logger } from './common-service/logger/service/index.js'
 import { config } from './config/index.js'
 import { app } from './src/app.js'
 

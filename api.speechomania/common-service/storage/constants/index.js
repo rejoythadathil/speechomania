@@ -1,0 +1,3 @@
+export const SIGNATURE_ALGORITHM = 'AWS4-HMAC-SHA256'
+
+export const BUCKET_EXISTS_STATUS = 409

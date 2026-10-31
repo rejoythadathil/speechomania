@@ -22,12 +22,15 @@ One repo (github.com/rejoythadathil/speechomania) with three apps: `api.speechom
 - BoardUI free components only, never Pro. Mochi Icons only in child mode, BoardUI never in child mode.
 - Work views stay flat: hairlines, no shadows, tight gaps (tokens in `app.speechomania/src/styles/brand.css`).
 - Ownership is enforced in SQL. Records the user can't access return 404; actions the role can't take return 403.
-- Every list endpoint is paginated on the server with `pageQuery` + `pageOf` (or `pageArray`) from `api.speechomania/utils.js`: `page` and `page_size` (max 100) in, `{ items, page, page_size, total, total_pages }` out. The screen asks for the page size it shows. No unbounded lists.
+- Every list endpoint is paginated on the server with `pageQuery` + `pageOf` (or `pageArray`) from `api.speechomania/common-service/http/` (`validation/index.js`, `utils/index.js`): `page` and `page_size` (max 100) in, `{ items, page, page_size, total, total_pages }` out. The screen asks for the page size it shows. No unbounded lists.
 - Every query is scoped by role and ownership (mentor: own children and own requests; parent: own children, shared remarks, lessons assigned to their children). Writes recheck the child's scope, not just authorship. Send only the fields a role needs (mentors don't get parent emails).
-- Every new endpoint gets a scoping test in `api.speechomania/test/`.
+- Every new endpoint gets a scoping test in its feature's `tests/index.test.js`.
+- API modules (`common-service/<name>/`, `src/routes/v1/<feature>/`) keep one concern per file, each kind in its own sub-folder like `common-service/voice/`: `route/`, `controller/`, `service/`, `validation/`, `constants/`, `exception/`, `utils/`, `tests/`, `docs/`, each file is `index.js` (tests `tests/index.test.js`, docs `docs/index.md`) (see `.notes/10-folder-structure.md`). Services throw named errors from `exception/`; pure helpers go in `utils/` with unit tests. Update the module's `docs/index.md` when its endpoints or behaviour change.
 - Every list screen shows `ListFooter` ("X–Y of Z", rows per page, pager). Full-page lists keep `page`/`size` in the URL via `usePageParams`; panels inside a page use local state.
 - Global search (`GET /v1/search`) reuses the scoped list services, so it can never return more than the lists do. Pickers for people use `PersonPicker` (server search), never a preloaded list.
 - `.env` files are never committed.
+- Child mode lives in `layout/learning-layout`, `views/child` and `components/child`, talks only to `/v1/learning` (parent only), and takes every icon from `components/child/child-icons.jsx`. Characters come from `components/child/characters.js`; new characters or actions are added there and to the lessons `constants/index.js` together.
+- Lesson audio is generated with `bun run audio <slug>` into a draft, never into a published row.
 
 ## Local
 - Stack: `deploy.speechomania/dev` (Postgres :7101, Valkey :7102, RustFS :7103, Firebase emulator :7105).

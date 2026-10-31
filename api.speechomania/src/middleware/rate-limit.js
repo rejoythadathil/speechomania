@@ -1,7 +1,7 @@
-import { valkey } from '../../common-service/cache/index.js'
-import { logger } from '../../common-service/logger/index.js'
+import { valkey } from '../../common-service/cache/service/index.js'
+import { logger } from '../../common-service/logger/service/index.js'
 import { config } from '../../config/index.js'
-import { HttpError } from '../../utils.js'
+import { tooManyRequests } from '../../common-service/http/exception/index.js'
 
 export async function rateLimit(c, next) {
   const key = `rate:${c.get('ip') ?? 'unknown'}:${Math.floor(Date.now() / 60000)}`
@@ -12,6 +12,6 @@ export async function rateLimit(c, next) {
   } catch (error) {
     logger.warn({ err: error }, 'rate limiter unavailable')
   }
-  if (count > config.RATE_LIMIT_PER_MINUTE) throw new HttpError(429, 'Too many requests. Wait a minute and try again.')
+  if (count > config.RATE_LIMIT_PER_MINUTE) throw tooManyRequests()
   await next()
 }

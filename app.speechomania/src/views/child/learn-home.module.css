@@ -1,0 +1,133 @@
+.main {
+  position: absolute;
+  inset: 104px 0 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 0 16px 120px;
+  overflow-y: auto;
+}
+
+.hello {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 34px 20px;
+  text-align: center;
+}
+
+.hello h1 {
+  margin: 0;
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.hello p {
+  margin: 0;
+  color: var(--child-ink-muted);
+  font-size: 20px;
+}
+
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
+  justify-content: center;
+  gap: 18px;
+  width: min(1140px, 100%);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.book {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  text-align: left;
+  transition: translate 200ms var(--child-ease);
+}
+
+.book:hover {
+  translate: 0 -4px;
+}
+
+.cover {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2%;
+  height: 150px;
+  padding: 10px 10px 0;
+  background: linear-gradient(#e3f1fb, #f4fafe 70%, #c9e5d2 70%);
+}
+
+.cover span {
+  display: block;
+  width: 46%;
+  aspect-ratio: 1;
+}
+
+.cover svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.coverIcon {
+  align-self: center;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 18px 18px;
+}
+
+.title {
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.status {
+  align-self: flex-start;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--child-blue-50);
+  color: var(--child-blue-700);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.new {
+  background: var(--child-amber-soft);
+  color: #7a5500;
+}
+
+.empty {
+  max-width: 460px;
+  padding: 24px 28px;
+  font-size: 19px;
+  text-align: center;
+}
+
+.pager {
+  display: flex;
+  gap: 12px;
+}
+
+.stars {
+  font-size: 18px;
+}
+
+@media (max-width: 860px) {
+  .main {
+    inset: 144px 0 0;
+  }
+}

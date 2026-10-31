@@ -1,6 +1,6 @@
 import { getApps, initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
-import { sql } from '../common-service/db/index.js'
+import { sql } from '../common-service/db/service/index.js'
 import { config } from '../config/index.js'
 import { app } from '../src/app.js'
 

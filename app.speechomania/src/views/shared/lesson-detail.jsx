@@ -18,13 +18,21 @@ import { useResource } from '@/hooks/use-resource.js'
 import { api } from '@/services/api.js'
 import { formatDate, formatDateTime } from '@/utils/format'
 
+function StepFacts({ step }) {
+  const facts = []
+  if (step.choices) facts.push(`${step.choices.join(' or ')} · answer: ${step.answer} · ${step.actor} acts out “${step.act}”`)
+  facts.push(step.audio?.key ? 'Voice ready' : 'No voice yet')
+  return <p className="text-body-2-regular text-text-tertiary">{facts.join(' · ')}</p>
+}
+
 function StepEditor({ lesson, onSaved }) {
   const [title, setTitle] = useState(lesson.title)
   const [steps, setSteps] = useState(() => lesson.content.steps.map((step) => ({ key: crypto.randomUUID(), ...step })))
   const [pending, setPending] = useState(false)
   const [error, setError] = useState(null)
 
-  const update = (key, text) => setSteps((current) => current.map((step) => (step.key === key ? { ...step, text } : step)))
+  const pick = lesson.content.player === 'pick'
+  const update = (key, text) => setSteps((current) => current.map((step) => (step.key === key ? { ...step, text, audio: null } : step)))
   const remove = (key) => setSteps((current) => current.filter((step) => step.key !== key))
   const move = (index, delta) => setSteps((current) => {
     const next = [...current]
@@ -37,7 +45,7 @@ function StepEditor({ lesson, onSaved }) {
     setPending(true)
     setError(null)
     try {
-      const content = { steps: steps.filter((step) => step.text.trim()).map(({ key: _key, ...step }) => step) }
+      const content = { ...lesson.content, steps: steps.filter((step) => step.text.trim()).map(({ key: _key, ...step }) => step) }
       onSaved(await api(`/lessons/${lesson.id}`, { method: 'PATCH', body: { title, content } }))
     } catch (caught) {
       setError(caught)
@@ -55,7 +63,10 @@ function StepEditor({ lesson, onSaved }) {
           {steps.map((step, index) => (
             <li key={step.key} className="inset flex gap-3 p-2">
               <span className="mt-1 inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-accent-50 text-caption-1-semibold text-accent-700">{index + 1}</span>
-              <Textarea className="flex-1" aria-label={`Step ${index + 1}`} value={step.text} onChange={(text) => update(step.key, text)} rows={2} autoResize maxLength={500} />
+              <div className="flex flex-1 flex-col gap-1">
+                <Textarea aria-label={`Step ${index + 1}`} value={step.text} onChange={(text) => update(step.key, text)} rows={2} autoResize maxLength={500} />
+                <StepFacts step={step} />
+              </div>
               <div className="flex flex-col gap-1">
                 <IconButton size="small" icon={RiArrowUpLine} aria-label={`Move step ${index + 1} up`} onClick={() => move(index, -1)} disabled={index === 0} />
                 <IconButton size="small" icon={RiArrowDownLine} aria-label={`Move step ${index + 1} down`} onClick={() => move(index, 1)} disabled={index === steps.length - 1} />
@@ -64,7 +75,7 @@ function StepEditor({ lesson, onSaved }) {
             </li>
           ))}
         </ol>
-        <Button variant="secondary" leadingIcon={RiAddLine} className="self-start" onClick={() => setSteps((current) => [...current, { key: crypto.randomUUID(), text: '' }])}>Add step</Button>
+        {pick ? null : <Button variant="secondary" leadingIcon={RiAddLine} className="self-start" onClick={() => setSteps((current) => [...current, { key: crypto.randomUUID(), text: '' }])}>Add step</Button>}
       </div>
     </Panel>
   )
@@ -77,7 +88,10 @@ function ReadOnlySteps({ lesson }) {
         {lesson.content.steps.map((step, index) => (
           <li key={index} className="flex gap-3">
             <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-accent-50 text-caption-1-semibold text-accent-700">{index + 1}</span>
-            <p className="pt-0.5 text-body-regular text-text-primary">{step.text}</p>
+            <div className="flex flex-col gap-0.5 pt-0.5">
+              <p className="text-body-regular text-text-primary">{step.text}</p>
+              <StepFacts step={step} />
+            </div>
           </li>
         ))}
       </ol>

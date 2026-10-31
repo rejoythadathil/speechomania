@@ -1,14 +1,15 @@
 import { Hono } from 'hono'
 import { requireAuth } from '../../middleware/auth.js'
-import { auditRoute } from './audit/audit.route.js'
-import { authRoute } from './auth/auth.route.js'
-import { changeRequestsRoute } from './change-requests/change-requests.route.js'
-import { childrenRoute } from './children/children.route.js'
-import { dashboardRoute } from './dashboard/dashboard.route.js'
-import { searchRoute } from './search/search.route.js'
-import { lessonsRoute } from './lessons/lessons.route.js'
-import { remarksRoute } from './remarks/remarks.route.js'
-import { usersRoute } from './users/users.route.js'
+import { auditRoute } from './audit/route/index.js'
+import { authRoute } from './auth/route/index.js'
+import { changeRequestsRoute } from './change-requests/route/index.js'
+import { childrenRoute } from './children/route/index.js'
+import { dashboardRoute } from './dashboard/route/index.js'
+import { searchRoute } from './search/route/index.js'
+import { learningRoute } from './learning/route/index.js'
+import { lessonsRoute } from './lessons/route/index.js'
+import { remarksRoute } from './remarks/route/index.js'
+import { usersRoute } from './users/route/index.js'
 
 export const v1 = new Hono()
   .use(requireAuth)
@@ -19,5 +20,6 @@ export const v1 = new Hono()
   .route('/', remarksRoute)
   .route('/children', childrenRoute)
   .route('/lessons', lessonsRoute)
+  .route('/learning', learningRoute)
   .route('/change-requests', changeRequestsRoute)
   .route('/audit', auditRoute)

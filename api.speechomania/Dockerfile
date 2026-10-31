@@ -7,7 +7,7 @@ FROM oven/bun:1.3.14-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
-COPY package.json server.js utils.js ./
+COPY package.json server.js ./
 COPY config ./config
 COPY common-service ./common-service
 COPY src ./src

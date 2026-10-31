@@ -47,4 +47,14 @@ White sidebar with a hairline border (same colours as the rest of the work views
 ## Avatars
 - Staff (admins, mentors, parents) use DiceBear **Gaze** faces (CC0 licence), generated in the browser by `@dicebear/core` + `@dicebear/styles` in `components/shared/user-avatar.jsx`. No calls to the DiceBear API, so no user ids leave our servers.
 - The seed is `users.metadata.avatar`, or the user id when none is chosen. The API returns it as `avatar` (`/auth/me`) and `author_avatar` (remarks).
-- Children keep initials. Child mode will get its own Mochi Icons world.
+- Children keep initials in work views. Child mode draws its own characters (see Child mode).
+
+## Child mode
+`/learn/:childId`, parents only, opened from "Start learning" on the child's page. Full screen, Lexend, the child's sensory settings applied.
+- **Shelf:** "Hi, {name}", total stars, the child's assigned published lessons as books (cover characters, "New book" or "Read again · best N stars"), large Back / More books buttons when there are more than four.
+- **Lesson player:** a cover ("Open the book"), then the pages, then "The end". Fixed positions on every screen: Grown-ups (top left), sound and Break (top right), Say it again (bottom left), Next (bottom right, only once the voice has finished).
+  - `pick` lessons: Learn (every page once, errorless: first wrong tap says "Let's look again" and the answer glows; second wrong tap shows and explains the answer) then Show me (every page again, a wrong tap moves on with "Let's try another"). The answer gets a ring and a "can't" tag, and the other character acts the verb out in the scene.
+  - `story` lessons: one sentence per page, read aloud.
+- **Read-along:** the caption highlights each word as the ElevenLabs voice says it; without recorded audio it uses the browser voice with estimated timings.
+- **Break:** a breathing circle and "I'm ready", returning to the same page.
+- **Grown-ups:** the parent's PIN, or press and hold for 2 seconds when no PIN is set, returns to the child's page.

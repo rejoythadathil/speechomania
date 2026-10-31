@@ -22,6 +22,8 @@ Rules:
 - **`metadata` column:** every table has `metadata jsonb NOT NULL DEFAULT '{}'` for extra values that don't have a column yet (imports, migrations, data transfer). Anything that is filtered, joined or must be valid gets a real column instead. Joi validates what goes into it, and personal data is not dumped there.
 - **Soft delete:** `deleted_at` on users, children and remarks. Hard delete only through the erasure action.
 - **Total stars** for a child are `SUM(attempts.stars)`; badges are computed from attempts, not stored.
+- **Lesson content** (`lessons.content`): `player` is `story` (`steps: [{ text }]`) or `pick` (`contrast`, `lines` for intro/quiz/retry/skip/outro/reward, and steps with `text`, `choices`, `answer`, `actor`, `act`, `praise`, `teach`). Any line can carry `audio: { key, duration, words }`, written by `bun run audio <slug>`. Joi in `src/routes/v1/lessons/validation/index.js` is the definition.
+- **Attempts:** a `pick` attempt has two pages per step (Learn and Show me); `events` holds one entry per answered page (`step`, `index`, `choice`, `correct`, `wrongs`, `latency_ms`). Stars are set by the API when the attempt completes.
 
 Add a table only when a column stops being enough, for example a child who needs two mentors at once.
 

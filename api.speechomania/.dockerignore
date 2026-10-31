@@ -8,3 +8,5 @@ coverage
 .githooks
 seeds
 bunfig.toml
+**/*.test.js
+**/docs/
