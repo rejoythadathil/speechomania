@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 import { call, makeChild, makePublishedLesson, makeUser } from '../../../../../test/helpers.js'
-import { starsFor, stepsTotal } from '../utils/index.js'
+import { badgeStars, starsFor, stepsTotal } from '../utils/index.js'
 
 const line = (text) => ({ text })
 const pickContent = {
@@ -13,7 +13,13 @@ const pickContent = {
   ]
 }
 
-let admin, mentor, parent, otherParent, child, pick, story
+const sharkContent = {
+  player: 'shark',
+  rounds: 2,
+  steps: ['eating', 'running', 'jumping'].map((word) => ({ text: `Feed me ${word}!`, word, image_key: `lessons/test/${word}.jpg` }))
+}
+
+let admin, mentor, parent, otherParent, child, pick, story, shark
 
 beforeAll(async () => {
   admin = await makeUser('admin')
@@ -24,6 +30,8 @@ beforeAll(async () => {
   const created = await call(admin, 'POST', '/lessons', { slug: `pick-${crypto.randomUUID().slice(0, 8)}`, title: 'Who can’t?', content: pickContent })
   pick = (await call(admin, 'POST', `/lessons/${created.body.id}/publish`)).body
   story = await makePublishedLesson(admin)
+  const game = await call(admin, 'POST', '/lessons', { slug: `shark-${crypto.randomUUID().slice(0, 8)}`, title: 'Feed the shark', content: sharkContent })
+  shark = (await call(admin, 'POST', `/lessons/${game.body.id}/publish`)).body
   await call(admin, 'PUT', `/children/${child.id}/lessons`, { slugs: [pick.slug] })
 })
 
@@ -79,8 +87,52 @@ describe('learning scope', () => {
   })
 })
 
+describe('game lessons', () => {
+  const create = (content) => call(admin, 'POST', '/lessons', { slug: `game-${crypto.randomUUID().slice(0, 8)}`, title: 'Game', content })
+
+  test('each game checks its own step shape', async () => {
+    expect((await create({ player: 'shark', steps: sharkContent.steps.slice(0, 2) })).status).toBe(400)
+    expect((await create({ player: 'shark', steps: sharkContent.steps.map(({ text, word }) => ({ text, word })) })).status).toBe(400)
+    expect((await create({ player: 'compare', steps: [{ text: 'Who is taller?', choices: ['giraffe', 'boy'], answer: 'tree' }] })).status).toBe(400)
+    expect((await create({ player: 'yesno', steps: [{ text: 'Is this a dog?', image_key: 'lessons/test/dog.jpg', answer: 'yes' }] })).status).toBe(400)
+    expect((await create({ player: 'train', rounds: 21, steps: [{ text: 'I see … dog.', choices: ['a', 'the'], answer: 'a' }] })).status).toBe(400)
+    expect((await create({ player: 'yesno', steps: [{ text: 'Is this a dog?', image_key: 'lessons/test/dog.jpg', answer: false, sentence: line('No. This is a cat.') }] })).status).toBe(201)
+    expect((await create({ player: 'squish', rounds: 1, steps: [{ text: 'Squish do not.', first: 'do', second: 'not', choices: ['don’t', 'won’t'], answer: 'don’t' }] })).status).toBe(201)
+    expect((await create({ player: 'shark', steps: ['run', 'swim', 'sing'].map((word) => ({ text: `Feed me ${word}!`, word, art: [word] })) })).status).toBe(201)
+    expect((await create({ player: 'shark', steps: [{ text: 'Feed me!', word: 'run', art: ['Not An Art'] }, { text: 'a', word: 'b', art: ['b'] }, { text: 'c', word: 'd', art: ['d'] }] })).status).toBe(400)
+    expect((await create({ player: 'compare', steps: [{ text: 'Who is taller?', choices: ['giraffe', 'boy'], art: ['giraffe'], answer: 'giraffe' }] })).status).toBe(400)
+    expect((await create({ player: 'compare', steps: [{ text: 'Who is taller?', choices: ['giraffe', 'boy'], art: ['giraffe', 'boy'], answer: 'giraffe' }] })).status).toBe(201)
+    expect((await create({ player: 'place', steps: [{ text: 'Put the cat in the box.', choices: ['in', 'on'], art: ['cat'], answer: 'in' }] })).status).toBe(400)
+    expect((await create({ player: 'place', steps: [{ text: 'Put the cat in the box.', choices: ['in', 'on'], art: ['cat', 'box'], answer: 'in' }] })).status).toBe(201)
+    const pair = (first, second) => ({ text: `${first} and ${second}.`, first, second, art: [first, second] })
+    expect((await create({ player: 'match', steps: [pair('hot', 'cold'), pair('up', 'down')] })).status).toBe(400)
+    expect((await create({ player: 'match', steps: [pair('hot', 'cold'), pair('up', 'down'), pair('big', 'small')] })).status).toBe(201)
+  })
+
+  test('a game opens with signed picture links and plays its rounds, and the shelf hides storage keys', async () => {
+    await call(admin, 'PUT', `/children/${child.id}/lessons`, { slugs: [pick.slug, shark.slug] })
+    const { status, body } = await call(parent, 'GET', `/learning/children/${child.id}/lessons/${shark.id}`)
+    expect(status).toBe(200)
+    expect(body.steps_total).toBe(2)
+    expect(body.content.steps.every((step) => 'image_url' in step)).toBe(true)
+    const shelf = await call(parent, 'GET', `/learning/children/${child.id}/lessons`)
+    const item = shelf.body.items.find((lesson) => lesson.id === shark.id)
+    expect(item).toMatchObject({ player: 'shark', max_stars: 2, cover: null })
+    expect('cover_url' in item).toBe(true)
+    expect(item.cover_key).toBeUndefined()
+    expect((await call(otherParent, 'GET', `/learning/children/${child.id}/lessons/${shark.id}`)).status).toBe(404)
+
+    const started = await call(parent, 'POST', `/learning/children/${child.id}/attempts`, { lesson_id: shark.id })
+    const play = (index, correct, wrongs = 0) => ({ step: 'play', index, correct, wrongs, latency_ms: 900, choice: 'running' })
+    const done = await call(parent, 'PATCH', `/learning/attempts/${started.body.id}`, { events: [play(0, true), play(2, true, 1)], steps_completed: 2, completed: true })
+    expect(done.body).toMatchObject({ status: 'completed', steps_completed: 2, stars: 1 })
+    await call(admin, 'PUT', `/children/${child.id}/lessons`, { slugs: [pick.slug] })
+  })
+})
+
 describe('attempts', () => {
   test('stars come from first-try answers in the check pages, and a finished attempt is closed', async () => {
+    const before = (await call(parent, 'GET', `/learning/children/${child.id}`)).body.stars
     const started = await call(parent, 'POST', `/learning/children/${child.id}/attempts`, { lesson_id: pick.id })
     expect(started.status).toBe(201)
     expect(started.body).toMatchObject({ status: 'in_progress', steps_total: 4 })
@@ -97,9 +149,23 @@ describe('attempts', () => {
     expect(done.body).toMatchObject({ status: 'completed', steps_completed: 4, stars: 1 })
 
     expect((await call(parent, 'PATCH', `/learning/attempts/${id}`, { events: [], steps_completed: 4 })).status).toBe(409)
-    expect((await call(parent, 'GET', `/learning/children/${child.id}`)).body.stars).toBe(1)
+    expect((await call(parent, 'GET', `/learning/children/${child.id}`)).body.stars).toBe(before + 1)
     const shelf = await call(parent, 'GET', `/learning/children/${child.id}/lessons`)
     expect(shelf.body.items[0]).toMatchObject({ times_completed: 1, best_stars: 1 })
+  })
+})
+
+describe('badges', () => {
+  test('a game finished with nearly every star earns a badge, and the learner counts games played', async () => {
+    const before = (await call(parent, 'GET', `/learning/children/${child.id}`)).body
+    expect(before).toMatchObject({ games_total: 1, games_played: 1 })
+    expect(before.badges).toEqual([])
+    const started = await call(parent, 'POST', `/learning/children/${child.id}/attempts`, { lesson_id: pick.id })
+    const check = (index) => ({ step: 'check', index, correct: true, wrongs: 0, latency_ms: 800 })
+    await call(parent, 'PATCH', `/learning/attempts/${started.body.id}`, { events: [check(0), check(1)], steps_completed: 4, completed: true })
+    const after = (await call(parent, 'GET', `/learning/children/${child.id}`)).body
+    expect(after.badges).toEqual([{ slug: pick.slug, title: 'Who can’t?', player: 'pick', cover: ['baby', 'swimmer'] }])
+    expect((await call(otherParent, 'GET', `/learning/children/${child.id}`)).status).toBe(404)
   })
 })
 
@@ -126,9 +192,25 @@ describe('learning rules', () => {
     expect(stepsTotal({})).toBe(0)
   })
 
+  test('a badge needs nine tenths of the stars, at least one', () => {
+    expect(badgeStars(10)).toBe(9)
+    expect(badgeStars(2)).toBe(2)
+    expect(badgeStars(1)).toBe(1)
+    expect(badgeStars(0)).toBe(1)
+  })
+
+  test('a game plays its rounds, never more than its steps', () => {
+    expect(stepsTotal({ player: 'shark', rounds: 2, steps: [{}, {}, {}] })).toBe(2)
+    expect(stepsTotal({ player: 'why', rounds: 8, steps: [{}, {}, {}] })).toBe(3)
+    expect(stepsTotal({ player: 'compare', steps: [{}, {}] })).toBe(2)
+    expect(stepsTotal({ player: 'match', steps: [{}, {}, {}, {}, {}, {}, {}] })).toBe(2)
+    expect(stepsTotal({ player: 'match', rounds: 1, steps: [{}, {}, {}, {}, {}, {}] })).toBe(1)
+  })
+
   test('stars count first-try check answers, and a story earns one', () => {
     const event = (step, correct, wrongs = 0) => ({ step, correct, wrongs })
     expect(starsFor([event('learn', true), event('check', true), event('check', true, 1), event('check', false)])).toBe(1)
     expect(starsFor([event('story', true)])).toBe(1)
+    expect(starsFor([event('play', true), event('play', true), event('play', true, 2), event('play', false)])).toBe(2)
   })
 })

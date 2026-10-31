@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router'
 import { BreakSheet, GrownUpSheet } from '@/components/child/sheets.jsx'
+import { useCelebrate } from '@/components/child/use-celebrate.js'
 import { useVoice } from '@/components/child/use-voice.js'
 import { useResource } from '@/hooks/use-resource.js'
 import { api } from '@/services/api.js'
@@ -24,6 +25,7 @@ export function LearningLayout() {
   const sensory = learner.data?.sensory_settings ?? {}
   const motion = reduced ? 'off' : sensory.motion === 'normal' ? 'full' : 'gentle'
   const voice = useVoice({ sound: sensory.sound, muted })
+  const celebrate = useCelebrate({ motion, sound: sensory.sound, muted })
   const { stop } = voice
 
   const closeSheet = useCallback(() => setSheet(null), [])
@@ -46,7 +48,7 @@ export function LearningLayout() {
   return (
     <div className={styles.root} data-motion={motion} data-colour={sensory.colour ?? 'normal'}>
       {learner.data ? (
-        <Outlet context={{ learner: learner.data, reloadLearner: learner.reload, voice, bar, motion }} />
+        <Outlet context={{ learner: learner.data, reloadLearner: learner.reload, voice, bar, motion, celebrate }} />
       ) : (
         <div className={styles.state} role={learner.error ? 'alert' : 'status'}>
           {learner.error ? (

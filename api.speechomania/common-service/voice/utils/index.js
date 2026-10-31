@@ -33,6 +33,7 @@ export function lessonLines(content) {
     lines.push(step)
     if (step.praise) lines.push(step.praise)
     if (step.teach) lines.push(step.teach)
+    if (step.sentence) lines.push(step.sentence)
   }
   return lines
 }

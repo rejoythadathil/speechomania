@@ -20,7 +20,11 @@ import { formatDate, formatDateTime } from '@/utils/format'
 
 function StepFacts({ step }) {
   const facts = []
-  if (step.choices) facts.push(`${step.choices.join(' or ')} · answer: ${step.answer} · ${step.actor} acts out “${step.act}”`)
+  if (step.word) facts.push(`Word: ${step.word}`)
+  if (step.choices) facts.push(`${step.choices.join(' or ')} · answer: ${step.answer}`)
+  if (typeof step.answer === 'boolean') facts.push(`Answer: ${step.answer ? 'yes' : 'no'}`)
+  if (step.actor) facts.push(`${step.actor} acts out “${step.act}”`)
+  if (step.image_key) facts.push('Picture')
   facts.push(step.audio?.key ? 'Voice ready' : 'No voice yet')
   return <p className="text-body-2-regular text-text-tertiary">{facts.join(' · ')}</p>
 }
@@ -31,7 +35,7 @@ function StepEditor({ lesson, onSaved }) {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState(null)
 
-  const pick = lesson.content.player === 'pick'
+  const fixedSteps = (lesson.content.player ?? 'story') !== 'story'
   const update = (key, text) => setSteps((current) => current.map((step) => (step.key === key ? { ...step, text, audio: null } : step)))
   const remove = (key) => setSteps((current) => current.filter((step) => step.key !== key))
   const move = (index, delta) => setSteps((current) => {
@@ -75,7 +79,7 @@ function StepEditor({ lesson, onSaved }) {
             </li>
           ))}
         </ol>
-        {pick ? null : <Button variant="secondary" leadingIcon={RiAddLine} className="self-start" onClick={() => setSteps((current) => [...current, { key: crypto.randomUUID(), text: '' }])}>Add step</Button>}
+        {fixedSteps ? null : <Button variant="secondary" leadingIcon={RiAddLine} className="self-start" onClick={() => setSteps((current) => [...current, { key: crypto.randomUUID(), text: '' }])}>Add step</Button>}
       </div>
     </Panel>
   )

@@ -19,7 +19,7 @@ One repo (github.com/rejoythadathil/speechomania) with three apps: `api.speechom
 - 7 tables only, each with `metadata jsonb`. The schema lives in `api.speechomania/prisma/schema.prisma`; migrations in `api.speechomania/prisma/migrations/`.
 - Schema change: edit `schema.prisma`, run `bun run migrate:new <name>` (creates a comment-free migration), add any CHECK constraint or grant Prisma can't express to that `migration.sql`, then `bun run migrate`. Never edit a migration that has been applied anywhere. `bun run migrate:check` must report no difference.
 - Prisma is used for schema and migrations only. Queries stay on Bun.sql; do not add Prisma Client.
-- BoardUI free components only, never Pro. Mochi Icons only in child mode, BoardUI never in child mode.
+- BoardUI free components only, never Pro. Mochi Icons only in child mode (for controls), BoardUI never in child mode. Child mode may reuse `components/shared` pieces (`Panel`, `StatCard`, `BrandMark`) for its grown-up-style summary areas.
 - Work views stay flat: hairlines, no shadows, tight gaps (tokens in `app.speechomania/src/styles/brand.css`).
 - Ownership is enforced in SQL. Records the user can't access return 404; actions the role can't take return 403.
 - Every list endpoint is paginated on the server with `pageQuery` + `pageOf` (or `pageArray`) from `api.speechomania/common-service/http/` (`validation/index.js`, `utils/index.js`): `page` and `page_size` (max 100) in, `{ items, page, page_size, total, total_pages }` out. The screen asks for the page size it shows. No unbounded lists.
@@ -29,8 +29,15 @@ One repo (github.com/rejoythadathil/speechomania) with three apps: `api.speechom
 - Every list screen shows `ListFooter` ("X–Y of Z", rows per page, pager). Full-page lists keep `page`/`size` in the URL via `usePageParams`; panels inside a page use local state.
 - Global search (`GET /v1/search`) reuses the scoped list services, so it can never return more than the lists do. Pickers for people use `PersonPicker` (server search), never a preloaded list.
 - `.env` files are never committed.
-- Child mode lives in `layout/learning-layout`, `views/child` and `components/child`, talks only to `/v1/learning` (parent only), and takes every icon from `components/child/child-icons.jsx`. Characters come from `components/child/characters.js`; new characters or actions are added there and to the lessons `constants/index.js` together.
+- A parent signs in straight to `/learn`: one active child opens that child's learning path, several show a picker. Grown-up screens are one tap away ("Grown-up area", or Grown-ups inside child mode).
+- Child mode lives in `layout/learning-layout`, `views/child` and `components/child`, talks only to `/v1/learning` (parent only) and `/v1/children` for the picker, and takes every icon from `components/child/child-icons.jsx`. Illustrations come from `components/child/art.jsx` (downloaded OpenMoji files in `src/assets/openmoji/`); a new character, action or game needs its art there and its value in the lessons `constants/index.js`. Each game is one file in `views/child/games/` registered in `games/index.js`, with its own theme (background, scenery and how-to-play tips) in `components/child/scenes.js`, and lesson pictures are illustrations named in the lesson content (`art`, names of files in that library); photos are never used in child mode.
 - Lesson audio is generated with `bun run audio <slug>` into a draft, never into a published row.
+
+## Assets: download, never hand-draw. Strictly.
+- Never hand-draw art: no hand-written SVG paths, CSS-drawn characters, shapes posing as illustrations, or canvas-drawn graphics. This covers characters, animals, scenes, backgrounds, icons, stickers and decorations.
+- Use downloaded assets only: openly licensed packs (for example Kenney CC0, OpenMoji, Mochi Icons) and the lesson material in `lessons/`. Effects such as confetti come from a library (`canvas-confetti`), not custom code.
+- Record each asset's source, licence and download URL in `.notes/assets.md` when it is added. No licence, no use.
+- Missing an asset? Find and download one, or ask. Never draw a stand-in.
 
 ## Local
 - Stack: `deploy.speechomania/dev` (Postgres :7101, Valkey :7102, RustFS :7103, Firebase emulator :7105).
