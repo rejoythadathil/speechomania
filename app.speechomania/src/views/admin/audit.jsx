@@ -1,6 +1,13 @@
 import { RiFileListLine } from '@remixicon/react'
 import { useState } from 'react'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@/components/base/table/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow
+} from '@/components/base/table/table'
 import { DataState } from '@/components/shared/data-state.jsx'
 import { EmptyState } from '@/components/shared/empty-state.jsx'
 import { ListFooter } from '@/components/shared/list-footer.jsx'
@@ -26,21 +33,50 @@ const describe = (action) => titleCase(action.split('.')[1] ?? action)
 export function AuditView() {
   const [entity, setEntity] = useState('all')
   const { page, pageSize, setPage, setPageSize } = usePageParams(50)
-  const audit = useResource('/audit', { entity_type: entity === 'all' ? undefined : entity, page, page_size: pageSize })
+  const audit = useResource('/audit', {
+    entity_type: entity === 'all' ? undefined : entity,
+    page,
+    page_size: pageSize
+  })
 
   return (
     <>
-      <PageHeader title="Audit log" description="Every change, and every time someone opened a child’s record. Entries cannot be edited or deleted." />
+      <PageHeader
+        title="Audit log"
+        description="Every change, and every time someone opened a child’s record. Entries cannot be edited or deleted."
+      />
       <Panel
         bodyClassName="p-0"
-        toolbar={(
+        toolbar={
           <>
-            <SelectField size="sm" className="w-52" options={ENTITY_OPTIONS} value={entity} onChange={(value) => { setEntity(value); setPage(1) }} />
+            <SelectField
+              size="sm"
+              className="w-52"
+              options={ENTITY_OPTIONS}
+              value={entity}
+              onChange={(value) => {
+                setEntity(value)
+                setPage(1)
+              }}
+            />
           </>
-        )}
-        footer={<ListFooter data={audit.data} page={page} onPage={setPage} pageSize={pageSize} onPageSize={setPageSize} noun="events" />}
+        }
+        footer={
+          <ListFooter
+            data={audit.data}
+            page={page}
+            onPage={setPage}
+            pageSize={pageSize}
+            onPageSize={setPageSize}
+            noun="events"
+          />
+        }
       >
-        <DataState loading={audit.loading && !audit.data} error={audit.error} onRetry={audit.reload}>
+        <DataState
+          loading={audit.loading && !audit.data}
+          error={audit.error}
+          onRetry={audit.reload}
+        >
           {audit.data?.items.length ? (
             <Table aria-label="Audit log" size="sm">
               <TableHeader>
@@ -53,7 +89,9 @@ export function AuditView() {
               <TableBody items={audit.data.items}>
                 {(entry) => (
                   <TableRow id={entry.id}>
-                    <TableCell className="whitespace-nowrap">{formatDateTime(entry.created_at)}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {formatDateTime(entry.created_at)}
+                    </TableCell>
                     <TableCell>
                       <span className="flex items-center gap-2">
                         {entry.actor_name ?? 'System'}
@@ -61,14 +99,23 @@ export function AuditView() {
                       </span>
                     </TableCell>
                     <TableCell>{describe(entry.action)}</TableCell>
-                    <TableCell><span className="text-text-secondary">{titleCase(entry.entity_type)}</span> <code className="text-caption-1-medium text-text-tertiary">{entry.entity_id.slice(-8)}</code></TableCell>
+                    <TableCell>
+                      <span className="text-text-secondary">{titleCase(entry.entity_type)}</span>{' '}
+                      <code className="text-caption-1-medium text-text-tertiary">
+                        {entry.entity_id.slice(-8)}
+                      </code>
+                    </TableCell>
                     <TableCell className="text-text-tertiary">{entry.ip ?? '—'}</TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
           ) : (
-            <EmptyState icon={RiFileListLine} title="No entries" description="Actions will be recorded here as people use the platform." />
+            <EmptyState
+              icon={RiFileListLine}
+              title="No entries"
+              description="Actions will be recorded here as people use the platform."
+            />
           )}
         </DataState>
       </Panel>

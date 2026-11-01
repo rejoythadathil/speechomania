@@ -1,4 +1,4 @@
-import { sql } from './common-service/db/service/index.js'
+import { db } from './common-service/db/service/index.js'
 import { logger } from './common-service/logger/service/index.js'
 import { config } from './config/index.js'
 import { app } from './src/app.js'
@@ -9,7 +9,7 @@ logger.info({ port: server.port }, 'api listening')
 async function shutdown(signal) {
   logger.info({ signal }, 'shutting down')
   await server.stop()
-  await sql.close()
+  await db.$disconnect()
   process.exit(0)
 }
 

@@ -17,7 +17,16 @@ beforeAll(async () => {
 
 describe('pagination contract', () => {
   test('every list returns the same page shape and honours page_size', async () => {
-    for (const path of ['/users', '/children', '/lessons', '/change-requests', '/audit', '/remarks/unread', `/children/${child.id}/remarks`, '/dashboard/follow-up']) {
+    for (const path of [
+      '/users',
+      '/children',
+      '/lessons',
+      '/change-requests',
+      '/audit',
+      '/remarks/unread',
+      `/children/${child.id}/remarks`,
+      '/dashboard/follow-up'
+    ]) {
       const { status, body } = await call(admin, 'GET', path, undefined, { page: 1, page_size: 2 })
       expect(status).toBe(200)
       expect(body).toMatchObject({ page: 1, page_size: 2 })
@@ -49,20 +58,29 @@ describe('domain scoping', () => {
   test('mentors do not receive parent emails, admins and the parent do', async () => {
     expect((await call(mentor, 'GET', `/children/${child.id}`)).body.parent_email).toBeNull()
     expect((await call(admin, 'GET', `/children/${child.id}`)).body.parent_email).toBe(parent.email)
-    expect((await call(parent, 'GET', `/children/${child.id}`)).body.parent_email).toBe(parent.email)
+    expect((await call(parent, 'GET', `/children/${child.id}`)).body.parent_email).toBe(
+      parent.email
+    )
   })
 
   test('a mentor moved off a child can no longer edit or delete their remarks there', async () => {
-    const { body: remark } = await call(mentor, 'POST', `/children/${child.id}/remarks`, { body: 'Before the move', visibility: 'internal' })
+    const { body: remark } = await call(mentor, 'POST', `/children/${child.id}/remarks`, {
+      body: 'Before the move',
+      visibility: 'internal'
+    })
     await call(admin, 'PUT', `/children/${child.id}/mentor`, { mentor_id: otherMentor.id })
-    expect((await call(mentor, 'PATCH', `/remarks/${remark.id}`, { body: 'Edited later' })).status).toBe(404)
+    expect(
+      (await call(mentor, 'PATCH', `/remarks/${remark.id}`, { body: 'Edited later' })).status
+    ).toBe(404)
     expect((await call(mentor, 'DELETE', `/remarks/${remark.id}`)).status).toBe(404)
     expect((await call(admin, 'DELETE', `/remarks/${remark.id}`)).status).toBe(204)
   })
 
-  test('a mentor cannot page through another mentor\'s remarks or follow-up list', async () => {
+  test("a mentor cannot page through another mentor's remarks or follow-up list", async () => {
     expect((await call(mentor, 'GET', `/children/${child.id}/remarks`)).status).toBe(404)
-    const followUp = await call(mentor, 'GET', '/dashboard/follow-up', undefined, { page_size: 100 })
+    const followUp = await call(mentor, 'GET', '/dashboard/follow-up', undefined, {
+      page_size: 100
+    })
     expect(followUp.body.items.some((item) => item.id === child.id)).toBe(false)
   })
 })

@@ -1,7 +1,8 @@
 FROM oven/bun:1.3.14-alpine AS deps
 WORKDIR /app
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production --ignore-scripts && bun --bun node_modules/prisma/build/index.js --version
+COPY package.json bun.lock prisma.config.mjs ./
+COPY prisma ./prisma
+RUN bun install --frozen-lockfile --production --ignore-scripts && DATABASE_OWNER_URL=postgresql://build@localhost/build bun --bun node_modules/prisma/build/index.js generate
 
 FROM oven/bun:1.3.14-alpine
 WORKDIR /app

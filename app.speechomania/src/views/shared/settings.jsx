@@ -1,4 +1,12 @@
-import { RiChat3Line, RiCheckDoubleLine, RiCheckLine, RiEditBoxLine, RiLockPasswordLine, RiRefreshLine, RiUserHeartLine } from '@remixicon/react'
+import {
+  RiChat3Line,
+  RiCheckDoubleLine,
+  RiCheckLine,
+  RiEditBoxLine,
+  RiLockPasswordLine,
+  RiRefreshLine,
+  RiUserHeartLine
+} from '@remixicon/react'
 import { useState } from 'react'
 import { Button } from '@/components/base/buttons/button'
 import { Input } from '@/components/base/input/input'
@@ -31,7 +39,12 @@ const STATS = {
 
 function Cover() {
   return (
-    <svg className="absolute inset-0 size-full" viewBox="0 0 1200 160" preserveAspectRatio="xMidYMid slice" aria-hidden>
+    <svg
+      className="absolute inset-0 size-full"
+      viewBox="0 0 1200 160"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden
+    >
       <defs>
         <linearGradient id="cover-sky" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#38b6ff" />
@@ -55,7 +68,10 @@ function AvatarPicker({ profile, onSaved }) {
   const [round, setRound] = useState(0)
   const [pending, setPending] = useState(null)
   const base = profile.id.slice(-12)
-  const faces = [profile.id, ...Array.from({ length: 11 }, (_, index) => `${base}-${round * 11 + index + 1}`)]
+  const faces = [
+    profile.id,
+    ...Array.from({ length: 11 }, (_, index) => `${base}-${round * 11 + index + 1}`)
+  ]
   const options = faces.includes(profile.avatar) ? faces : [profile.avatar, ...faces.slice(0, 11)]
 
   async function choose(seed) {
@@ -74,9 +90,22 @@ function AvatarPicker({ profile, onSaved }) {
     <Panel
       title="Avatar"
       description="Pick a face. It shows next to your name and remarks."
-      actions={<Button variant="secondary" size="xs" leadingIcon={RiRefreshLine} onClick={() => setRound(round + 1)}>More faces</Button>}
+      actions={
+        <Button
+          variant="secondary"
+          size="xs"
+          leadingIcon={RiRefreshLine}
+          onClick={() => setRound(round + 1)}
+        >
+          More faces
+        </Button>
+      }
     >
-      <div role="radiogroup" aria-label="Choose your avatar" className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-12">
+      <div
+        role="radiogroup"
+        aria-label="Choose your avatar"
+        className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-12"
+      >
         {options.map((seed) => {
           const selected = seed === profile.avatar
           return (
@@ -90,12 +119,19 @@ function AvatarPicker({ profile, onSaved }) {
               onClick={() => choose(seed)}
               className={cx(
                 'relative flex aspect-square items-center justify-center rounded-xl border bg-[var(--surface-muted)] p-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-border-focus-ring',
-                selected ? 'border-accent-500 bg-accent-50' : 'border-[var(--line)] hover:border-[var(--line-strong)]',
+                selected
+                  ? 'border-accent-500 bg-accent-50'
+                  : 'border-[var(--line)] hover:border-[var(--line-strong)]',
                 pending === seed && 'opacity-60'
               )}
             >
               <UserAvatar seed={seed} size={56} className="size-full" />
-              {selected ? <RiCheckLine className="absolute top-1 right-1 size-4 rounded-full bg-accent-600 p-0.5 text-white" aria-hidden /> : null}
+              {selected ? (
+                <RiCheckLine
+                  className="absolute top-1 right-1 size-4 rounded-full bg-accent-600 p-0.5 text-white"
+                  aria-hidden
+                />
+              ) : null}
             </button>
           )
         })}
@@ -110,14 +146,20 @@ function DetailsForm({ profile, onSaved }) {
   const [error, setError] = useState(null)
   const errors = fieldErrors(error)
   const set = (key) => (value) => setForm((current) => ({ ...current, [key]: value }))
-  const changed = form.full_name.trim() !== profile.full_name || form.phone.trim() !== (profile.phone ?? '')
+  const changed =
+    form.full_name.trim() !== profile.full_name || form.phone.trim() !== (profile.phone ?? '')
 
   async function submit(event) {
     event.preventDefault()
     setPending(true)
     setError(null)
     try {
-      onSaved(await api('/auth/me', { method: 'PATCH', body: { full_name: form.full_name, phone: form.phone } }))
+      onSaved(
+        await api('/auth/me', {
+          method: 'PATCH',
+          body: { full_name: form.full_name, phone: form.phone }
+        })
+      )
     } catch (failure) {
       setError(failure)
     } finally {
@@ -130,13 +172,38 @@ function DetailsForm({ profile, onSaved }) {
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         <FormAlert error={error && !Object.keys(errors).length ? error : null} />
         <div className="grid gap-4 sm:grid-cols-2">
-          <Input label="Full name" value={form.full_name} onChange={set('full_name')} isRequired isInvalid={Boolean(errors.full_name)} hint={errors.full_name} />
-          <Input label="Phone" type="tel" value={form.phone} onChange={set('phone')} isInvalid={Boolean(errors.phone)} hint={errors.phone ?? 'Optional'} />
-          <Input label="Email" value={profile.email} isReadOnly hint="Ask an admin to change your sign-in email." />
-          <Input label="Role" value={profile.role === 'admin' ? 'Administrator' : 'Mentor'} isReadOnly />
+          <Input
+            label="Full name"
+            value={form.full_name}
+            onChange={set('full_name')}
+            isRequired
+            isInvalid={Boolean(errors.full_name)}
+            hint={errors.full_name}
+          />
+          <Input
+            label="Phone"
+            type="tel"
+            value={form.phone}
+            onChange={set('phone')}
+            isInvalid={Boolean(errors.phone)}
+            hint={errors.phone ?? 'Optional'}
+          />
+          <Input
+            label="Email"
+            value={profile.email}
+            isReadOnly
+            hint="Ask an admin to change your sign-in email."
+          />
+          <Input
+            label="Role"
+            value={profile.role === 'admin' ? 'Administrator' : 'Mentor'}
+            isReadOnly
+          />
         </div>
         <div className="flex justify-end">
-          <Button type="submit" disabled={pending || !changed}>{pending ? 'Saving…' : 'Save changes'}</Button>
+          <Button type="submit" disabled={pending || !changed}>
+            {pending ? 'Saving…' : 'Save changes'}
+          </Button>
         </div>
       </form>
     </Panel>
@@ -165,7 +232,9 @@ function Security({ email }) {
           <RiLockPasswordLine className="size-4 text-text-tertiary" aria-hidden />
           {email}
         </span>
-        <Button variant="secondary" size="small" onClick={send} disabled={pending}>{pending ? 'Sending…' : 'Send reset link'}</Button>
+        <Button variant="secondary" size="small" onClick={send} disabled={pending}>
+          {pending ? 'Sending…' : 'Send reset link'}
+        </Button>
       </div>
     </Panel>
   )
@@ -190,22 +259,49 @@ export function SettingsView() {
         {data ? (
           <>
             <section className="surface overflow-hidden">
-              <div className="relative h-32 sm:h-40"><Cover /></div>
-              <div className="flex flex-wrap items-end gap-4 px-4 pb-4">
-              <UserAvatar seed={data.avatar} name={data.full_name} size={96} className="relative z-10 -mt-12 border-4 border-white" />
-              <div className="flex min-w-0 flex-1 flex-col gap-1 pt-2">
-                <span className="flex flex-wrap items-center gap-2">
-                  <span className="font-display text-title-2-semibold text-text-primary">{data.full_name}</span>
-                  <StatusChip value={data.role} />
-                </span>
-                <span className="text-body-2-medium text-text-secondary">{data.email}{data.phone ? ` · ${data.phone}` : ''}</span>
-                <span className="text-caption-1-medium text-text-tertiary">With Speechomania since {formatDate(data.created_at)}</span>
+              <div className="relative h-32 sm:h-40">
+                <Cover />
               </div>
+              <div className="flex flex-wrap items-end gap-4 px-4 pb-4">
+                <UserAvatar
+                  seed={data.avatar}
+                  name={data.full_name}
+                  size={96}
+                  className="relative z-10 -mt-12 border-4 border-white"
+                />
+                <div className="flex min-w-0 flex-1 flex-col gap-1 pt-2">
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="font-display text-title-2-semibold text-text-primary">
+                      {data.full_name}
+                    </span>
+                    <StatusChip value={data.role} />
+                  </span>
+                  <span className="text-body-2-medium text-text-secondary">
+                    {data.email}
+                    {data.phone ? ` · ${data.phone}` : ''}
+                  </span>
+                  <span className="text-caption-1-medium text-text-tertiary">
+                    With Speechomania since {formatDate(data.created_at)}
+                  </span>
+                </div>
               </div>
             </section>
             {STATS[data.role] ? (
-              <StatStrip className={data.role === 'mentor' ? 'grid-cols-1 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-3 [&>*:last-child]:col-span-1' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-2 [&>*:last-child]:col-span-1'}>
-                {STATS[data.role].map((stat) => <KpiTile key={stat.key} label={stat.label} icon={stat.icon} value={data.stats[stat.key]} />)}
+              <StatStrip
+                className={
+                  data.role === 'mentor'
+                    ? 'grid-cols-1 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-3 [&>*:last-child]:col-span-1'
+                    : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-2 [&>*:last-child]:col-span-1'
+                }
+              >
+                {STATS[data.role].map((stat) => (
+                  <KpiTile
+                    key={stat.key}
+                    label={stat.label}
+                    icon={stat.icon}
+                    value={data.stats[stat.key]}
+                  />
+                ))}
               </StatStrip>
             ) : null}
             <AvatarPicker profile={data} onSaved={saved} />

@@ -43,12 +43,29 @@ function Composer({ initial, onSubmit, onCancel, submitLabel }) {
   return (
     <form onSubmit={submit} className="flex flex-col gap-3">
       <FormAlert error={error} />
-      <Textarea label={initial ? 'Edit remark' : 'Add a remark'} placeholder="What did you notice today?" value={body} onChange={setBody} rows={3} autoResize maxRows={10} maxLength={5000} />
+      <Textarea
+        label={initial ? 'Edit remark' : 'Add a remark'}
+        placeholder="What did you notice today?"
+        value={body}
+        onChange={setBody}
+        rows={3}
+        autoResize
+        maxRows={10}
+        maxLength={5000}
+      />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Switch isSelected={shared} onChange={setShared}>Share with parent</Switch>
+        <Switch isSelected={shared} onChange={setShared}>
+          Share with parent
+        </Switch>
         <div className="flex gap-2">
-          {onCancel ? <Button variant="secondary" size="small" onClick={onCancel}>Cancel</Button> : null}
-          <Button type="submit" size="small" disabled={pending || !body.trim()}>{pending ? 'Saving…' : submitLabel}</Button>
+          {onCancel ? (
+            <Button variant="secondary" size="small" onClick={onCancel}>
+              Cancel
+            </Button>
+          ) : null}
+          <Button type="submit" size="small" disabled={pending || !body.trim()}>
+            {pending ? 'Saving…' : submitLabel}
+          </Button>
         </div>
       </div>
     </form>
@@ -68,7 +85,9 @@ export function RemarksPanel({ childId }) {
 
   async function create(values) {
     await api(`/children/${childId}/remarks`, { method: 'POST', body: values })
-    notify(values.visibility === 'shared' ? 'Remark added and shared with the parent' : 'Remark added')
+    notify(
+      values.visibility === 'shared' ? 'Remark added and shared with the parent' : 'Remark added'
+    )
     setPage(1)
     remarks.reload()
   }
@@ -84,11 +103,19 @@ export function RemarksPanel({ childId }) {
     <Panel
       title={user.role === 'parent' ? 'Notes from Speechomania' : 'Remarks'}
       footer={<ListFooter data={remarks.data} page={page} onPage={setPage} noun="remarks" />}
-      description={user.role === 'parent' ? 'Notes your child’s mentor has shared with you.' : 'Internal remarks stay with Speechomania staff. Shared remarks are visible to the parent.'}
+      description={
+        user.role === 'parent'
+          ? 'Notes your child’s mentor has shared with you.'
+          : 'Internal remarks stay with Speechomania staff. Shared remarks are visible to the parent.'
+      }
     >
       <div className="flex flex-col gap-3">
         {canWrite ? <Composer onSubmit={create} submitLabel="Add remark" /> : null}
-        <DataState loading={remarks.loading && !remarks.data} error={remarks.error} onRetry={remarks.reload}>
+        <DataState
+          loading={remarks.loading && !remarks.data}
+          error={remarks.error}
+          onRetry={remarks.reload}
+        >
           {remarks.data?.items.length ? (
             <ol className="hairlines -mx-3 -mb-3 flex flex-col border-t border-[var(--line)]">
               {remarks.data.items.map((remark) => (
@@ -96,20 +123,42 @@ export function RemarksPanel({ childId }) {
                   <UserAvatar seed={remark.author_avatar} name={remark.author_name} size={28} />
                   <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-body-medium text-text-primary">{remark.author_name}</span>
+                      <span className="text-body-medium text-text-primary">
+                        {remark.author_name}
+                      </span>
                       <StatusChip value={remark.author_role} />
                       {user.role !== 'parent' ? <StatusChip value={remark.visibility} /> : null}
-                      <span className="text-caption-1-medium text-text-tertiary">{formatDateTime(remark.created_at)}</span>
+                      <span className="text-caption-1-medium text-text-tertiary">
+                        {formatDateTime(remark.created_at)}
+                      </span>
                     </div>
                     {editing === remark.id ? (
-                      <Composer initial={remark} onSubmit={update} onCancel={() => setEditing(null)} submitLabel="Save" />
+                      <Composer
+                        initial={remark}
+                        onSubmit={update}
+                        onCancel={() => setEditing(null)}
+                        submitLabel="Save"
+                      />
                     ) : (
-                      <p className="whitespace-pre-wrap text-body-regular text-text-secondary">{remark.body}</p>
+                      <p className="whitespace-pre-wrap text-body-regular text-text-secondary">
+                        {remark.body}
+                      </p>
                     )}
-                    {editing !== remark.id && (remark.author_id === user.id || user.role === 'admin') ? (
+                    {editing !== remark.id &&
+                    (remark.author_id === user.id || user.role === 'admin') ? (
                       <div className="flex gap-2">
-                        {remark.author_id === user.id ? <Button variant="secondary" size="xs" onClick={() => setEditing(remark.id)}>Edit</Button> : null}
-                        <Button variant="secondary" size="xs" onClick={() => setRemoving(remark)}>Delete</Button>
+                        {remark.author_id === user.id ? (
+                          <Button
+                            variant="secondary"
+                            size="xs"
+                            onClick={() => setEditing(remark.id)}
+                          >
+                            Edit
+                          </Button>
+                        ) : null}
+                        <Button variant="secondary" size="xs" onClick={() => setRemoving(remark)}>
+                          Delete
+                        </Button>
                       </div>
                     ) : null}
                   </div>
@@ -117,7 +166,15 @@ export function RemarksPanel({ childId }) {
               ))}
             </ol>
           ) : (
-            <EmptyState icon={RiChat3Line} title="No remarks yet" description={canWrite ? 'Add the first remark above.' : 'Your child’s mentor has not shared any notes yet.'} />
+            <EmptyState
+              icon={RiChat3Line}
+              title="No remarks yet"
+              description={
+                canWrite
+                  ? 'Add the first remark above.'
+                  : 'Your child’s mentor has not shared any notes yet.'
+              }
+            />
           )}
         </DataState>
       </div>

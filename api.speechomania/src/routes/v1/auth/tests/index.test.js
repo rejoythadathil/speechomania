@@ -17,9 +17,16 @@ describe('own profile', () => {
   })
 
   test('staff can edit their own name and phone only', async () => {
-    const { status, body } = await call(mentor, 'PATCH', '/auth/me', { full_name: 'Renamed Mentor', phone: '+91 98450 12345' })
+    const { status, body } = await call(mentor, 'PATCH', '/auth/me', {
+      full_name: 'Renamed Mentor',
+      phone: '+91 98450 12345'
+    })
     expect(status).toBe(200)
-    expect(body).toMatchObject({ full_name: 'Renamed Mentor', phone: '+91 98450 12345', role: 'mentor' })
+    expect(body).toMatchObject({
+      full_name: 'Renamed Mentor',
+      phone: '+91 98450 12345',
+      role: 'mentor'
+    })
     expect((await call(mentor, 'PATCH', '/auth/me', { role: 'admin' })).status).toBe(400)
   })
 

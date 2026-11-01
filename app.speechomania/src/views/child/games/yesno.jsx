@@ -5,7 +5,10 @@ import { Picture, useShake } from './parts.jsx'
 import { useRound } from './use-round.js'
 import styles from './games.module.css'
 
-const BUTTONS = [[true, 'thumbs-up', 'Yes'], [false, 'thumbs-down', 'No']]
+const BUTTONS = [
+  [true, 'thumbs-up', 'Yes'],
+  [false, 'thumbs-down', 'No']
+]
 
 export function YesNoGame(props) {
   const { step } = props
@@ -22,16 +25,21 @@ export function YesNoGame(props) {
               key={label}
               type="button"
               aria-label={label}
-              className={cx(styles.thumb, picked === value && styles.right, shaking === value && styles.shake, round.hint && round.open && value === step.answer && styles.hint)}
+              className={cx(
+                styles.thumb,
+                picked === value && styles.right,
+                shaking === value && styles.shake,
+                round.hint && round.open && value === step.answer && styles.hint
+              )}
               onAnimationEnd={stop}
               onClick={(event) => {
                 if (!round.open) return
                 if (value !== step.answer) {
                   shake(value)
-                  return round.wrong()
+                  return round.wrong(value ? 'yes' : 'no')
                 }
                 setPicked(value)
-                round.right(event.currentTarget)
+                round.right(event.currentTarget, value ? 'yes' : 'no')
               }}
             >
               <img src={ART[art]} alt="" draggable="false" />

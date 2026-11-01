@@ -7,4 +7,9 @@ import { followUpQuery } from '../validation/index.js'
 export const dashboardRoute = new Hono()
   .get('/', controller.get)
   .get('/badges', controller.badges)
-  .get('/follow-up', allow('admin', 'mentor'), validate({ query: followUpQuery }), controller.followUp)
+  .get(
+    '/follow-up',
+    allow('admin', 'mentor'),
+    validate({ query: followUpQuery }),
+    controller.followUp
+  )

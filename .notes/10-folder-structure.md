@@ -5,7 +5,7 @@ One repository (github.com/rejoythadathil/speechomania) with the three apps side
 |---|---|
 | `route/index.js` | Hono routes, roles (`allow`) and validation wiring (features only) |
 | `controller/index.js` | reads `c.get('valid')`, calls the service, shapes the response (features only) |
-| `service/index.js` | the work: SQL, transactions, audit calls, external APIs |
+| `service/index.js` | the work: Prisma queries, transactions, audit calls, external APIs |
 | `validation/index.js` | Joi schemas for params, query and body |
 | `constants/index.js` | fixed values and lists (statuses, limits, weights) |
 | `exception/index.js` | named error factories (`lessonNotFound()`, `wrongPin()`), never inline `new HttpError` in services |
@@ -37,8 +37,8 @@ api.speechomania/
   seeds/dev.js                   #local only: accounts, children, lessons ("Can and can't" is a pick lesson), remarks, a change request
   server.js                      #starts the HTTP server, graceful shutdown
   common-service/                #each module: service/ plus constants/ exception/ utils/ validation/ tests/ docs/ as needed
-    http/                        #HttpError and error factories, paging (pageQuery, pageOf, pageArray), json(), requestCtx()
-    db/                          #Bun.sql pool (prepare: false), Postgres error mapping
+    http/                        #HttpError and error factories, paging (pageQuery, pageOf, pageArray), containsText(), isoDate(), requestCtx()
+    db/                          #Prisma Client (db), Postgres error mapping, SERIAL
     cache/                       #Valkey client
     logger/                      #pino with personal data redacted
     firebase/                    #token verification, invites, disable accounts
@@ -64,6 +64,7 @@ api.speechomania/
       remarks/                   #per child; parents see shared only; unread inbox for admins
       lessons/                   #versions, publish, new draft, archive
       change-requests/           #mentor requests, admin review (approval creates a draft)
+      assessments/               #build, publish, assign, results and scoring of assessments
       learning/                  #parent only, child mode: child, shelf, playable lesson, attempts, exit with PIN
       audit/                     #admin: read the audit log
   test/                          #setup.js (fresh test database), helpers.js, and cross-feature scoping.test.js; module tests live beside their code

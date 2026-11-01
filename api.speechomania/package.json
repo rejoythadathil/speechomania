@@ -6,17 +6,22 @@
     "dev": "bun --watch server.js",
     "start": "bun server.js",
     "migrate": "bun --bun prisma migrate deploy",
+    "generate": "bun --bun prisma generate",
     "seed": "bun seeds/dev.js",
-    "lint": "eslint .",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
     "test": "bun test",
     "check-env": "bun scripts/check-env.js",
     "prepare": "git config core.hooksPath .githooks",
     "migrate:new": "bun scripts/migration-new.js",
     "migrate:check": "bun --bun prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
     "migrate:status": "bun --bun prisma migrate status",
-    "audio": "bun scripts/lesson-audio.js"
+    "audio": "bun scripts/lesson-audio.js",
+    "postinstall": "bun --bun prisma generate"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
     "firebase-admin": "14.5.0",
     "hono": "4.13.14",
     "joi": "18.3.0",
@@ -26,6 +31,7 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "eslint": "10.13.0",
-    "globals": "17.13.0"
+    "globals": "17.13.0",
+    "prettier": "3.6.2"
   }
 }

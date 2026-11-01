@@ -27,6 +27,6 @@ fi
 gitleaks git --pre-commit --staged --redact --no-banner
 for app in api.speechomania app.speechomania; do
   if printf '%s\n' "$staged" | grep -q "^$app/"; then
-    (cd "$app" && bunx eslint .)
+    (cd "$app" && bun run lint)
   fi
 done

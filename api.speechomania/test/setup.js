@@ -23,7 +23,9 @@ await owner.unsafe(`
 `)
 await owner.close()
 
-const migrate = Bun.spawnSync(['bun', '--bun', 'prisma', 'migrate', 'deploy'], { env: { ...process.env, DATABASE_OWNER_URL: ownerBase.toString() } })
+const migrate = Bun.spawnSync(['bun', '--bun', 'prisma', 'migrate', 'deploy'], {
+  env: { ...process.env, DATABASE_OWNER_URL: ownerBase.toString() }
+})
 if (migrate.exitCode !== 0) throw new Error(`migration failed: ${migrate.stderr}`)
 
 process.env.DATABASE_URL = appBase.toString()

@@ -2,7 +2,10 @@ import { createHash } from 'node:crypto'
 import { AUDIO_FOLDER, VOICE_SETTINGS } from '../constants/index.js'
 
 export function audioBase(text, { voiceId, model }) {
-  const hash = createHash('sha256').update(JSON.stringify([voiceId, model, VOICE_SETTINGS, text])).digest('hex').slice(0, 24)
+  const hash = createHash('sha256')
+    .update(JSON.stringify([voiceId, model, VOICE_SETTINGS, text]))
+    .digest('hex')
+    .slice(0, 24)
   return `${AUDIO_FOLDER}/${hash}`
 }
 

@@ -147,7 +147,9 @@
   display: block;
   width: 24px;
   opacity: 0.25;
-  transition: opacity var(--child-t) ease, scale var(--child-t) ease;
+  transition:
+    opacity var(--child-t) ease,
+    scale var(--child-t) ease;
 }
 
 .progress .check img {

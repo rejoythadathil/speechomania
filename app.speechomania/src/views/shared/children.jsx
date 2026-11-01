@@ -5,7 +5,14 @@ import { Avatar } from '@/components/base/avatar/avatar'
 import { Button } from '@/components/base/buttons/button'
 import { Checkbox } from '@/components/base/checkbox/checkbox'
 import { Input } from '@/components/base/input/input'
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@/components/base/table/table'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow
+} from '@/components/base/table/table'
 import { DataState } from '@/components/shared/data-state.jsx'
 import { EmptyState } from '@/components/shared/empty-state.jsx'
 import { ListFooter } from '@/components/shared/list-footer.jsx'
@@ -21,7 +28,11 @@ import { useResource } from '@/hooks/use-resource.js'
 import { age, formatDate, initials } from '@/utils/format'
 import { ChildFormModal } from './child-form.jsx'
 
-const STATUS_OPTIONS = [{ id: 'all', label: 'All statuses' }, { id: 'active', label: 'Active' }, { id: 'inactive', label: 'Inactive' }]
+const STATUS_OPTIONS = [
+  { id: 'all', label: 'All statuses' },
+  { id: 'active', label: 'Active' },
+  { id: 'inactive', label: 'Inactive' }
+]
 
 export function ChildrenView() {
   const [params] = useSearchParams()
@@ -51,25 +62,73 @@ function ChildrenList() {
     <>
       <PageHeader
         title={user.role === 'admin' ? 'Children' : 'My children'}
-        description={user.role === 'admin' ? 'Every child enrolled with Speechomania, their parent and their mentor.' : undefined}
-        actions={canAdd ? <Button leadingIcon={RiAddLine} onClick={() => setAdding(true)}>Add child</Button> : null}
+        description={
+          user.role === 'admin'
+            ? 'Every child enrolled with Speechomania, their parent and their mentor.'
+            : undefined
+        }
+        actions={
+          canAdd ? (
+            <Button leadingIcon={RiAddLine} onClick={() => setAdding(true)}>
+              Add child
+            </Button>
+          ) : null
+        }
       />
       <Panel
         bodyClassName="p-0"
-        toolbar={(
+        toolbar={
           <>
-            <Input size="small" className="max-w-64" aria-label="Search children" placeholder="Search by name" leadingIcon={RiSearchLine} value={search} onChange={(value) => { setSearch(value); setPage(1) }} />
+            <Input
+              size="small"
+              className="max-w-64"
+              aria-label="Search children"
+              placeholder="Search by name"
+              leadingIcon={RiSearchLine}
+              value={search}
+              onChange={(value) => {
+                setSearch(value)
+                setPage(1)
+              }}
+            />
             {user.role === 'admin' ? (
               <>
-                <SelectField size="sm" className="w-44" options={STATUS_OPTIONS} value={status} onChange={(value) => { setStatus(value); setPage(1) }} />
-                <Checkbox isSelected={unassigned} onChange={(value) => setParam('unassigned', value ? '1' : null)}>Waiting for a mentor</Checkbox>
+                <SelectField
+                  size="sm"
+                  className="w-44"
+                  options={STATUS_OPTIONS}
+                  value={status}
+                  onChange={(value) => {
+                    setStatus(value)
+                    setPage(1)
+                  }}
+                />
+                <Checkbox
+                  isSelected={unassigned}
+                  onChange={(value) => setParam('unassigned', value ? '1' : null)}
+                >
+                  Waiting for a mentor
+                </Checkbox>
               </>
             ) : null}
           </>
-        )}
-        footer={<ListFooter data={children.data} page={page} onPage={setPage} pageSize={pageSize} onPageSize={setPageSize} noun="children" />}
+        }
+        footer={
+          <ListFooter
+            data={children.data}
+            page={page}
+            onPage={setPage}
+            pageSize={pageSize}
+            onPageSize={setPageSize}
+            noun="children"
+          />
+        }
       >
-        <DataState loading={children.loading && !children.data} error={children.error} onRetry={children.reload}>
+        <DataState
+          loading={children.loading && !children.data}
+          error={children.error}
+          onRetry={children.reload}
+        >
           {children.data?.items.length ? (
             <Table aria-label="Children" onRowAction={(id) => navigate(`/children/${id}`)}>
               <TableHeader>
@@ -87,15 +146,29 @@ function ChildrenList() {
                       <span className="flex items-center gap-3">
                         <Avatar size="sm" color="blue" initials={initials(child.display_name)} />
                         <span className="flex flex-col">
-                          <span className="text-body-medium text-text-primary">{child.display_name}</span>
-                          {age(child.date_of_birth) !== null ? <span className="text-caption-1-medium text-text-tertiary">{age(child.date_of_birth)} years</span> : null}
+                          <span className="text-body-medium text-text-primary">
+                            {child.display_name}
+                          </span>
+                          {age(child.date_of_birth) !== null ? (
+                            <span className="text-caption-1-medium text-text-tertiary">
+                              {age(child.date_of_birth)} years
+                            </span>
+                          ) : null}
                         </span>
                       </span>
                     </TableCell>
                     {user.role !== 'parent' ? <TableCell>{child.parent_name}</TableCell> : null}
-                    {user.role !== 'mentor' ? <TableCell>{child.mentor_name ?? <span className="text-text-tertiary">Not assigned</span>}</TableCell> : null}
+                    {user.role !== 'mentor' ? (
+                      <TableCell>
+                        {child.mentor_name ?? (
+                          <span className="text-text-tertiary">Not assigned</span>
+                        )}
+                      </TableCell>
+                    ) : null}
                     <TableCell>{child.assigned_lessons.length}</TableCell>
-                    <TableCell><StatusChip value={child.status} /></TableCell>
+                    <TableCell>
+                      <StatusChip value={child.status} />
+                    </TableCell>
                     <TableCell>{formatDate(child.created_at)}</TableCell>
                   </TableRow>
                 )}
@@ -105,7 +178,11 @@ function ChildrenList() {
             <EmptyState
               icon={RiUserHeartLine}
               title={q || unassigned ? 'No children match' : 'No children yet'}
-              description={user.role === 'mentor' ? 'Children assigned to you by Speechomania will appear here.' : 'Add a child to get started.'}
+              description={
+                user.role === 'mentor'
+                  ? 'Children assigned to you by Speechomania will appear here.'
+                  : 'Add a child to get started.'
+              }
             />
           )}
         </DataState>

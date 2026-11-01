@@ -24,22 +24,31 @@ export function PlaceGame(props) {
             <button
               key={choice}
               type="button"
-              className={cx(styles.target, spotClass(choice), placed === choice && styles.taken, shaking === choice && styles.shake, round.hint && round.open && choice === step.answer && styles.hint)}
+              className={cx(
+                styles.target,
+                spotClass(choice),
+                placed === choice && styles.taken,
+                shaking === choice && styles.shake,
+                round.hint && round.open && choice === step.answer && styles.hint
+              )}
               onAnimationEnd={stop}
               onClick={(event) => {
                 if (!round.open) return
                 if (choice !== step.answer) {
                   shake(choice)
-                  return round.wrong()
+                  return round.wrong(choice)
                 }
                 setPlaced(choice)
-                round.right(event.currentTarget)
+                round.right(event.currentTarget, choice)
               }}
             >
               {choice}
             </button>
           ))}
-          <Art name={thing} className={cx(styles.thing, placed && spotClass(placed), placed && styles.placed)} />
+          <Art
+            name={thing}
+            className={cx(styles.thing, placed && spotClass(placed), placed && styles.placed)}
+          />
         </div>
       </div>
     </div>

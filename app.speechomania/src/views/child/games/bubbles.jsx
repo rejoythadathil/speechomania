@@ -9,7 +9,12 @@ export function BubblesGame(props) {
     <div className={styles.stage}>
       <div className={styles.column}>
         <Picture step={step} />
-        <WordChoices choices={step.choices} answer={step.answer} round={round} className={styles.bubbleChoices} />
+        <WordChoices
+          choices={step.choices}
+          answer={step.answer}
+          round={round}
+          className={styles.bubbleChoices}
+        />
       </div>
     </div>
   )

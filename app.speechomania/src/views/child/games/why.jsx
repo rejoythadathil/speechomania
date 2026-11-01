@@ -14,7 +14,12 @@ export function WhyGame(props) {
           <Picture step={step} className={styles.spot} />
           <img className={styles.magnifier} src={ART.magnifier} alt="" draggable="false" />
         </span>
-        <WordChoices choices={step.choices} answer={step.answer} round={round} className={styles.reasons} />
+        <WordChoices
+          choices={step.choices}
+          answer={step.answer}
+          round={round}
+          className={styles.reasons}
+        />
       </div>
     </div>
   )

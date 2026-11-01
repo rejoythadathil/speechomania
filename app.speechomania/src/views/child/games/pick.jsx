@@ -22,21 +22,35 @@ export function PickGame(props) {
             key={id}
             type="button"
             aria-label={`The ${id}`}
-            className={cx(styles.animal, picked === id && styles.right, shaking === id && styles.shake, round.hint && round.open && id === step.answer && styles.hint)}
+            className={cx(
+              styles.animal,
+              picked === id && styles.right,
+              shaking === id && styles.shake,
+              round.hint && round.open && id === step.answer && styles.hint
+            )}
             onAnimationEnd={stop}
             onClick={(event) => {
               if (!round.open) return
               if (id !== step.answer) {
                 shake(id)
-                return round.wrong()
+                return round.wrong(id)
               }
               setPicked(id)
-              round.right(event.currentTarget)
+              round.right(event.currentTarget, id)
             }}
           >
             <img src={ART[id]} alt="" draggable="false" />
-            {revealed && id === step.actor ? <img className={styles.prop} src={ART[ACTION_ART[step.act]]} alt="" draggable="false" /> : null}
-            {revealed && id === step.answer ? <span className={styles.tag}>{contrast ?? 'Yes'}</span> : null}
+            {revealed && id === step.actor ? (
+              <img
+                className={styles.prop}
+                src={ART[ACTION_ART[step.act]]}
+                alt=""
+                draggable="false"
+              />
+            ) : null}
+            {revealed && id === step.answer ? (
+              <span className={styles.tag}>{contrast ?? 'Yes'}</span>
+            ) : null}
           </button>
         ))}
       </div>
