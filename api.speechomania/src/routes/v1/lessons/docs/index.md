@@ -16,6 +16,12 @@ Versioned lessons. One row per version (`slug` + `version`); at most one draft a
 ## Content
 - `player: 'story'`: `steps: [{ text, image_key?, audio? }]`.
 - `player: 'pick'`: `contrast` (the coloured word, e.g. `can’t`), `lines` (`intro`, `quiz`, `retry`, `skip`, `outro`, `reward`), and steps with `text` (the question), `choices` (two of `LESSON_CHARACTERS`), `answer`, `actor` (who acts it out), `act` (one of `LESSON_ACTIONS`), `praise`, `teach`.
+- Games (`rounds` 1–20, how many steps one play uses; any step may add `praise` and `sentence` lines):
+  - Pictures: `art` (1–3 illustration names, lowercase with hyphens, matching files in the app's OpenMoji library) or `image_key` (an S3 key).
+  - `shark`, `balloons` (`PICTURE_PLAYERS`): steps with `word` and a picture; at least three steps, because the others are the wrong options.
+  - `yesno`: steps with a picture and `answer` true or false.
+  - `match`: opposite pairs with `first`, `second` and two `art`; boards of `PAIRS_PER_BOARD`, so at least that many steps.
+  - `bubbles`, `squish` (also `first`, `second`), `compare` (one `art` per choice), `place` (`art` is the thing and the place), `train` (the gap is `…`), `why` (`CHOICE_PLAYERS`): steps with `choices` (2–4 words) and an `answer` that is one of them.
 - Any line may carry `audio: { key, duration, words }`, filled by `bun run audio <slug>` into a draft.
 
 ## Errors (`exception/index.js`)

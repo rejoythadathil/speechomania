@@ -12,7 +12,7 @@
   --child-coral-ink: #9c3a26;
   --child-amber: #f2b93b;
   --child-amber-soft: #fff4d8;
-  --child-lift: 0 2px 0 rgba(27, 42, 56, 0.06), 0 14px 34px -12px rgba(27, 42, 56, 0.22);
+  --child-lift: 0 0 0 1.5px rgba(27, 42, 56, 0.1);
   --child-ground: 19%;
   --child-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --child-t: 420ms;

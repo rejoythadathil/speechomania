@@ -1,5 +1,5 @@
 import { cx } from '@/utils/cx'
-import { BreakIcon, DoneIcon, GrownUpIcon, MuteIcon, SayAgainIcon } from './child-icons.jsx'
+import { BreakIcon, GrownUpIcon, MuteIcon, SayAgainIcon } from './child-icons.jsx'
 import styles from './child.module.css'
 
 export function TopBar({ centre, onGrownUp, onBreak, muted, onMute }) {
@@ -34,19 +34,5 @@ export function BottomBar({ onSayAgain, next }) {
       ) : <span />}
       {next}
     </footer>
-  )
-}
-
-export function Steps({ steps, current, count }) {
-  return (
-    <ol className={styles.steps} aria-label="Lesson steps">
-      {steps.map((label, index) => (
-        <li key={label} className={cx(styles.step, index === current && styles.stepNow, index < current && styles.stepDone)} aria-current={index === current ? 'step' : undefined}>
-          <span className={styles.stepNumber}>{index < current ? <DoneIcon size={16} strokeWidth={3} /> : index + 1}</span>
-          <span className={styles.label}>{label}</span>
-        </li>
-      ))}
-      {count ? <li className={styles.count}>{count}</li> : null}
-    </ol>
   )
 }

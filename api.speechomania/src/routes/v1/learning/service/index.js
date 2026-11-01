@@ -4,8 +4,9 @@ import { mediaUrl } from '../../../../../common-service/storage/service/index.js
 import { lessonLines } from '../../../../../common-service/voice/utils/index.js'
 import { json, pageOf } from '../../../../../common-service/http/utils/index.js'
 import { MAX_EVENTS_PER_ATTEMPT } from '../constants/index.js'
+import { PAIRS_PER_BOARD } from '../../lessons/constants/index.js'
 import { attemptFinished, attemptNotFound, learnerNotFound, lessonNotFound, tooManyEvents, wrongPin } from '../exception/index.js'
-import { starsFor, stepsTotal } from '../utils/index.js'
+import { badgeStars, starsFor, stepsTotal } from '../utils/index.js'
 
 async function findLearner(db, user, id) {
   const [child] = await db`
@@ -25,23 +26,56 @@ function playable(db, childId) {
   `
 }
 
+function maxStars(db) {
+  return db`CASE coalesce(l.content ->> 'player', 'story') WHEN 'story' THEN 1 WHEN 'pick' THEN jsonb_array_length(l.content -> 'steps')
+        WHEN 'match' THEN least(coalesce((l.content ->> 'rounds')::int, jsonb_array_length(l.content -> 'steps') / ${PAIRS_PER_BOARD}), jsonb_array_length(l.content -> 'steps') / ${PAIRS_PER_BOARD})
+        ELSE least(coalesce((l.content ->> 'rounds')::int, jsonb_array_length(l.content -> 'steps')), jsonb_array_length(l.content -> 'steps')) END`
+}
+
 export async function getLearner(user, id) {
   const child = await findLearner(sql, user, id)
   const [{ stars }] = await sql`SELECT coalesce(sum(stars), 0)::int AS stars FROM attempts WHERE child_id = ${id}`
-  return { id: child.id, display_name: child.display_name, sensory_settings: child.sensory_settings, has_pin: Boolean(child.pin_hash), stars }
+  const games = await sql`
+    SELECT l.slug, l.title, coalesce(l.content ->> 'player', 'story') AS player,
+      CASE WHEN l.content ->> 'player' = 'pick' THEN l.content -> 'steps' -> 0 -> 'choices' END AS cover,
+      ${maxStars(sql)} AS max_stars,
+      (SELECT max(a.stars) FROM attempts a JOIN lessons v ON v.id = a.lesson_id
+        WHERE a.child_id = c.id AND v.slug = l.slug AND a.status = 'completed') AS best
+    ${playable(sql, id)}
+    ORDER BY l.title
+  `
+  const badges = games.filter((game) => game.best !== null && game.best >= badgeStars(game.max_stars)).map(({ slug, title, player, cover }) => ({ slug, title, player, cover }))
+  return {
+    id: child.id,
+    display_name: child.display_name,
+    sensory_settings: child.sensory_settings,
+    has_pin: Boolean(child.pin_hash),
+    stars,
+    games_total: games.length,
+    games_played: games.filter((game) => game.best !== null).length,
+    badges
+  }
 }
 
 export async function listShelf(user, id, window) {
   await findLearner(sql, user, id)
-  return pageOf(sql, sql`
+  const page = await pageOf(sql, sql`
     SELECT l.id, l.slug, l.title, coalesce(l.content ->> 'player', 'story') AS player, l.content ->> 'contrast' AS contrast,
-      jsonb_array_length(l.content -> 'steps') AS step_count, l.content -> 'steps' -> 0 -> 'choices' AS cover,
+      jsonb_array_length(l.content -> 'steps') AS step_count, CASE WHEN l.content ->> 'player' = 'pick' THEN l.content -> 'steps' -> 0 -> 'choices' END AS cover,
+      ${maxStars(sql)} AS max_stars,
+      (SELECT s -> 'art' FROM jsonb_array_elements(l.content -> 'steps') s WHERE s ? 'art' LIMIT 1) AS cover_art,
+      (SELECT s ->> 'image_key' FROM jsonb_array_elements(l.content -> 'steps') s WHERE s ? 'image_key' LIMIT 1) AS cover_key,
       (SELECT count(*)::int FROM attempts a JOIN lessons v ON v.id = a.lesson_id
         WHERE a.child_id = c.id AND v.slug = l.slug AND a.status = 'completed') AS times_completed,
       (SELECT coalesce(max(a.stars), 0)::int FROM attempts a JOIN lessons v ON v.id = a.lesson_id
         WHERE a.child_id = c.id AND v.slug = l.slug AND a.status = 'completed') AS best_stars
     ${playable(sql, id)}
   `, sql`list.title, list.id`, window)
+  for (const lesson of page.items) {
+    lesson.cover_url = mediaUrl(lesson.cover_key)
+    delete lesson.cover_key
+  }
+  return page
 }
 
 export async function getPlayableLesson(user, id, lessonId) {
@@ -50,6 +84,9 @@ export async function getPlayableLesson(user, id, lessonId) {
   if (!lesson) throw lessonNotFound()
   for (const line of lessonLines(lesson.content)) {
     if (line.audio?.key) line.audio.url = mediaUrl(line.audio.key)
+  }
+  for (const step of lesson.content.steps ?? []) {
+    if (step.image_key) step.image_url = mediaUrl(step.image_key)
   }
   return { ...lesson, steps_total: stepsTotal(lesson.content) }
 }

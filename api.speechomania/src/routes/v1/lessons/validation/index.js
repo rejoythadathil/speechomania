@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import { pageQuery } from '../../../../../common-service/http/validation/index.js'
-import { LESSON_ACTIONS, LESSON_CHARACTERS, LESSON_LINES, LESSON_PLAYERS, LESSON_STATUSES } from '../constants/index.js'
+import { ART_NAME, CHOICE_PLAYERS, LESSON_ACTIONS, LESSON_CHARACTERS, LESSON_LINES, LESSON_PLAYERS, LESSON_STATUSES, MAX_ROUNDS, PAIRS_PER_BOARD, PICTURE_PLAYERS } from '../constants/index.js'
 
 const text = Joi.string().trim().min(1).max(500)
 
@@ -17,8 +17,11 @@ const audio = Joi.object({
 const line = Joi.object({ text: text.required(), audio })
 const character = Joi.string().valid(...LESSON_CHARACTERS)
 
+const art = Joi.array().items(Joi.string().pattern(ART_NAME).max(40)).min(1).max(3)
+
 const storyStep = Joi.object({
   text: text.required(),
+  art,
   image_key: Joi.string().max(300).allow(null, ''),
   audio_key: Joi.string().max(300).allow(null, ''),
   audio
@@ -37,15 +40,51 @@ const pickStep = storyStep.keys({
   return value
 })
 
+const word = Joi.string().trim().min(1).max(60)
+const gameStep = storyStep.keys({ praise: line, sentence: line })
+
+const pictureStep = gameStep.keys({ word: word.required() }).or('art', 'image_key')
+
+const choiceStep = gameStep.keys({
+  choices: Joi.array().items(word).min(2).max(4).unique().required(),
+  answer: word.required(),
+  first: word,
+  second: word
+}).custom((value, helpers) => (value.choices.includes(value.answer) ? value : helpers.message('The answer must be one of the choices')))
+
+const compareStep = choiceStep.keys({ art: art.required() })
+  .custom((value, helpers) => (value.art.length === value.choices.length ? value : helpers.message('Give one picture for each choice')))
+
+const placeStep = choiceStep.keys({ art: art.length(2).required() })
+
+const matchStep = gameStep.keys({ first: word.required(), second: word.required(), art: art.length(2).required() })
+
+const yesNoStep = gameStep.keys({ answer: Joi.boolean().required() }).or('art', 'image_key')
+
+const stepsFor = (player) => {
+  if (player === 'pick') return pickStep
+  if (player === 'yesno') return yesNoStep
+  if (player === 'match') return matchStep
+  if (player === 'compare') return compareStep
+  if (player === 'place') return placeStep
+  if (PICTURE_PLAYERS.includes(player)) return pictureStep
+  if (CHOICE_PLAYERS.includes(player)) return choiceStep
+  return storyStep
+}
+
 const content = Joi.object({
   player: Joi.string().valid(...LESSON_PLAYERS).default('story'),
   contrast: Joi.string().trim().max(40),
+  rounds: Joi.number().integer().min(1).max(MAX_ROUNDS),
   lines: Joi.object(Object.fromEntries(LESSON_LINES.map((name) => [name, line]))),
-  steps: Joi.when('player', {
-    is: 'pick',
-    then: Joi.array().items(pickStep).max(100).required(),
+  steps: Joi.alternatives().conditional('player', {
+    switch: LESSON_PLAYERS.map((player) => ({ is: player, then: Joi.array().items(stepsFor(player)).max(100).required() })),
     otherwise: Joi.array().items(storyStep).max(100).required()
   })
+}).custom((value, helpers) => {
+  if (PICTURE_PLAYERS.includes(value.player) && value.steps.length && value.steps.length < 3) return helpers.message('This game needs at least three pictures')
+  if (value.player === 'match' && value.steps.length && value.steps.length < PAIRS_PER_BOARD) return helpers.message(`A memory game needs at least ${PAIRS_PER_BOARD} pairs`)
+  return value
 })
 
 export const idParams = Joi.object({ id: Joi.string().uuid().required() })

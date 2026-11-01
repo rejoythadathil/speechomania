@@ -6,6 +6,7 @@ import { AuditView } from '@/views/admin/audit.jsx'
 import { PeopleView } from '@/views/admin/people.jsx'
 import { LoginView } from '@/views/auth/login.jsx'
 import { LearnHomeView } from '@/views/child/learn-home.jsx'
+import { LearnStartView } from '@/views/child/learn-start.jsx'
 import { LessonPlayerView } from '@/views/child/lesson-player.jsx'
 import { ChangeRequestsView } from '@/views/shared/change-requests.jsx'
 import { ChildDetailView } from '@/views/shared/child-detail.jsx'
@@ -25,6 +26,11 @@ function RequireAuth() {
   return <Outlet />
 }
 
+function Home() {
+  const { user } = useAuth()
+  return <Navigate to={user.role === 'parent' ? '/learn' : '/dashboard'} replace />
+}
+
 function RequireRole({ roles }) {
   const { user } = useAuth()
   if (!roles.includes(user.role)) return <NotFoundView />
@@ -37,7 +43,7 @@ export const router = createBrowserRouter([
     element: <RequireAuth />,
     children: [{
       element: <RequireRole roles={['parent']} />,
-      children: [{
+      children: [{ path: 'learn', element: <LearnStartView /> }, {
         path: 'learn/:childId',
         element: <LearningLayout />,
         children: [
@@ -48,7 +54,7 @@ export const router = createBrowserRouter([
     }, {
       element: <WorkLayout />,
       children: [
-        { index: true, element: <Navigate to="/dashboard" replace /> },
+        { index: true, element: <Home /> },
         { path: 'dashboard', element: <DashboardView /> },
         { path: 'children', element: <ChildrenView /> },
         { path: 'children/:id', element: <ChildDetailView /> },

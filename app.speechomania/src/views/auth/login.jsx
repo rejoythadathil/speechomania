@@ -22,7 +22,7 @@ export function LoginView() {
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null)
 
-  if (auth.status === 'signed-in') return <Navigate to="/dashboard" replace />
+  if (auth.status === 'signed-in') return <Navigate to={auth.user?.role === 'parent' ? '/learn' : '/dashboard'} replace />
 
   async function submit(event) {
     event.preventDefault()
@@ -50,23 +50,14 @@ export function LoginView() {
 
   return (
     <div className={styles.page}>
-      <section className={styles.story}>
-        <div className="flex items-center gap-3">
-          <span className="inline-flex rounded-2xl bg-white p-2"><BrandMark size={36} /></span>
-          <span className="font-display text-headline-semibold text-white">Speechomania</span>
+      <main className={styles.main}>
+        <div className={styles.brand}>
+          <BrandMark size={40} />
+          <span className="font-display text-headline-semibold text-text-primary">Speechomania</span>
         </div>
-        <div className="relative z-10 flex max-w-lg flex-col gap-4">
-          <h1 className="font-display text-[clamp(2rem,4vw,3rem)] leading-[1.1] font-bold">Every child deserves to be heard.</h1>
-          <p className="text-body-regular text-white/80">
-            One place for Speechomania’s therapists, mentors and families to follow each child’s learning, share notes and shape lessons together.
-          </p>
-        </div>
-        <p className="relative z-10 text-caption-1-medium text-white/60">A product of Autism Synergies</p>
-      </section>
-      <section className={styles.formSide}>
         <form className={styles.form} onSubmit={submit} noValidate>
-          <div className="flex flex-col gap-1">
-            <h2 className="font-display text-title-1-semibold text-text-primary">Sign in</h2>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <h1 className="font-display text-title-1-semibold text-text-primary">Welcome back</h1>
             <p className="text-body-regular text-text-secondary">Use the email Speechomania invited you with.</p>
           </div>
           <FormAlert error={error ?? (auth.error ? { message: auth.error } : null)} />
@@ -74,9 +65,10 @@ export function LoginView() {
           <Input label="Email" type="email" autoComplete="email" value={email} onChange={setEmail} isRequired />
           <Input label="Password" type="password" autoComplete="current-password" value={password} onChange={setPassword} isRequired />
           <Button type="submit" disabled={pending || !email || !password}>{pending ? 'Signing in…' : 'Sign in'}</Button>
-          <LinkButton variant="secondary" size="small" type="button" onClick={reset} className="self-start">Forgot password</LinkButton>
+          <LinkButton variant="secondary" size="small" type="button" onClick={reset} className="self-center">Forgot password</LinkButton>
         </form>
-      </section>
+      </main>
+      <footer className={styles.footer}>A product of Autism Synergies</footer>
     </div>
   )
 }
