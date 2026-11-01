@@ -8,7 +8,11 @@ import styles from './games.module.css'
 export function BalloonsGame(props) {
   const { step, steps } = props
   const round = useRound(props)
-  const options = useMemo(() => shuffle([step, ...shuffle(steps.filter((other) => other.word !== step.word)).slice(0, 2)]), [step, steps])
+  const options = useMemo(
+    () =>
+      shuffle([step, ...shuffle(steps.filter((other) => other.word !== step.word)).slice(0, 2)]),
+    [step, steps]
+  )
   const [popped, setPopped] = useState(null)
   const { shaking, shake, stop } = useShake()
 
@@ -20,19 +24,30 @@ export function BalloonsGame(props) {
             key={option.word}
             type="button"
             aria-label={option.word}
-            className={cx(styles.balloon, styles[`float${index}`], popped === index && styles.popped, shaking === index && styles.shake, round.hint && round.open && option === step && styles.hint)}
+            className={cx(
+              styles.balloon,
+              styles[`float${index}`],
+              popped === index && styles.popped,
+              shaking === index && styles.shake,
+              round.hint && round.open && option === step && styles.hint
+            )}
             onAnimationEnd={stop}
             onClick={(event) => {
               if (!round.open) return
               if (option !== step) {
                 shake(index)
-                return round.wrong()
+                return round.wrong(option.word)
               }
               setPopped(index)
-              round.right(event.currentTarget)
+              round.right(event.currentTarget, option.word)
             }}
           >
-            <img className={styles.balloonBody} src={ART[popped === index ? 'pop' : 'balloon']} alt="" draggable="false" />
+            <img
+              className={styles.balloonBody}
+              src={ART[popped === index ? 'pop' : 'balloon']}
+              alt=""
+              draggable="false"
+            />
             <StepArt step={option} className={styles.badge} artClassName={styles.badgeArt} />
           </button>
         ))}

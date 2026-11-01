@@ -1,7 +1,10 @@
 import { requestCtx } from '../../../../../common-service/http/utils/index.js'
 import * as service from '../service/index.js'
 
-export const list = async (c) => c.json(await service.listForChild(c.get('user'), c.get('valid').params.childId, c.get('valid').query))
+export const list = async (c) =>
+  c.json(
+    await service.listForChild(c.get('user'), c.get('valid').params.childId, c.get('valid').query)
+  )
 
 export async function create(c) {
   const { params, body } = c.get('valid')
@@ -18,6 +21,7 @@ export async function remove(c) {
   return c.body(null, 204)
 }
 
-export const seen = async (c) => c.json(await service.markSeen(c.get('user'), c.get('valid').params.id))
+export const seen = async (c) =>
+  c.json(await service.markSeen(c.get('user'), c.get('valid').params.id))
 
 export const unread = async (c) => c.json(await service.unread(c.get('valid').query))

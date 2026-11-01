@@ -1,73 +1,114 @@
 import { audit } from '../../../../../common-service/audit/service/index.js'
-import { sql } from '../../../../../common-service/db/service/index.js'
+import { SERIAL } from '../../../../../common-service/db/constants/index.js'
+import { db } from '../../../../../common-service/db/service/index.js'
 import { forbidden } from '../../../../../common-service/http/exception/index.js'
-import { json, likePattern, pageOf } from '../../../../../common-service/http/utils/index.js'
+import { containsText, pageOf } from '../../../../../common-service/http/utils/index.js'
 import { CONSENT_VERSION } from '../constants/index.js'
-import { childNotFound, chooseActive, chooseParent, lessonsNotPublished } from '../exception/index.js'
+import {
+  childNotFound,
+  chooseActive,
+  chooseParent,
+  lessonsNotPublished
+} from '../exception/index.js'
+import { childScope, childView } from '../utils/index.js'
 
-function scope(db, user) {
-  if (user.role === 'admin') return db``
-  if (user.role === 'mentor') return db`AND c.mentor_id = ${user.id}`
-  return db`AND c.parent_id = ${user.id}`
+const fields = {
+  id: true,
+  display_name: true,
+  date_of_birth: true,
+  avatar_key: true,
+  sensory_settings: true,
+  assigned_lessons: true,
+  assigned_assessments: true,
+  consent_version: true,
+  consent_at: true,
+  status: true,
+  metadata: true,
+  created_at: true,
+  updated_at: true,
+  parent_id: true,
+  mentor_id: true,
+  pin_hash: true,
+  parent: { select: { full_name: true, email: true } },
+  mentor: { select: { full_name: true } }
 }
 
-function select(db, user) {
-  return db`
-    SELECT c.id, c.display_name, to_char(c.date_of_birth, 'YYYY-MM-DD') AS date_of_birth, c.avatar_key,
-      c.sensory_settings, c.assigned_lessons, c.consent_version, c.consent_at, c.status, c.metadata,
-      c.created_at, c.updated_at, c.parent_id, p.full_name AS parent_name, (c.pin_hash IS NOT NULL) AS has_pin,
-      ${user.role === 'mentor' ? db`NULL::text` : db`p.email`} AS parent_email,
-      c.mentor_id, m.full_name AS mentor_name
-    FROM children c
-    JOIN users p ON p.id = c.parent_id
-    LEFT JOIN users m ON m.id = c.mentor_id
-  `
-}
-
-export async function findScopedChild(db, user, id) {
-  const [child] = await db`${select(db, user)} WHERE c.id = ${id} AND c.deleted_at IS NULL ${scope(db, user)}`
+export async function findScopedChild(tx, user, id) {
+  const child = await tx.children.findFirst({
+    where: { id, deleted_at: null, ...childScope(user) },
+    select: fields
+  })
   if (!child) throw childNotFound()
-  return child
+  return childView(child, user.role)
 }
 
-export function listChildren(user, { status, mentor_id, parent_id, unassigned, q, ...window }) {
-  return pageOf(sql, sql`
-    ${select(sql, user)}
-    WHERE c.deleted_at IS NULL ${scope(sql, user)}
-      ${status ? sql`AND c.status = ${status}` : sql``}
-      ${mentor_id ? sql`AND c.mentor_id = ${mentor_id}` : sql``}
-      ${parent_id ? sql`AND c.parent_id = ${parent_id}` : sql``}
-      ${unassigned ? sql`AND c.mentor_id IS NULL` : sql``}
-      ${q ? sql`AND c.display_name ILIKE ${likePattern(q)}` : sql``}
-  `, sql`list.display_name, list.id`, window)
+export async function listChildren(
+  user,
+  { status, mentor_id, parent_id, unassigned, q, ...window }
+) {
+  const page = await pageOf(
+    db.children,
+    {
+      where: {
+        deleted_at: null,
+        AND: [
+          childScope(user),
+          status ? { status } : {},
+          parent_id ? { parent_id } : {},
+          mentor_id ? { mentor_id } : {},
+          unassigned ? { mentor_id: null } : {},
+          q ? { display_name: containsText(q) } : {}
+        ]
+      },
+      select: fields,
+      orderBy: [{ display_name: 'asc' }, { id: 'asc' }]
+    },
+    window
+  )
+  return { ...page, items: page.items.map((child) => childView(child, user.role)) }
 }
 
-export async function getChild(user, id, ctx) {
-  return sql.begin(async (tx) => {
+export function getChild(user, id, ctx) {
+  return db.$transaction(async (tx) => {
     const child = await findScopedChild(tx, user, id)
     await audit(tx, { actor: user, action: 'child.viewed', entityType: 'child', entityId: id, ctx })
     return child
   })
 }
 
-async function requireRole(db, id, role, label) {
-  const [row] = await db`SELECT id FROM users WHERE id = ${id} AND role = ${role} AND status <> 'disabled' AND deleted_at IS NULL`
-  if (!row) throw chooseActive(label)
+async function requireRole(tx, id, role, label) {
+  const found = await tx.users.count({
+    where: { id, role, status: { not: 'disabled' }, deleted_at: null }
+  })
+  if (!found) throw chooseActive(label)
 }
 
-export async function createChild(user, body, ctx) {
+export function createChild(user, body, ctx) {
   const parentId = user.role === 'parent' ? user.id : body.parent_id
   if (!parentId) throw chooseParent()
   if (user.role === 'parent' && body.parent_id && body.parent_id !== user.id) throw forbidden()
-  return sql.begin(async (tx) => {
+  return db.$transaction(async (tx) => {
     await requireRole(tx, parentId, 'parent', 'parent')
-    const [{ id }] = await tx`
-      INSERT INTO children (parent_id, display_name, date_of_birth, avatar_key, sensory_settings, consent_version, metadata)
-      VALUES (${parentId}, ${body.display_name}, ${body.date_of_birth ?? null}, ${body.avatar_key || null},
-        ${json(body.sensory_settings)}::jsonb, ${CONSENT_VERSION}, ${json(body.metadata ?? {})}::jsonb)
-      RETURNING id
-    `
-    await audit(tx, { actor: user, action: 'child.created', entityType: 'child', entityId: id, diff: { consent_version: CONSENT_VERSION }, ctx })
+    const { id } = await tx.children.create({
+      data: {
+        parent_id: parentId,
+        display_name: body.display_name,
+        date_of_birth: body.date_of_birth ? new Date(body.date_of_birth) : null,
+        avatar_key: body.avatar_key || null,
+        sensory_settings: body.sensory_settings ?? {},
+        consent_version: CONSENT_VERSION,
+        metadata: body.metadata ?? {}
+      },
+      select: { id: true }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'child.created',
+      entityType: 'child',
+      entityId: id,
+      diff: { consent_version: CONSENT_VERSION },
+      ctx
+    })
     return findScopedChild(tx, user, id)
   })
 }
@@ -76,55 +117,97 @@ export async function updateChild(user, id, body, ctx) {
   if (user.role !== 'admin' && body.status !== undefined) throw forbidden()
   if (user.role !== 'parent' && body.pin !== undefined) throw forbidden()
   const pinHash = body.pin ? await Bun.password.hash(body.pin) : null
-  return sql.begin(async (tx) => {
+  return db.$transaction(async (tx) => {
     const current = await findScopedChild(tx, user, id)
-    await tx`
-      UPDATE children SET
-        display_name = ${body.display_name ?? current.display_name},
-        date_of_birth = ${body.date_of_birth === undefined ? current.date_of_birth : body.date_of_birth},
-        avatar_key = ${body.avatar_key === undefined ? current.avatar_key : body.avatar_key || null},
-        sensory_settings = sensory_settings || ${json(body.sensory_settings ?? {})}::jsonb,
-        status = ${body.status ?? current.status},
-        pin_hash = ${body.pin === undefined ? tx`pin_hash` : pinHash},
-        metadata = metadata || ${json(body.metadata ?? {})}::jsonb,
-        updated_at = now()
-      WHERE id = ${id}
-    `
-    await audit(tx, { actor: user, action: 'child.updated', entityType: 'child', entityId: id, diff: { fields: Object.keys(body) }, ctx })
+    await tx.children.update({
+      where: { id },
+      data: {
+        display_name: body.display_name,
+        date_of_birth:
+          body.date_of_birth === undefined
+            ? undefined
+            : body.date_of_birth
+              ? new Date(body.date_of_birth)
+              : null,
+        avatar_key: body.avatar_key === undefined ? undefined : body.avatar_key || null,
+        sensory_settings: { ...current.sensory_settings, ...body.sensory_settings },
+        status: body.status,
+        pin_hash: body.pin === undefined ? undefined : pinHash,
+        metadata: { ...current.metadata, ...body.metadata },
+        updated_at: new Date()
+      }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'child.updated',
+      entityType: 'child',
+      entityId: id,
+      diff: { fields: Object.keys(body) },
+      ctx
+    })
     return findScopedChild(tx, user, id)
-  })
+  }, SERIAL)
 }
 
-export async function assignMentor(user, id, mentorId, ctx) {
-  return sql.begin(async (tx) => {
+export function assignMentor(user, id, mentorId, ctx) {
+  return db.$transaction(async (tx) => {
     const current = await findScopedChild(tx, user, id)
     if (mentorId) await requireRole(tx, mentorId, 'mentor', 'mentor')
-    await tx`UPDATE children SET mentor_id = ${mentorId}, updated_at = now() WHERE id = ${id}`
-    await audit(tx, { actor: user, action: 'child.mentor_assigned', entityType: 'child', entityId: id, diff: { from: current.mentor_id, to: mentorId }, ctx })
+    await tx.children.update({
+      where: { id },
+      data: { mentor_id: mentorId, updated_at: new Date() }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'child.mentor_assigned',
+      entityType: 'child',
+      entityId: id,
+      diff: { from: current.mentor_id, to: mentorId },
+      ctx
+    })
     return findScopedChild(tx, user, id)
   })
 }
 
-export async function assignLessons(user, id, slugs, ctx) {
-  return sql.begin(async (tx) => {
+export function assignLessons(user, id, slugs, ctx) {
+  return db.$transaction(async (tx) => {
     const current = await findScopedChild(tx, user, id)
-    const found = await tx`
-      SELECT slug::text AS slug FROM lessons
-      WHERE status = 'published' AND slug::text IN (SELECT jsonb_array_elements_text(${json(slugs)}::jsonb))
-    `
-    const published = new Set(found.map((row) => row.slug))
-    const missing = slugs.filter((slug) => !published.has(slug))
+    const found = await tx.lessons.findMany({
+      where: { status: 'published', slug: { in: slugs } },
+      select: { slug: true }
+    })
+    const published = new Set(found.map((row) => row.slug.toLowerCase()))
+    const missing = slugs.filter((slug) => !published.has(slug.toLowerCase()))
     if (missing.length) throw lessonsNotPublished(missing)
-    await tx`UPDATE children SET assigned_lessons = ${json(slugs)}::jsonb, updated_at = now() WHERE id = ${id}`
-    await audit(tx, { actor: user, action: 'child.lessons_assigned', entityType: 'child', entityId: id, diff: { from: current.assigned_lessons, to: slugs }, ctx })
+    await tx.children.update({
+      where: { id },
+      data: { assigned_lessons: slugs, updated_at: new Date() }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'child.lessons_assigned',
+      entityType: 'child',
+      entityId: id,
+      diff: { from: current.assigned_lessons, to: slugs },
+      ctx
+    })
     return findScopedChild(tx, user, id)
   })
 }
 
 export async function deleteChild(user, id, ctx) {
-  await sql.begin(async (tx) => {
+  await db.$transaction(async (tx) => {
     await findScopedChild(tx, user, id)
-    await tx`UPDATE children SET deleted_at = now(), status = 'archived', updated_at = now() WHERE id = ${id}`
-    await audit(tx, { actor: user, action: 'child.deleted', entityType: 'child', entityId: id, ctx })
+    await tx.children.update({
+      where: { id },
+      data: { deleted_at: new Date(), status: 'archived', updated_at: new Date() }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'child.deleted',
+      entityType: 'child',
+      entityId: id,
+      ctx
+    })
   })
 }

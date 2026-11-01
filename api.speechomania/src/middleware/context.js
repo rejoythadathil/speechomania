@@ -15,12 +15,15 @@ export async function context(c, next) {
   c.set('ip', forwarded ?? remoteAddress(c))
   const started = performance.now()
   await next()
-  logger.info({
-    requestId: c.get('requestId'),
-    method: c.req.method,
-    path: c.req.path,
-    status: c.res.status,
-    ms: Math.round(performance.now() - started),
-    userId: c.get('user')?.id
-  }, 'request')
+  logger.info(
+    {
+      requestId: c.get('requestId'),
+      method: c.req.method,
+      path: c.req.path,
+      status: c.res.status,
+      ms: Math.round(performance.now() - started),
+      userId: c.get('user')?.id
+    },
+    'request'
+  )
 }

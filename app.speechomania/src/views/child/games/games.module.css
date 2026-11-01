@@ -5,15 +5,6 @@
   padding: 236px 16px 108px;
 }
 
-
-
-
-
-
-
-
-
-
 .column {
   display: flex;
   flex-direction: column;
@@ -69,7 +60,9 @@
   box-shadow: var(--child-lift);
   font-size: clamp(22px, 3.2vw, 32px);
   font-weight: 600;
-  transition: transform 150ms ease, background-color var(--child-t) ease;
+  transition:
+    transform 150ms ease,
+    background-color var(--child-t) ease;
 }
 
 .chip:active {
@@ -98,7 +91,6 @@
   animation: pulse 1s ease-in-out infinite;
 }
 
-
 .shark {
   position: absolute;
   left: 2%;
@@ -113,7 +105,11 @@
 .fish {
   position: absolute;
   width: min(22vw, 190px);
-  transition: left 700ms ease-in, top 700ms ease-in, transform 700ms ease, opacity 400ms ease;
+  transition:
+    left 700ms ease-in,
+    top 700ms ease-in,
+    transform 700ms ease,
+    opacity 400ms ease;
 }
 
 .swim0 {
@@ -165,7 +161,9 @@
   border: 4px solid #fff;
   border-radius: 50%;
   background: #fff;
-  transition: transform 300ms ease, opacity 300ms ease;
+  transition:
+    transform 300ms ease,
+    opacity 300ms ease;
 }
 
 .badge {
@@ -187,7 +185,6 @@
   transform: scale(0.15);
   opacity: 0;
 }
-
 
 .balloons {
   display: flex;
@@ -224,8 +221,6 @@
 .popped .balloonBody {
   animation: popout 700ms ease forwards;
 }
-
-
 
 .bubbleChoices .chip {
   border: 3px solid #b6e3fb;
@@ -268,7 +263,9 @@
   box-shadow: var(--child-lift);
   font-size: clamp(30px, 5vw, 48px);
   font-weight: 700;
-  transition: transform 600ms var(--child-ease), opacity 400ms ease 200ms;
+  transition:
+    transform 600ms var(--child-ease),
+    opacity 400ms ease 200ms;
 }
 
 .blockTwo {
@@ -297,7 +294,9 @@
   white-space: nowrap;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.3);
-  transition: transform 500ms var(--child-ease) 500ms, opacity 300ms ease 500ms;
+  transition:
+    transform 500ms var(--child-ease) 500ms,
+    opacity 300ms ease 500ms;
 }
 
 .merged b {
@@ -395,7 +394,10 @@
   z-index: 4;
   width: 46%;
   transform: translate(-50%, -50%);
-  transition: left 700ms var(--child-ease), top 700ms var(--child-ease), width 700ms var(--child-ease);
+  transition:
+    left 700ms var(--child-ease),
+    top 700ms var(--child-ease),
+    width 700ms var(--child-ease);
 }
 
 .at-in {
@@ -439,7 +441,6 @@
 .thing.at-in {
   width: 34%;
 }
-
 
 .cards {
   display: grid;
@@ -501,7 +502,6 @@
 .found .cardFront {
   outline: 5px solid #2fb36b;
 }
-
 
 .sentence {
   margin: 0;

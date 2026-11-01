@@ -124,7 +124,9 @@
   font-weight: 500;
   color: var(--color-text-secondary);
   outline: none;
-  transition: color 200ms var(--ease-liquid), background-color 200ms var(--ease-liquid);
+  transition:
+    color 200ms var(--ease-liquid),
+    background-color 200ms var(--ease-liquid);
 }
 
 .link:hover {
@@ -188,7 +190,9 @@
   border-radius: 8px;
   color: var(--color-text-tertiary);
   outline: none;
-  transition: color 160ms var(--ease-liquid), background-color 160ms var(--ease-liquid);
+  transition:
+    color 160ms var(--ease-liquid),
+    background-color 160ms var(--ease-liquid);
 }
 
 .signOut:hover {
@@ -229,7 +233,9 @@
     width: 272px;
     visibility: hidden;
     transform: translateX(-100%);
-    transition: transform 320ms var(--ease-liquid), visibility 320ms;
+    transition:
+      transform 320ms var(--ease-liquid),
+      visibility 320ms;
   }
 
   .open {

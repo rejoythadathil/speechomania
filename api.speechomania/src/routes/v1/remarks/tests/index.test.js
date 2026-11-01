@@ -13,10 +13,25 @@ beforeAll(async () => {
 
 describe('remarks', () => {
   test('assigned mentors and admins can write remarks; others cannot', async () => {
-    expect((await call(mentor, 'POST', `/children/${child.id}/remarks`, { body: 'Good focus today', visibility: 'shared' })).status).toBe(201)
-    expect((await call(admin, 'POST', `/children/${child.id}/remarks`, { body: 'Internal admin note' })).status).toBe(201)
-    expect((await call(otherMentor, 'POST', `/children/${child.id}/remarks`, { body: 'Not mine' })).status).toBe(404)
-    expect((await call(parent, 'POST', `/children/${child.id}/remarks`, { body: 'Parent note' })).status).toBe(403)
+    expect(
+      (
+        await call(mentor, 'POST', `/children/${child.id}/remarks`, {
+          body: 'Good focus today',
+          visibility: 'shared'
+        })
+      ).status
+    ).toBe(201)
+    expect(
+      (await call(admin, 'POST', `/children/${child.id}/remarks`, { body: 'Internal admin note' }))
+        .status
+    ).toBe(201)
+    expect(
+      (await call(otherMentor, 'POST', `/children/${child.id}/remarks`, { body: 'Not mine' }))
+        .status
+    ).toBe(404)
+    expect(
+      (await call(parent, 'POST', `/children/${child.id}/remarks`, { body: 'Parent note' })).status
+    ).toBe(403)
   })
 
   test('parents only see shared remarks', async () => {
@@ -28,15 +43,25 @@ describe('remarks', () => {
   })
 
   test('only the author edits; author or admin deletes', async () => {
-    const { body: remark } = await call(mentor, 'POST', `/children/${child.id}/remarks`, { body: 'Draft note' })
-    expect((await call(otherMentor, 'PATCH', `/remarks/${remark.id}`, { body: 'Hijack' })).status).toBe(404)
-    expect((await call(admin, 'PATCH', `/remarks/${remark.id}`, { body: 'Admin edit' })).status).toBe(403)
-    expect((await call(mentor, 'PATCH', `/remarks/${remark.id}`, { body: 'Edited note' })).body.body).toBe('Edited note')
+    const { body: remark } = await call(mentor, 'POST', `/children/${child.id}/remarks`, {
+      body: 'Draft note'
+    })
+    expect(
+      (await call(otherMentor, 'PATCH', `/remarks/${remark.id}`, { body: 'Hijack' })).status
+    ).toBe(404)
+    expect(
+      (await call(admin, 'PATCH', `/remarks/${remark.id}`, { body: 'Admin edit' })).status
+    ).toBe(403)
+    expect(
+      (await call(mentor, 'PATCH', `/remarks/${remark.id}`, { body: 'Edited note' })).body.body
+    ).toBe('Edited note')
     expect((await call(admin, 'DELETE', `/remarks/${remark.id}`)).status).toBe(204)
   })
 
   test('mentor remarks are unread for admins until marked seen; admin remarks are not', async () => {
-    const { body: remark } = await call(mentor, 'POST', `/children/${child.id}/remarks`, { body: 'Please review' })
+    const { body: remark } = await call(mentor, 'POST', `/children/${child.id}/remarks`, {
+      body: 'Please review'
+    })
     const unread = await call(admin, 'GET', '/remarks/unread')
     expect(unread.body.items.some((item) => item.id === remark.id)).toBe(true)
     expect(unread.body.items.some((item) => item.preview === 'Internal admin note')).toBe(false)

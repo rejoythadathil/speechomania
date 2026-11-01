@@ -12,7 +12,12 @@ export function Scenery({ player }) {
           src={ART[name]}
           alt=""
           draggable="false"
-          style={{ left: `${left}%`, top: `${top}%`, width: `clamp(${Math.round(size * 0.55)}px, ${(size / 12).toFixed(1)}vw, ${size}px)`, animationDelay: `-${index * 1.3}s` }}
+          style={{
+            left: `${left}%`,
+            top: `${top}%`,
+            width: `clamp(${Math.round(size * 0.55)}px, ${(size / 12).toFixed(1)}vw, ${size}px)`,
+            animationDelay: `-${index * 1.3}s`
+          }}
         />
       ))}
     </div>

@@ -7,8 +7,15 @@ export const list = async (c) => c.json(await service.listUsers(c.get('valid').q
 export const get = async (c) => c.json(await service.getUser(c.get('valid').params.id))
 
 export async function create(c) {
-  const { user, inviteLink } = await service.createUser(c.get('user'), c.get('valid').body, requestCtx(c))
-  return c.json({ user, invite_link: inviteLink, invite_link_is_local: config.APP_ENV === 'local' }, 201)
+  const { user, inviteLink } = await service.createUser(
+    c.get('user'),
+    c.get('valid').body,
+    requestCtx(c)
+  )
+  return c.json(
+    { user, invite_link: inviteLink, invite_link_is_local: config.APP_ENV === 'local' },
+    201
+  )
 }
 
 export async function update(c) {

@@ -1,6 +1,6 @@
 # children
 
-Child profiles. Scoped in SQL: admins see every child, mentors their assigned children, parents their own. A child outside your scope is 404.
+Child profiles. Scoped in the query: admins see every child, mentors their assigned children, parents their own. A child outside your scope is 404.
 
 | Method | Path | Roles | Input | Returns |
 |---|---|---|---|---|

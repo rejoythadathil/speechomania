@@ -13,7 +13,10 @@
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface-muted);
-  transition: border-color 160ms var(--ease-liquid), background-color 160ms var(--ease-liquid), box-shadow 160ms var(--ease-liquid);
+  transition:
+    border-color 160ms var(--ease-liquid),
+    background-color 160ms var(--ease-liquid),
+    box-shadow 160ms var(--ease-liquid);
 }
 
 .field:hover {

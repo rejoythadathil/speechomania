@@ -30,14 +30,23 @@ export function ListFooter({ data, page, onPage, pageSize, onPageSize, noun = 'i
               aria-label="Rows per page"
               className="appearance-none rounded-lg border border-[var(--line)] bg-[var(--surface)] py-1 pr-7 pl-2.5 text-body-2-medium text-text-primary outline-none transition-colors hover:border-[var(--line-strong)] focus-visible:ring-2 focus-visible:ring-border-focus-ring"
             >
-              {PAGE_SIZES.map((size) => <option key={size} value={size}>{size}</option>)}
+              {PAGE_SIZES.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
             </select>
-            <RiArrowDownSLine className="pointer-events-none absolute top-1/2 right-1.5 size-4 -translate-y-1/2 text-text-tertiary" aria-hidden />
+            <RiArrowDownSLine
+              className="pointer-events-none absolute top-1/2 right-1.5 size-4 -translate-y-1/2 text-text-tertiary"
+              aria-hidden
+            />
           </span>
         </label>
       ) : null}
       <div className="ml-auto min-w-0">
-        {totalPages > 1 ? <Pagination page={Math.min(page, totalPages)} totalPages={totalPages} onChange={onPage} /> : null}
+        {totalPages > 1 ? (
+          <Pagination page={Math.min(page, totalPages)} totalPages={totalPages} onChange={onPage} />
+        ) : null}
       </div>
     </div>
   )

@@ -1,4 +1,7 @@
-import { SQL } from 'bun'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaClient } from '../../../node_modules/.prisma-client/client.ts'
 import { config } from '../../../config/index.js'
 
-export const sql = new SQL({ url: config.DATABASE_URL, prepare: false, max: config.DATABASE_POOL_MAX })
+export const db = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: config.DATABASE_URL, max: config.DATABASE_POOL_MAX })
+})

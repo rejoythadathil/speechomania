@@ -9,4 +9,9 @@ export const changeRequestsRoute = new Hono()
   .get('/', validate({ query: listQuery }), controller.list)
   .post('/', allow('mentor'), validate({ body: createBody }), controller.create)
   .get('/:id', validate({ params: idParams }), controller.get)
-  .post('/:id/review', allow('admin'), validate({ params: idParams, body: reviewBody }), controller.review)
+  .post(
+    '/:id/review',
+    allow('admin'),
+    validate({ params: idParams, body: reviewBody }),
+    controller.review
+  )

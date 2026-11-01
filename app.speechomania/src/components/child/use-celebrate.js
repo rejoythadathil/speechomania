@@ -10,7 +10,10 @@ const VOLUME = { normal: 1, quiet: 0.5 }
 function originOf(element) {
   if (!element) return { x: 0.5, y: 0.5 }
   const box = element.getBoundingClientRect()
-  return { x: (box.left + box.width / 2) / window.innerWidth, y: (box.top + box.height / 2) / window.innerHeight }
+  return {
+    x: (box.left + box.width / 2) / window.innerWidth,
+    y: (box.top + box.height / 2) / window.innerHeight
+  }
 }
 
 export function useCelebrate({ motion, sound, muted }) {
@@ -23,7 +26,11 @@ export function useCelebrate({ motion, sound, muted }) {
     }
     const burst = (options) => {
       if (motion === 'off') return
-      confetti({ disableForReducedMotion: true, particleCount: motion === 'gentle' ? 40 : 90, ...options })
+      confetti({
+        disableForReducedMotion: true,
+        particleCount: motion === 'gentle' ? 40 : 90,
+        ...options
+      })
     }
     return {
       cheer(element) {
@@ -35,7 +42,12 @@ export function useCelebrate({ motion, sound, muted }) {
       },
       finale(element) {
         play('win')
-        burst({ particleCount: motion === 'gentle' ? 60 : 160, spread: 110, startVelocity: 45, origin: originOf(element) })
+        burst({
+          particleCount: motion === 'gentle' ? 60 : 160,
+          spread: 110,
+          startVelocity: 45,
+          origin: originOf(element)
+        })
         if (motion !== 'full') return
         setTimeout(() => burst({ angle: 60, spread: 60, origin: { x: 0, y: 0.7 } }), 300)
         setTimeout(() => burst({ angle: 120, spread: 60, origin: { x: 1, y: 0.7 } }), 500)

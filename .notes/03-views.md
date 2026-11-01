@@ -31,6 +31,30 @@ There are two visual worlds, and they never mix.
   - per-child sensory settings (motion, sound level, colour intensity) set by the parent
 - Reports use 2–3 fixed templates.
 
+## Lessons (all roles)
+- **List (admin and mentor):** each row shows the title, slug, a small thumbnail and name of its game, version, steps, status and publish date.
+- **Lesson page (admin, mentor, and parents for lessons assigned to their children):** what the child sees, read-only.
+  - **Game:** the game's thumbnail, its name, the focus word, its three how-to-play tips and how many rounds one play uses.
+  - **Rounds** (Pages for stories, Questions for Who can't?): every step as a card with its pictures, question, the right answer highlighted among the choices, the line said after it, and whether its voice is ready. Paged, twelve at a time.
+  - **Spoken lines:** the start, question, wrong-answer, right-answer, end and reward lines with their voice status.
+  - Admins also edit drafts (title and step text) and see versions; mentors request changes.
+- **Child page:** assigned lessons show their game thumbnail and name and open the lesson page.
+
+## Assessments (admin and mentor)
+- **List:** title and points, questions, status, assigned and completed (mentors: their children only). Search and a status filter; admins create a draft from here.
+- **Draft (admin):**
+  - Details: title and notes for mentors, "Save draft".
+  - Questions: each question as a round card with its source lesson, points, move up and down, remove. "Add questions" opens a picker: published lessons on the left (search, game thumbnail), the chosen lesson's questions on the right as checkboxes.
+  - Settings: scoring numbers, then switches for play, data collected and who sees the score.
+  - Publish, Delete draft, Play preview.
+- **Published or archived:**
+  - Summary strip: assigned, started, completed, average score, pass rate.
+  - Children: each assigned child in scope with status, latest score (and pass or below pass mark), attempts and due date; open an attempt to see every answer, tries and time (only the data points that were collected); remove an assignment.
+  - Question results: how often each question was answered right on the first try.
+  - Questions as round cards, Settings read-only, and Assign (search children, optional due date).
+- **Child page:** an Assessments panel with each assigned assessment, its status and latest score. Parents see the score and answers only when the assessment shares them.
+- **Preview:** "Play preview" on the lesson and assessment pages opens the child's game full screen. Grown-ups closes it; nothing is saved.
+
 ## Dashboard (admin and mentor)
 Built around one question: which child needs attention today.
 1. KPI row: children, waiting for a mentor (admin) or no lessons (mentor), need a remark (none in 14+ days), change requests. Plain counts, no percentages on small numbers.
@@ -51,6 +75,8 @@ White sidebar with a hairline border (same colours as the rest of the work views
 
 ## Child mode
 Parents land here after signing in: `/learn` opens the only active child straight away, or shows "Who is learning today?" with an animal avatar per child and a small "Grown-up area" link. `/learn/:childId` is the child's space. Full screen, Lexend, the child's sensory settings applied. Every picture is a vector illustration from the downloaded OpenMoji library, named in the lesson content; no photos.
+- **Check-ins:** when the child has assigned assessments, "Check-ins" sits above "Let's play!" inside the same frame: up to three cards (the first question's game world, a Check-in tag, Ready or Done, the title and the score when the child may see it), with arrows for more. A finished check-in without retakes is shown but can't be opened.
+- **Check-in player:** the same player as lessons. Each question appears in its own game world; a wrong answer moves on once the allowed tries are used; the end screen shows the score only when allowed.
 - **Games home (one unit):** a slim header (brand, sound, Break, Grown-ups) over a soft sky with drifting clouds. Everything else sits in one flat white frame with hairline dividers, set in the work-view type: the head row has the avatar, "Hi, {name}" and a stat strip (stars, badges, games played); below it, "Let's play!" fills the left with thumbnail cards showing each game's own world, its tag, "Play next" or "New", the title and its stars; "My badges" runs down the right column inside the same frame. Three cards per row on desktop, two on tablet, one on phone, where the badges drop below the games; six per page with large arrows. No spoken greeting.
 - **Lesson player:** every game has its own world from `components/child/scenes.js` (background colours plus OpenMoji scenery placed around the edges). The start page shows the game's art large on one side and, on the other, the title, the intro line, three picture tips on how to play and "Play". Then the rounds, then "You did it!" with a trophy, the score in stars, confetti and a fanfare. Fixed positions on every screen: Grown-ups (top left), round stars (top centre), sound and Break (top right), Say it again (bottom left). The caption under the top bar reads each line aloud and highlights the words.
 - **Rounds:** a right answer plays a chime and confetti, says the praise or the full sentence, and moves on by itself. A wrong answer wobbles with a soft sound and says "Let's look again"; from the second wrong answer the right one glows. Story pages wait for Next.

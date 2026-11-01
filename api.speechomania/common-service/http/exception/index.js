@@ -18,6 +18,8 @@ export const signInRequired = () => new HttpError(401, 'Sign in to continue')
 
 export const sessionExpired = () => new HttpError(401, 'Your session has expired. Sign in again.')
 
-export const accountInactive = () => new HttpError(403, 'This account is not active. Contact Speechomania.')
+export const accountInactive = () =>
+  new HttpError(403, 'This account is not active. Contact Speechomania.')
 
-export const tooManyRequests = () => new HttpError(429, 'Too many requests. Wait a minute and try again.')
+export const tooManyRequests = () =>
+  new HttpError(429, 'Too many requests. Wait a minute and try again.')

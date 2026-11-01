@@ -4,4 +4,7 @@ export function niceMax(value) {
   return [1, 2, 2.5, 5, 10].map((step) => step * power).find((step) => step >= value)
 }
 
-export const compact = new Intl.NumberFormat('en-IN', { notation: 'compact', maximumFractionDigits: 1 })
+export const compact = new Intl.NumberFormat('en-IN', {
+  notation: 'compact',
+  maximumFractionDigits: 1
+})

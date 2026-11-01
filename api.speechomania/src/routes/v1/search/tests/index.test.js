@@ -26,7 +26,7 @@ describe('global search', () => {
     expect(Object.keys(body.groups).sort()).toEqual(['children', 'lessons', 'people'])
   })
 
-  test('results respect each role\'s scope', async () => {
+  test("results respect each role's scope", async () => {
     const forMentor = await call(mentor, 'GET', '/search', undefined, { q: tag })
     expect(ids(forMentor.body, 'children')).toEqual([mine.id])
     expect(forMentor.body.groups.people).toBeUndefined()
@@ -36,7 +36,9 @@ describe('global search', () => {
   })
 
   test('people results never leak to non-admins and parent emails stay hidden', async () => {
-    const { body } = await call(mentor, 'GET', '/search', undefined, { q: parent.email.slice(0, 12) })
+    const { body } = await call(mentor, 'GET', '/search', undefined, {
+      q: parent.email.slice(0, 12)
+    })
     expect(body.groups.people).toBeUndefined()
     expect(JSON.stringify(body)).not.toContain(parent.email)
   })

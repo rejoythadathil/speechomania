@@ -12,7 +12,9 @@ const settings = {
   bucket: config.S3_MEDIA_BUCKET
 }
 
-export const mediaReady = Boolean(settings.endpoint && settings.accessKeyId && settings.secretAccessKey)
+export const mediaReady = Boolean(
+  settings.endpoint && settings.accessKeyId && settings.secretAccessKey
+)
 export const media = mediaReady ? new S3Client(settings) : null
 
 export function mediaUrl(key) {

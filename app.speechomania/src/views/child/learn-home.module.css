@@ -183,6 +183,18 @@
   padding: 18px 22px 22px;
 }
 
+.checkins {
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1.5px solid var(--line-soft);
+}
+
+.card:disabled {
+  cursor: default;
+  opacity: 0.75;
+  transform: none;
+}
+
 .side {
   padding: 18px 18px 22px;
   border-left: 1.5px solid var(--line-soft);
@@ -262,7 +274,9 @@
   border-radius: 12px;
   background: #fff;
   text-align: left;
-  transition: border-color 150ms ease, transform var(--child-t) var(--child-ease);
+  transition:
+    border-color 150ms ease,
+    transform var(--child-t) var(--child-ease);
 }
 
 .card:hover {

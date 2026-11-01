@@ -20,8 +20,15 @@ export const createBody = Joi.object({
 
 export const reviewBody = Joi.object({
   decision: Joi.string().valid('approve', 'reject').required(),
-  review_note: Joi.string().trim().max(2000).allow('').when('decision', {
-    is: 'reject',
-    then: Joi.string().min(1).required().messages({ 'any.required': 'Add a note explaining the rejection' })
-  })
+  review_note: Joi.string()
+    .trim()
+    .max(2000)
+    .allow('')
+    .when('decision', {
+      is: 'reject',
+      then: Joi.string()
+        .min(1)
+        .required()
+        .messages({ 'any.required': 'Add a note explaining the rejection' })
+    })
 })

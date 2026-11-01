@@ -7,11 +7,18 @@ export function ReadAlong({ text, wordIndex, contrast, id }) {
     <p className={styles.say} id={id}>
       {text.split(' ').map((word, index) => {
         const bare = word.replace(/[^\p{L}’']/gu, '').toLowerCase()
-        const tone = negative && bare === negative ? styles.neg : negative && bare === 'can' ? styles.pos : null
+        const tone =
+          negative && bare === negative
+            ? styles.neg
+            : negative && bare === 'can'
+              ? styles.pos
+              : null
         return (
           <span key={`${index}-${word}`}>
             {index ? ' ' : null}
-            <span className={cx(styles.word, tone, index === wordIndex && styles.wordOn)}>{word}</span>
+            <span className={cx(styles.word, tone, index === wordIndex && styles.wordOn)}>
+              {word}
+            </span>
           </span>
         )
       })}

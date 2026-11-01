@@ -1,4 +1,14 @@
-import { RiBookOpenLine, RiDashboardLine, RiEditBoxLine, RiFileListLine, RiParentLine, RiShieldUserLine, RiUserHeartLine, RiUserStarLine } from '@remixicon/react'
+import {
+  RiBookOpenLine,
+  RiClipboardLine,
+  RiDashboardLine,
+  RiEditBoxLine,
+  RiFileListLine,
+  RiParentLine,
+  RiShieldUserLine,
+  RiUserHeartLine,
+  RiUserStarLine
+} from '@remixicon/react'
 
 export const NAVIGATION = {
   admin: [
@@ -16,6 +26,7 @@ export const NAVIGATION = {
       label: 'Content',
       items: [
         { to: '/lessons', label: 'Lessons', icon: RiBookOpenLine },
+        { to: '/assessments', label: 'Assessments', icon: RiClipboardLine },
         { to: '/change-requests', label: 'Change requests', icon: RiEditBoxLine }
       ]
     },
@@ -28,6 +39,7 @@ export const NAVIGATION = {
       items: [
         { to: '/children', label: 'My children', icon: RiUserHeartLine },
         { to: '/lessons', label: 'Lessons', icon: RiBookOpenLine },
+        { to: '/assessments', label: 'Assessments', icon: RiClipboardLine },
         { to: '/change-requests', label: 'Change requests', icon: RiEditBoxLine }
       ]
     }

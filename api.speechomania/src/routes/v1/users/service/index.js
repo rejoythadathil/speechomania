@@ -1,39 +1,76 @@
 import { audit } from '../../../../../common-service/audit/service/index.js'
-import { sql } from '../../../../../common-service/db/service/index.js'
-import { createAuthUser, inviteLink, setAuthUserDisabled } from '../../../../../common-service/firebase/service/index.js'
-import { json, likePattern, pageOf } from '../../../../../common-service/http/utils/index.js'
-import { cannotDisableSelf, cannotRemoveSelf, parentHasChildren, userNotFound } from '../exception/index.js'
+import { SERIAL } from '../../../../../common-service/db/constants/index.js'
+import { db } from '../../../../../common-service/db/service/index.js'
+import {
+  createAuthUser,
+  inviteLink,
+  setAuthUserDisabled
+} from '../../../../../common-service/firebase/service/index.js'
+import { containsText, pageOf } from '../../../../../common-service/http/utils/index.js'
+import {
+  cannotDisableSelf,
+  cannotRemoveSelf,
+  parentHasChildren,
+  userNotFound
+} from '../exception/index.js'
+
+const fields = {
+  id: true,
+  email: true,
+  full_name: true,
+  phone: true,
+  role: true,
+  status: true,
+  metadata: true,
+  created_at: true,
+  updated_at: true
+}
 
 export function listUsers({ role, status, q, ...window }) {
-  return pageOf(sql, sql`
-    SELECT id, email, full_name, phone, role, status, metadata, created_at, updated_at
-    FROM users
-    WHERE deleted_at IS NULL
-      ${role ? sql`AND role = ${role}` : sql``}
-      ${status ? sql`AND status = ${status}` : sql``}
-      ${q ? sql`AND (full_name ILIKE ${likePattern(q)} OR email ILIKE ${likePattern(q)})` : sql``}
-  `, sql`list.created_at DESC, list.id`, window)
+  return pageOf(
+    db.users,
+    {
+      where: {
+        deleted_at: null,
+        role,
+        status,
+        ...(q ? { OR: [{ full_name: containsText(q) }, { email: containsText(q) }] } : {})
+      },
+      select: fields,
+      orderBy: [{ created_at: 'desc' }, { id: 'asc' }]
+    },
+    window
+  )
 }
 
 export async function getUser(id) {
-  const [user] = await sql`
-    SELECT id, email, full_name, phone, role, status, metadata, created_at, updated_at
-    FROM users
-    WHERE id = ${id} AND deleted_at IS NULL
-  `
+  const user = await db.users.findFirst({ where: { id, deleted_at: null }, select: fields })
   if (!user) throw userNotFound()
   return user
 }
 
 export async function createUser(actor, body, ctx) {
   const firebaseUid = await createAuthUser({ email: body.email, fullName: body.full_name })
-  const user = await sql.begin(async (tx) => {
-    const [created] = await tx`
-      INSERT INTO users (firebase_uid, email, full_name, phone, role, metadata)
-      VALUES (${firebaseUid}, ${body.email}, ${body.full_name}, ${body.phone || null}, ${body.role}, ${json(body.metadata ?? {})}::jsonb)
-      RETURNING id, email, full_name, phone, role, status, metadata, created_at, updated_at
-    `
-    await audit(tx, { actor, action: 'user.created', entityType: 'user', entityId: created.id, diff: { role: created.role }, ctx })
+  const user = await db.$transaction(async (tx) => {
+    const created = await tx.users.create({
+      data: {
+        firebase_uid: firebaseUid,
+        email: body.email,
+        full_name: body.full_name,
+        phone: body.phone || null,
+        role: body.role,
+        metadata: body.metadata ?? {}
+      },
+      select: fields
+    })
+    await audit(tx, {
+      actor,
+      action: 'user.created',
+      entityType: 'user',
+      entityId: created.id,
+      diff: { role: created.role },
+      ctx
+    })
     return created
   })
   return { user, inviteLink: await inviteLink(body.email) }
@@ -41,46 +78,61 @@ export async function createUser(actor, body, ctx) {
 
 export async function updateUser(actor, id, body, ctx) {
   if (actor.id === id && body.status === 'disabled') throw cannotDisableSelf()
-  const { before, after, firebaseUid } = await sql.begin(async (tx) => {
-    const [current] = await tx`SELECT * FROM users WHERE id = ${id} AND deleted_at IS NULL FOR UPDATE`
+  const { before, after } = await db.$transaction(async (tx) => {
+    const current = await tx.users.findFirst({ where: { id, deleted_at: null } })
     if (!current) throw userNotFound()
-    const [updated] = await tx`
-      UPDATE users SET
-        full_name = ${body.full_name ?? current.full_name},
-        phone = ${body.phone === undefined ? current.phone : body.phone || null},
-        status = ${body.status ?? current.status},
-        metadata = metadata || ${json(body.metadata ?? {})}::jsonb,
-        updated_at = now()
-      WHERE id = ${id}
-      RETURNING id, email, full_name, phone, role, status, metadata, created_at, updated_at
-    `
+    const updated = await tx.users.update({
+      where: { id },
+      data: {
+        full_name: body.full_name,
+        phone: body.phone === undefined ? undefined : body.phone || null,
+        status: body.status,
+        metadata: { ...current.metadata, ...body.metadata },
+        updated_at: new Date()
+      },
+      select: fields
+    })
     await audit(tx, {
       actor,
       action: 'user.updated',
       entityType: 'user',
       entityId: id,
-      diff: { status: [current.status, updated.status], full_name_changed: current.full_name !== updated.full_name },
+      diff: {
+        status: [current.status, updated.status],
+        full_name_changed: current.full_name !== updated.full_name
+      },
       ctx
     })
-    return { before: current, after: updated, firebaseUid: current.firebase_uid }
-  })
-  if (firebaseUid && before.status !== after.status) await setAuthUserDisabled(firebaseUid, after.status === 'disabled')
+    return { before: current, after: updated }
+  }, SERIAL)
+  if (before.firebase_uid && before.status !== after.status)
+    await setAuthUserDisabled(before.firebase_uid, after.status === 'disabled')
   return after
 }
 
 export async function deleteUser(actor, id, ctx) {
   if (actor.id === id) throw cannotRemoveSelf()
-  const firebaseUid = await sql.begin(async (tx) => {
-    const [current] = await tx`SELECT * FROM users WHERE id = ${id} AND deleted_at IS NULL FOR UPDATE`
+  const firebaseUid = await db.$transaction(async (tx) => {
+    const current = await tx.users.findFirst({ where: { id, deleted_at: null } })
     if (!current) throw userNotFound()
-    if (current.role === 'parent') {
-      const [{ count }] = await tx`SELECT count(*)::int AS count FROM children WHERE parent_id = ${id} AND deleted_at IS NULL`
-      if (count > 0) throw parentHasChildren()
-    }
-    const unassigned = current.role === 'mentor'
-      ? await tx`UPDATE children SET mentor_id = NULL, updated_at = now() WHERE mentor_id = ${id} RETURNING id`
-      : []
-    await tx`UPDATE users SET deleted_at = now(), status = 'disabled', updated_at = now() WHERE id = ${id}`
+    if (
+      current.role === 'parent' &&
+      (await tx.children.count({ where: { parent_id: id, deleted_at: null } }))
+    )
+      throw parentHasChildren()
+    const unassigned =
+      current.role === 'mentor'
+        ? await tx.children.findMany({ where: { mentor_id: id }, select: { id: true } })
+        : []
+    if (unassigned.length)
+      await tx.children.updateMany({
+        where: { mentor_id: id },
+        data: { mentor_id: null, updated_at: new Date() }
+      })
+    await tx.users.update({
+      where: { id },
+      data: { deleted_at: new Date(), status: 'disabled', updated_at: new Date() }
+    })
     await audit(tx, {
       actor,
       action: 'user.deleted',
@@ -90,6 +142,6 @@ export async function deleteUser(actor, id, ctx) {
       ctx
     })
     return current.firebase_uid
-  })
+  }, SERIAL)
   if (firebaseUid) await setAuthUserDisabled(firebaseUid, true)
 }

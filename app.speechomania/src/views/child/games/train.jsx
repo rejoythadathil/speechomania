@@ -29,16 +29,21 @@ export function TrainGame(props) {
             <button
               key={choice}
               type="button"
-              className={cx(styles.wagon, shaking === choice && styles.shake, loaded === choice && styles.empty, round.hint && round.open && choice === step.answer && styles.hint)}
+              className={cx(
+                styles.wagon,
+                shaking === choice && styles.shake,
+                loaded === choice && styles.empty,
+                round.hint && round.open && choice === step.answer && styles.hint
+              )}
               onAnimationEnd={stop}
               onClick={(event) => {
                 if (!round.open) return
                 if (choice !== step.answer) {
                   shake(choice)
-                  return round.wrong()
+                  return round.wrong(choice)
                 }
                 setLoaded(choice)
-                round.right(event.currentTarget)
+                round.right(event.currentTarget, choice)
               }}
             >
               <img src={ART.wagon} alt="" draggable="false" />

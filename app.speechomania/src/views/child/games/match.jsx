@@ -6,12 +6,21 @@ import styles from './games.module.css'
 
 export function MatchGame(props) {
   const { page, steps, lines, voice, celebrate } = props
-  const board = useMemo(() => ({ ...(lines.quiz ?? { text: 'Find the pairs.' }), praise: lines.yes }), [lines])
+  const board = useMemo(
+    () => ({ ...(lines.quiz ?? { text: 'Find the pairs.' }), praise: lines.yes }),
+    [lines]
+  )
   const round = useRound({ ...props, step: board })
-  const cards = useMemo(() => shuffle(page.group.flatMap((index) => [
-    { pair: index, word: steps[index].first, art: steps[index].art[0] },
-    { pair: index, word: steps[index].second, art: steps[index].art[1] }
-  ])).map((card, id) => ({ ...card, id })), [page.group, steps])
+  const cards = useMemo(
+    () =>
+      shuffle(
+        page.group.flatMap((index) => [
+          { pair: index, word: steps[index].first, art: steps[index].art[0] },
+          { pair: index, word: steps[index].second, art: steps[index].art[1] }
+        ])
+      ).map((card, id) => ({ ...card, id })),
+    [page.group, steps]
+  )
   const [open, setOpen] = useState([])
   const [found, setFound] = useState([])
   const busy = useRef(false)
@@ -50,11 +59,17 @@ export function MatchGame(props) {
                 key={card.id}
                 type="button"
                 aria-label={faceUp ? card.word : 'Hidden card'}
-                className={cx(styles.card, faceUp && styles.faceUp, found.includes(card.pair) && styles.found)}
+                className={cx(
+                  styles.card,
+                  faceUp && styles.faceUp,
+                  found.includes(card.pair) && styles.found
+                )}
                 onClick={(event) => flip(card, event)}
               >
                 <span className={styles.cardInner}>
-                  <span className={styles.cardBack}><img src={ART.sparkles} alt="" draggable="false" /></span>
+                  <span className={styles.cardBack}>
+                    <img src={ART.sparkles} alt="" draggable="false" />
+                  </span>
                   <span className={styles.cardFront}>
                     <Art name={card.art} className={styles.cardArt} />
                     <b>{card.word}</b>

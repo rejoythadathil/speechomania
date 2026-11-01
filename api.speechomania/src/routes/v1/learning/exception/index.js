@@ -6,6 +6,10 @@ export const lessonNotFound = () => notFound('Lesson')
 
 export const attemptNotFound = () => notFound('Attempt')
 
+export const assessmentNotFound = () => notFound('Assessment')
+
+export const alreadyDone = () => new HttpError(409, 'This assessment is already done')
+
 export const attemptFinished = () => new HttpError(409, 'This attempt is already finished')
 
 export const tooManyEvents = () => new HttpError(409, 'This attempt has too many events')

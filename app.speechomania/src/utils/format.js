@@ -1,11 +1,26 @@
-const dateFormat = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-const dateTimeFormat = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+const dateFormat = new Intl.DateTimeFormat('en-IN', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric'
+})
+const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit'
+})
 
 export const formatDate = (value) => (value ? dateFormat.format(new Date(value)) : '—')
 export const formatDateTime = (value) => (value ? dateTimeFormat.format(new Date(value)) : '—')
 
 export function initials(name = '') {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join('')
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join('')
 }
 
 export function age(dateOfBirth) {
@@ -17,4 +32,5 @@ export function age(dateOfBirth) {
   return years
 }
 
-export const titleCase = (text = '') => text.replaceAll('_', ' ').replace(/^\w/, (char) => char.toUpperCase())
+export const titleCase = (text = '') =>
+  text.replaceAll('_', ' ').replace(/^\w/, (char) => char.toUpperCase())

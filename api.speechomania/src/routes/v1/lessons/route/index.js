@@ -8,8 +8,18 @@ export const lessonsRoute = new Hono()
   .get('/', validate({ query: listQuery }), controller.list)
   .post('/', allow('admin'), validate({ body: createBody }), controller.create)
   .get('/:id', validate({ params: idParams }), controller.get)
-  .get('/:id/versions', allow('admin'), validate({ params: idParams, query: pageOnly }), controller.versions)
-  .patch('/:id', allow('admin'), validate({ params: idParams, body: updateBody }), controller.update)
+  .get(
+    '/:id/versions',
+    allow('admin'),
+    validate({ params: idParams, query: pageOnly }),
+    controller.versions
+  )
+  .patch(
+    '/:id',
+    allow('admin'),
+    validate({ params: idParams, body: updateBody }),
+    controller.update
+  )
   .post('/:id/publish', allow('admin'), validate({ params: idParams }), controller.publish)
   .post('/:id/draft', allow('admin'), validate({ params: idParams }), controller.draft)
   .delete('/:id', allow('admin'), validate({ params: idParams }), controller.remove)

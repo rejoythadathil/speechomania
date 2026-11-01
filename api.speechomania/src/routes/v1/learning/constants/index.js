@@ -1,4 +1,4 @@
-export const EVENT_STEPS = ['learn', 'check', 'story', 'play']
+export const EVENT_STEPS = ['learn', 'check', 'story', 'play', 'assess']
 
 export const MAX_EVENTS_PER_ATTEMPT = 500
 

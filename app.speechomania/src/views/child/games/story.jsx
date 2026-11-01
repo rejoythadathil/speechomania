@@ -12,7 +12,8 @@ export function StoryGame({ page, step, voice, onDone }) {
       if (page.intro) await speak(page.intro)
       if (!active) return
       await speak(step)
-      if (active) onDone({ correct: true, wrongs: 0, latency_ms: Math.round(performance.now() - shownAt) })
+      if (active)
+        onDone({ correct: true, wrongs: 0, latency_ms: Math.round(performance.now() - shownAt) })
     })()
     return () => {
       active = false
@@ -21,7 +22,11 @@ export function StoryGame({ page, step, voice, onDone }) {
   return (
     <div className={styles.stage}>
       <div className={styles.column}>
-        {step.art?.length || step.image_url ? <Picture step={step} /> : <img className={styles.storyArt} src={ART.book} alt="" draggable="false" />}
+        {step.art?.length || step.image_url ? (
+          <Picture step={step} />
+        ) : (
+          <img className={styles.storyArt} src={ART.book} alt="" draggable="false" />
+        )}
       </div>
     </div>
   )
