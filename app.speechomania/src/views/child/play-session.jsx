@@ -222,9 +222,11 @@ export function PlaySession({
       {!page && !result ? (
         <section className={styles.cover}>
           <div className={styles.hero} aria-hidden="true">
-            {cover.art.map((name) => (
-              <img key={name} src={ART[name]} alt="" draggable="false" />
-            ))}
+            {cover.scene ? (
+              <img className={styles.heroScene} src={cover.scene} alt="" draggable="false" />
+            ) : (
+              cover.art.map((name) => <img key={name} src={ART[name]} alt="" draggable="false" />)
+            )}
           </div>
           <div className={cx(child.card, styles.intro)}>
             <h1>{title}</h1>

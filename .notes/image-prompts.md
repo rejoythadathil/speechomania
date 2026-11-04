@@ -34,3 +34,14 @@ Keep the top-left corner empty (the game tag sits there) and the main subject ce
 - **Rewards:** gold star, trophy, medal ribbon, confetti piece set.
 - **Avatars (round, head and shoulders):** lion, rabbit, panda, fox, koala, penguin, owl, frog, bear, unicorn.
 - **Game badges (round medal with the game's sprite inside, its theme colour as the medal face):** one for each of the 12 games.
+
+## Status (2026-11-04)
+In use as game scenes: shark, balloons, bubbles, compare, place, train, yesno, pick.
+
+Regenerate before use:
+- **Memory cards:** the result showed tarot cards with "Sun" and "Moon" written on them. Ask for plain rounded cards with no writing and no tarot look.
+- **Word squish:** the result had the words "SUN SHINE" on the blocks. Ask for blank coloured blocks.
+- **Story:** the result was photo-realistic. Repeat the style block word for word.
+- **Detective (Why?):** not generated yet.
+
+Not used: the sprite sheets, avatars, rewards and badges. They would sit beside OpenMoji icons on the same row (avatar next to the stats, trophy next to the stars) and clash in style. The sheet's shark also has an open, toothy mouth, which is wrong for this audience. They are kept until a full sprite set can replace OpenMoji in one go.

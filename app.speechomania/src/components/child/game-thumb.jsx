@@ -1,8 +1,15 @@
-import { ART, GAME_ART } from './art.jsx'
+import { ART, GAME_ART, GAME_SCENES } from './art.jsx'
 import { sceneFor } from './scenes.js'
 import styles from './child.module.css'
 
 export function GameThumb({ player, cover }) {
+  if (GAME_SCENES[player]) {
+    return (
+      <span className={styles.thumb} aria-hidden="true">
+        <img className={styles.thumbScene} src={GAME_SCENES[player]} alt="" draggable="false" />
+      </span>
+    )
+  }
   const scene = sceneFor(player)
   const art = player === 'pick' && cover ? cover : (GAME_ART[player] ?? GAME_ART.story)
   return (

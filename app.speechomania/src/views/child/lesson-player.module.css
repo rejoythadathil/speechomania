@@ -45,6 +45,14 @@
   width: min(320px, 30vw);
 }
 
+.hero .heroScene {
+  width: min(560px, 42vw);
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border: 1px solid rgb(0 0 0 / 0.08);
+  border-radius: 16px;
+}
+
 .hero img + img {
   width: min(150px, 14vw);
   margin-left: -6%;
@@ -168,6 +176,9 @@
   }
   .hero img {
     width: 36vw;
+  }
+  .hero .heroScene {
+    width: min(480px, 84vw);
   }
   .hero img + img {
     width: 18vw;

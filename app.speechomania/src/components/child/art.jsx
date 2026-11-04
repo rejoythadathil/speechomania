@@ -8,6 +8,16 @@ export const ART = Object.fromEntries(
   Object.entries(files).map(([path, url]) => [path.split('/').pop().replace('.svg', ''), url])
 )
 
+const sceneFiles = import.meta.glob('../../assets/scenes/*.webp', {
+  eager: true,
+  query: '?url',
+  import: 'default'
+})
+
+export const GAME_SCENES = Object.fromEntries(
+  Object.entries(sceneFiles).map(([path, url]) => [path.split('/').pop().replace('.webp', ''), url])
+)
+
 export const GAME_ART = {
   story: ['book'],
   pick: ['lion', 'snake'],
