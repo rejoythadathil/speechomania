@@ -5,24 +5,6 @@
   background: linear-gradient(#d9f0ff, #f4fbff);
 }
 
-.cloud {
-  position: absolute;
-  width: clamp(90px, 14vw, 160px);
-  opacity: 0.8;
-  animation: drift 14s ease-in-out infinite alternate;
-}
-
-.cloudOne {
-  top: 10%;
-  left: 8%;
-}
-
-.cloudTwo {
-  top: 22%;
-  right: 10%;
-  animation-delay: -7s;
-}
-
 .main {
   display: flex;
   flex-direction: column;
@@ -83,16 +65,4 @@
   top: 18px;
   right: clamp(14px, 3vw, 36px);
   text-decoration: none;
-}
-
-@keyframes drift {
-  to {
-    translate: 40px 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cloud {
-    animation: none;
-  }
 }

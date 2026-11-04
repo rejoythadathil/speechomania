@@ -2,30 +2,19 @@ export const SCENES = {
   story: {
     tag: 'Story',
     background: 'linear-gradient(#fff0f0, #ffe2bd)',
-    decor: [
-      ['rainbow', 3, 22, 130],
-      ['sunflower', 88, 74, 90],
-      ['green-apple', 6, 78, 70],
-      ['butterfly', 86, 24, 60]
-    ],
+    decor: [['books', 3, 82, 110]],
     how: [
-      ['speaker', 'Listen'],
-      ['book', 'Look'],
-      ['star', 'Next page']
+      ['sound-on', 'Listen'],
+      ['book', 'Look at the page'],
+      ['arrow-right', 'Next page']
     ]
   },
   pick: {
     tag: 'Who can’t?',
     background: 'linear-gradient(#e3f6d6, #b5dd94)',
-    decor: [
-      ['tree', 1, 46, 170],
-      ['monkey', 87, 24, 80],
-      ['bee', 10, 22, 54],
-      ['sunflower', 88, 76, 80],
-      ['clover', 20, 86, 50]
-    ],
+    decor: [['tree', 1, 46, 170]],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['lion', 'Look at both'],
       ['raised-hand', 'Tap who can’t']
     ]
@@ -36,13 +25,10 @@ export const SCENES = {
     decor: [
       ['seaweed', 3, 84, 100],
       ['coral', 16, 86, 90],
-      ['shell', 44, 90, 56],
-      ['seaweed', 78, 84, 90],
-      ['coral', 90, 86, 90],
-      ['bubbles', 92, 30, 56, 'rise']
+      ['coral', 90, 86, 90]
     ],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['fish', 'Find the fish'],
       ['shark', 'Feed the shark']
     ]
@@ -50,14 +36,9 @@ export const SCENES = {
   balloons: {
     tag: 'Balloon pop',
     background: 'linear-gradient(#ffd9e6, #fff4f8)',
-    decor: [
-      ['cloud', 4, 22, 130, 'drift'],
-      ['sun-cloud', 84, 20, 120],
-      ['cloud', 70, 46, 90, 'drift'],
-      ['party', 6, 80, 80]
-    ],
+    decor: [['cloud', 4, 18, 130]],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['smiling', 'Find the face'],
       ['pop', 'Pop the balloon']
     ]
@@ -65,14 +46,9 @@ export const SCENES = {
   bubbles: {
     tag: 'Word bubbles',
     background: 'linear-gradient(#d0f4ef, #8fd9d0)',
-    decor: [
-      ['octopus', 3, 72, 130],
-      ['bubbles', 88, 30, 70, 'rise'],
-      ['shell', 86, 84, 64],
-      ['tropical-fish', 88, 58, 80]
-    ],
+    decor: [['shell', 86, 84, 64]],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['lemon', 'Look at the picture'],
       ['bubbles', 'Pop the word']
     ]
@@ -80,44 +56,29 @@ export const SCENES = {
   match: {
     tag: 'Memory cards',
     background: 'linear-gradient(#24365f, #4f5fa8)',
-    decor: [
-      ['moon', 4, 22, 100],
-      ['glowing-star', 88, 24, 64],
-      ['sparkles', 86, 76, 80],
-      ['glowing-star', 8, 78, 50]
-    ],
+    decor: [['moon', 4, 18, 100]],
     how: [
-      ['sparkles', 'Turn two cards'],
-      ['hot', 'Find opposites'],
-      ['cold', 'Match them all']
+      ['raised-hand', 'Turn two cards'],
+      ['eyes', 'Remember them'],
+      ['check-mark', 'Match the opposites']
     ]
   },
   squish: {
     tag: 'Word squish',
     background: 'linear-gradient(#fff3d6, #ffd98f)',
-    decor: [
-      ['palm', 1, 50, 160],
-      ['sun', 86, 20, 90],
-      ['turtle', 86, 80, 90],
-      ['shell', 16, 88, 50]
-    ],
+    decor: [],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['clamp', 'Squish two words'],
-      ['star', 'Pick the short word']
+      ['raised-hand', 'Tap the short word']
     ]
   },
   compare: {
     tag: 'Weigh it up',
     background: 'linear-gradient(#e2f6e7, #a7dcb4)',
-    decor: [
-      ['tree', 1, 48, 170],
-      ['sun', 86, 20, 80],
-      ['flower', 18, 86, 54],
-      ['butterfly', 88, 70, 60]
-    ],
+    decor: [['tree', 1, 48, 170]],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['scale', 'Look at both'],
       ['raised-hand', 'Tap the right one']
     ]
@@ -127,12 +88,10 @@ export const SCENES = {
     background: 'linear-gradient(#eef8dd, #bfe39a)',
     decor: [
       ['tree', 84, 46, 170],
-      ['butterfly', 8, 24, 60],
-      ['flower', 6, 82, 64],
-      ['hibiscus', 20, 88, 50]
+      ['flower', 6, 84, 64]
     ],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['box', 'Find the spot'],
       ['cat', 'Put it there']
     ]
@@ -142,12 +101,10 @@ export const SCENES = {
     background: 'linear-gradient(#fdeedd, #f3c79a)',
     decor: [
       ['pine', 1, 56, 130],
-      ['pine', 9, 64, 96],
-      ['cloud', 76, 22, 110, 'drift'],
-      ['camping', 86, 74, 90]
+      ['pine', 9, 64, 96]
     ],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['wagon', 'Pick a wagon'],
       ['engine', 'Fill the gap']
     ]
@@ -155,14 +112,9 @@ export const SCENES = {
   yesno: {
     tag: 'Yes or no',
     background: 'linear-gradient(#f0e6ff, #cdb9fb)',
-    decor: [
-      ['rainbow', 2, 22, 130],
-      ['teddy', 86, 76, 100],
-      ['butterfly', 86, 24, 60],
-      ['sparkles', 8, 80, 60]
-    ],
+    decor: [['teddy', 86, 76, 100]],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['thumbs-up', 'Yes'],
       ['thumbs-down', 'No']
     ]
@@ -170,14 +122,9 @@ export const SCENES = {
   why: {
     tag: 'Detective',
     background: 'linear-gradient(#fbf4e6, #e6d3ad)',
-    decor: [
-      ['books', 3, 80, 110],
-      ['closed-book', 88, 82, 70],
-      ['glowing-star', 88, 24, 60],
-      ['magnifier', 6, 24, 70]
-    ],
+    decor: [['books', 3, 80, 110]],
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['detective', 'Look closely'],
       ['magnifier', 'Find the reason']
     ]

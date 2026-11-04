@@ -10,10 +10,10 @@ export const ASSESSMENT_LINES = { ...LINES, outro: { text: 'All done. Great work
 export function assessmentCover(assessment) {
   return {
     player: assessment.items[0]?.player ?? 'story',
-    art: ['clipboard', 'star'],
+    art: ['clipboard'],
     intro: `${assessment.items.length} questions. Take your time.`,
     how: [
-      ['speaker', 'Listen'],
+      ['sound-on', 'Listen'],
       ['eyes', 'Look'],
       ['raised-hand', 'Tap your answer']
     ]

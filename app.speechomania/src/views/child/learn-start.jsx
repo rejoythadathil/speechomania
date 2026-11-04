@@ -15,8 +15,6 @@ export function LearnStartView() {
 
   return (
     <div className={cx(layout.root, styles.root)}>
-      <img className={cx(styles.cloud, styles.cloudOne)} src={ART.cloud} alt="" draggable="false" />
-      <img className={cx(styles.cloud, styles.cloudTwo)} src={ART.cloud} alt="" draggable="false" />
       <main className={styles.main}>
         {children.data ? (
           list.length ? (

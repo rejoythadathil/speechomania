@@ -6,19 +6,22 @@ There are two visual worlds, and they never mix.
 | Who | Admin, mentor, parent (incl. parent settings and child progress) | The child, inside a parent session |
 | Look | Professional, dense, light theme: flat white panels with 1px hairline borders, 10px corners, no shadows, header bars with dividers, tables flush to the panel edge, stats as one joined strip, 8–12px between panels (reference: rightfit.so) | Interactive, playful, calm |
 | Components | [BoardUI](https://www.boardui.com/) free MIT components only, no Pro (React Aria based, so keyboard and screen-reader support come built in): tables, forms, charts, sidebar, calendar | Our own components in `components/child/`, built for touch |
-| Icons | BoardUI's icon set | [Mochi Icons](https://mochi-icons.com/) (`mochi-icons`, MIT, sticker style) |
+| Icons | BoardUI's icon set | [OpenMoji](https://openmoji.org/) colour SVGs, the same set as every child-mode picture, so controls and pictures share one style |
 | Layouts | one `work-layout` whose sidebar changes by role | `learning-layout` (full screen) |
 
 **Keeping them apart**
 - Code lives in separate folders: `components/base/` and `components/foundations/` (BoardUI, added through its CLI and converted to JSX), `components/shared/` (our work-view pieces built on BoardUI) and `components/child/` (ours, child mode).
 - If a work-view component isn't in BoardUI's free set, we build it ourselves in `components/shared/` with the same Tailwind v4 tokens, rather than buying Pro. Modal, stat card, panel and toast were built this way.
-- An ESLint `no-restricted-imports` rule enforces it: `views/child/` and `components/child/` cannot import BoardUI, and nothing outside them can import `mochi-icons`. CI fails on a violation.
+- An ESLint `no-restricted-imports` rule enforces it: `views/child/` and `components/child/` cannot import BoardUI. CI fails on a violation.
 - The switch between worlds happens in one place only: the parent's "Start learning" action opens `learning-layout`, and leaving child mode needs the parent's PIN.
 
-**Using Mochi Icons in child mode**
-- Every icon has a word and a spoken audio label next to it. An icon is never the only way to understand a button.
-- One icon means one thing everywhere: the same icon for "next", "replay audio" and "done" on every screen.
-- Icon colour follows the child's sensory setting: the `primaryColor` prop uses a muted palette when "colour intensity" is low.
+**Icons and decoration in child mode**
+- One family only: every control icon (`components/child/child-icons.jsx`: lock, sound on and off, pause, arrows) and every picture is an OpenMoji colour SVG, so line weight and colours match.
+- Every icon has a word next to it. An icon is never the only way to understand a button.
+- One icon means one thing everywhere: the same icon for "next", "sound" and "break" on every screen.
+- Decoration must belong to the game's world and stay still: one to three pieces at the edges (seaweed and coral at sea, a teddy in the playroom, books in the library). No floating, drifting or bobbing pictures, and no random extras such as butterflies, sparkles or rainbows. Movement is kept only where it is the game (fish swimming, balloons rising, cards turning) and stops when motion is off.
+- How-to-play tips use pictures that show the action (a hand for "tap", eyes for "look", an arrow for "next page").
+- Low colour intensity desaturates the whole child-mode screen.
 - Large touch targets (at least 64 × 64 px) and a limited number of icons per screen.
 
 - The child's learning mode is interactive (lessons, games, rewards). Parent settings are not part of learning mode.

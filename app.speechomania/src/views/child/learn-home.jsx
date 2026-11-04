@@ -154,15 +154,6 @@ export function LearnHomeView() {
 
   return (
     <div className={styles.root}>
-      <img className={cx(styles.decor, styles.cloudOne)} src={ART.cloud} alt="" draggable="false" />
-      <img className={cx(styles.decor, styles.cloudTwo)} src={ART.cloud} alt="" draggable="false" />
-      <img
-        className={cx(styles.decor, styles.rainbow)}
-        src={ART.rainbow}
-        alt=""
-        draggable="false"
-      />
-
       <header className={styles.bar}>
         <span className={styles.brand}>
           <BrandMark size={30} />
@@ -212,7 +203,7 @@ export function LearnHomeView() {
                 of={learner.games_total}
               />
               <Stat
-                art="game"
+                art="check-mark"
                 label="Played"
                 value={learner.games_played}
                 of={learner.games_total}

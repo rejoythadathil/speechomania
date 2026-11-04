@@ -8,32 +8,6 @@
   --line-soft: rgba(27, 42, 56, 0.1);
 }
 
-.decor {
-  position: absolute;
-  pointer-events: none;
-}
-
-.cloudOne {
-  top: 84px;
-  left: 2%;
-  width: clamp(70px, 9vw, 130px);
-  animation: drift 20s ease-in-out infinite alternate;
-}
-
-.cloudTwo {
-  top: 40%;
-  right: 1%;
-  width: clamp(60px, 7vw, 110px);
-  animation: drift 24s ease-in-out infinite alternate-reverse;
-}
-
-.rainbow {
-  bottom: 12px;
-  left: 1%;
-  width: clamp(70px, 9vw, 130px);
-  opacity: 0.85;
-}
-
 .bar {
   position: relative;
   z-index: 1;
@@ -394,16 +368,6 @@
 
 .medal {
   width: 26px;
-}
-
-@keyframes drift {
-  to {
-    translate: 50px 0;
-  }
-}
-
-:global([data-motion='off']) .decor {
-  animation: none;
 }
 
 @media (max-width: 1100px) {

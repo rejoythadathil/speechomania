@@ -378,41 +378,6 @@
   position: absolute;
 }
 
-.bob {
-  animation: sceneBob 6s ease-in-out infinite;
-}
-
-.drift {
-  animation: sceneDrift 18s ease-in-out infinite alternate;
-}
-
-.rise {
-  animation: sceneRise 7s ease-in-out infinite;
-}
-
-:global([data-motion='off']) .scenery img {
-  animation: none;
-}
-
-@keyframes sceneBob {
-  50% {
-    translate: 0 -10px;
-  }
-}
-
-@keyframes sceneDrift {
-  to {
-    translate: 60px 0;
-  }
-}
-
-@keyframes sceneRise {
-  50% {
-    translate: 0 -24px;
-    opacity: 0.7;
-  }
-}
-
 .thumb {
   position: relative;
   display: block;

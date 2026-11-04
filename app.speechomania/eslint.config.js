@@ -40,19 +40,7 @@ export default [
       'speechomania/no-comments': 'error',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }],
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: [
-            {
-              name: 'mochi-icons',
-              message:
-                'Mochi Icons belong to child mode only (src/views/child, src/components/child).'
-            }
-          ]
-        }
-      ]
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' }]
     }
   },
   {
