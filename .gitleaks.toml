@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Firebase web config is public and ships in the app bundle"
+paths = ['''^app\.speechomania/\.env\.production$''']

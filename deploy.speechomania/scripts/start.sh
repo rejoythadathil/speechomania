@@ -4,6 +4,10 @@ load_env
 docker network inspect speechomania-network >/dev/null 2>&1 || docker network create speechomania-network
 info "Starting database stack"
 compose database up -d --build
+if [ "${SINGLE_HOST:-0}" = 1 ]; then
+  info "Starting storage stack"
+  compose storage up -d
+fi
 info "Starting monitoring stack"
 compose monitoring up -d
 if [ -f "$API_DIR/.env" ] && docker image inspect speechomania-api:current >/dev/null 2>&1; then
