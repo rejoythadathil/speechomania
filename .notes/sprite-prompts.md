@@ -60,5 +60,26 @@ a football (soccer ball), a basketball, a tennis ball, a cricket bat with a ball
 
 Names: football, basketball, tennis-ball, cricket, bike, car, engine, wagon, bandage, feather
 
+## Status (2026-11-04)
+Done: sheets C, D, E, F, G, H, J, K. Still needed: A, B, I.
+
 ## Already done (from the first sheets)
 lion, rabbit, panda, fox, koala, penguin, owl, frog, bear, unicorn, balloon, pop, cloud, cards, octopus, bubbles, box, chair, tree, cat, dog, mouse, duck, bird, star, glowing-star, trophy, medal, scale, tropical-fish, fish, blowfish, seaweed, coral, shell, thumbs-up, thumbs-down, clamp. The realistic shark is replaced by the friendly one on Sheet F.
+
+## Redo in the new style (optional, for one consistent look)
+The first sheets (sea life, place objects, rewards, avatars) are more detailed than sheets C–K, which use flat colours and small smiling faces. Generate these with the same style block so everything matches.
+
+### Sheet L: sea and sky (12)
+a blue fish, a yellow and black striped tropical fish, an orange puffer fish, green seaweed, pink coral, a seashell, one clear soap bubble, a red octopus, a white cloud, a red balloon on a string, a balloon bursting with small confetti, a green tree
+
+Names: fish, tropical-fish, blowfish, seaweed, coral, shell, bubbles, octopus, cloud, balloon, pop, tree
+
+### Sheet M: animals (12)
+Each sitting and facing forward: a cat, a dog, a mouse, a duck, a bird, a lion, a rabbit, a panda, a fox, a koala, a penguin, an owl
+
+Names: cat, dog, mouse, duck, bird, lion, rabbit, panda, fox, koala, penguin, owl
+
+### Sheet N: things and rewards (12)
+a frog, a bear, a unicorn, an open cardboard box, a wooden chair, a gold star, a gold trophy, a gold medal on a ribbon, a balance scale (level), a thumbs up hand, a thumbs down hand, a metal clamp
+
+Names: frog, bear, unicorn, box, chair, star, trophy, medal, scale, thumbs-up, thumbs-down, clamp
