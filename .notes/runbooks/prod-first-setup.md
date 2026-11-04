@@ -9,7 +9,7 @@ One-time setup of the prod VM, following the `xam-reloaded/server` pattern. See 
 - [ ] Backup bucket in a **different region and a different account** from prod, with its own access key
 - [ ] Firebase project `speechomania-prod`: enable Email/Password sign-in and download a service account key
 - [ ] Discord webhook URL for alerts
-- [ ] GitHub: an environment named `production` with required reviewers, and secrets `PROD_SSH_KEY`, `PROD_SSH_HOST`, `PROD_SSH_KNOWN_HOSTS` in both repos
+- [ ] GitHub: nothing to set. Release workflows only push images to GHCR; the VM pulls them (`sudo sh scripts/auto-deploy.sh --install`)
 
 ## Steps
 1. Clone the repo (it holds `deploy.speechomania` and `api.speechomania`, so the paths below match):

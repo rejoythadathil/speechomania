@@ -1,5 +1,5 @@
 # Folder / codebase structure
-One repository (github.com/rejoythadathil/speechomania) with the three apps side by side, these notes, a root `.githooks/pre-commit` (env files, comments in CSS/SQL/Prisma/configs, gitleaks, eslint for the app that changed) and root `.github/workflows/` (`api-ci`, `api-release`, `app-ci`, `app-release`; each runs only when its folder changes, and deploy jobs run only when the repository variable `DEPLOY_ENABLED` is `true`). Every API module (each `common-service/<name>/` and each `src/routes/v1/<feature>/`) keeps one concern per file, each kind in its own sub-folder as an `index.js` (tests are `tests/index.test.js` so `bun test` finds them, docs are `docs/index.md`):
+One repository (github.com/rejoythadathil/speechomania) with the three apps side by side, these notes, a root `.githooks/pre-commit` (env files, comments in CSS/SQL/Prisma/configs, gitleaks, eslint for the app that changed) and root `.github/workflows/` (`api-ci`, `api-release`, `app-ci`, `app-release`; each runs only when its folder changes; release workflows push images to GHCR and the VM pulls them). Every API module (each `common-service/<name>/` and each `src/routes/v1/<feature>/`) keeps one concern per file, each kind in its own sub-folder as an `index.js` (tests are `tests/index.test.js` so `bun test` finds them, docs are `docs/index.md`):
 
 | Sub-folder / file | Holds |
 |---|---|
@@ -93,7 +93,7 @@ app.speechomania/
       base/                      #BoardUI free components (JSX)
       foundations/               #BoardUI internals (direction, icons)
       shared/                    #ours for work views: modal, panel, stat card, toast, select field, status chip
-      child/                     #child mode: characters, scene, actor, read-along, voice hook, sheets, Mochi Icons (child-icons.jsx)
+      child/                     #child mode: characters, scene, actor, read-along, voice hook, sheets, OpenMoji control icons (child-icons.jsx)
     layout/
       work-layout/               #sidebar shell for admin, mentor and parent; menu in navigation.js
       learning-layout/           #child mode shell: learner, sensory settings, Break and Grown-ups sheets
