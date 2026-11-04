@@ -15,8 +15,6 @@ export function LearnStartView() {
 
   return (
     <div className={cx(layout.root, styles.root)}>
-      <img className={cx(styles.cloud, styles.cloudOne)} src={ART.cloud} alt="" draggable="false" />
-      <img className={cx(styles.cloud, styles.cloudTwo)} src={ART.cloud} alt="" draggable="false" />
       <main className={styles.main}>
         {children.data ? (
           list.length ? (
@@ -25,7 +23,11 @@ export function LearnStartView() {
               <ul className={styles.kids}>
                 {list.map((kid) => (
                   <li key={kid.id}>
-                    <button type="button" className={styles.kid} onClick={() => navigate(`/learn/${kid.id}`)}>
+                    <button
+                      type="button"
+                      className={styles.kid}
+                      onClick={() => navigate(`/learn/${kid.id}`)}
+                    >
                       <img src={ART[avatarFor(kid.id)]} alt="" draggable="false" />
                       <span>{kid.display_name}</span>
                     </button>
@@ -34,13 +36,19 @@ export function LearnStartView() {
               </ul>
             </>
           ) : (
-            <p className={cx(child.card, styles.empty)}>No learners yet. Speechomania will add your child soon.</p>
+            <p className={cx(child.card, styles.empty)}>
+              No learners yet. Speechomania will add your child soon.
+            </p>
           )
         ) : (
-          <p className={styles.loading} role={children.error ? 'alert' : 'status'}>{children.error ? children.error.message : 'Getting ready…'}</p>
+          <p className={styles.loading} role={children.error ? 'alert' : 'status'}>
+            {children.error ? children.error.message : 'Getting ready…'}
+          </p>
         )}
       </main>
-      <Link to="/dashboard" className={cx(child.pill, styles.grownUps)}>Grown-up area</Link>
+      <Link to="/dashboard" className={cx(child.pill, styles.grownUps)}>
+        Grown-up area
+      </Link>
     </div>
   )
 }

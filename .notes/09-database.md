@@ -1,12 +1,13 @@
 # Database schema
-The schema is defined in `api.speechomania/prisma/schema.prisma`; the first migration (`prisma/migrations/20261025000000_init`) is the SQL in [`schema.sql`](schema.sql). It has **7 tables**; anything a column, the queue, S3 or the audit log can hold does not get its own table.
+The schema is defined in `api.speechomania/prisma/schema.prisma`; the first migration (`prisma/migrations/20261025000000_init`) is the SQL in [`schema.sql`](schema.sql). It has **8 tables** (the eighth, `assessments`, was added on 2026-11-01); anything a column, the queue, S3 or the audit log can hold does not get its own table.
 
 | Table | Holds | Replaces |
 |-------|-------|----------|
 | `users` | Admins, mentors, parents. `role` column; `status = invited` until the Firebase invite is accepted. | invites |
-| `children` | Profile, parent, current mentor, sensory settings, PIN, assigned lesson slugs (a JSON array), consent version and date. | consents, mentor assignments, lesson assignments |
+| `children` | Profile, parent, current mentor, sensory settings, PIN, assigned lesson slugs (a JSON array), assigned assessments (`[{ assessment_id, due_on, assigned_by, assigned_at }]`), consent version and date. | consents, mentor assignments, lesson and assessment assignments |
 | `lessons` | One row per version (`slug` + `version`). At most one draft and one published per slug; published rows never change. | separate versions table |
-| `attempts` | One row per lesson attempt, pinned to the exact lesson version. Step events as JSON, stars earned. | attempt events, reward ledger |
+| `attempts` | One row per lesson or assessment attempt (exactly one of `lesson_id`, `assessment_id`; a CHECK enforces it), pinned to the exact lesson version. Step events as JSON, stars earned (lessons), score in `metadata.result` (assessments). | attempt events, reward ledger, assessment results |
+| `assessments` | Assessments built from lesson questions: `items` (copied questions), `settings` (scoring, play, data collected, who sees the score), `status` draft, published or archived. See [11-assessments](11-assessments.md). | question banks, assessment versions |
 | `remarks` | Notes on a child written by a mentor or an admin, internal or shared. `seen_at` drives the unread count. | notifications |
 | `change_requests` | Mentor requests to change a lesson, with admin review. | |
 | `audit_logs` | Append-only record of every change and every view of a child's data. Also the history of mentor reassignments. | |
@@ -30,5 +31,7 @@ Add a table only when a column stops being enough, for example a child who needs
 Analytics (mentor performance, child progress) will be read from materialized views refreshed by the worker, not computed live on every page load. The current dashboard counts are simple live queries; they move to materialized views when the data grows.
 
 Prisma Migrate adds one bookkeeping table, `_prisma_migrations`, which holds no product data and is revoked from the app role.
+
+New migrations: `bun run migrate:new <name>` diffs `schema.prisma` against the local database (`prisma migrate diff`) and writes a comment-free `migration.sql`. `prisma migrate dev` is not used, because its shadow database cannot replay the migration that revokes `_prisma_migrations` from the app role.
 
 Prisma cannot express CHECK constraints, the `citext` extension or grants, so those live as hand-written SQL inside the migration files. Partial unique indexes are in `schema.prisma` (preview feature `partialIndexes`). `bun run migrate:check` fails CI if `schema.prisma` and the migrations disagree.

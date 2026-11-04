@@ -1,0 +1,7 @@
+node_modules
+dist
+src/components/base
+src/components/foundations
+src/assets
+*.md
+bun.lock

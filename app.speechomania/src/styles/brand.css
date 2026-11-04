@@ -17,14 +17,26 @@
   --color-brand-teal-soft: #e7f6f4;
   --color-brand-navy: #16163e;
   --color-brand-mist: #f4f8fb;
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bricolage Grotesque", "Plus Jakarta Sans", ui-sans-serif, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Plus Jakarta Sans', ui-sans-serif, sans-serif;
 }
 
 :root {
-  --gradient-button-primary-default: linear-gradient(180deg, var(--color-accent-600) 0%, var(--color-accent-700) 100%);
-  --gradient-button-primary-hover: linear-gradient(180deg, var(--color-accent-500) 0%, var(--color-accent-600) 100%);
-  --gradient-button-primary-active: linear-gradient(180deg, var(--color-accent-700) 0%, var(--color-accent-800) 100%);
+  --gradient-button-primary-default: linear-gradient(
+    180deg,
+    var(--color-accent-600) 0%,
+    var(--color-accent-700) 100%
+  );
+  --gradient-button-primary-hover: linear-gradient(
+    180deg,
+    var(--color-accent-500) 0%,
+    var(--color-accent-600) 100%
+  );
+  --gradient-button-primary-active: linear-gradient(
+    180deg,
+    var(--color-accent-700) 0%,
+    var(--color-accent-800) 100%
+  );
   --color-background-full: #f6f7f9;
 }
 
@@ -63,7 +75,9 @@ body {
 }
 
 .surface-interactive {
-  transition: border-color 160ms var(--ease-liquid), background-color 160ms var(--ease-liquid);
+  transition:
+    border-color 160ms var(--ease-liquid),
+    background-color 160ms var(--ease-liquid);
 }
 
 .surface-interactive:hover {

@@ -10,5 +10,7 @@ const app = initializeApp({
 export const auth = getAuth(app)
 
 if (import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL) {
-  connectAuthEmulator(auth, import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL, { disableWarnings: true })
+  connectAuthEmulator(auth, import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL, {
+    disableWarnings: true
+  })
 }

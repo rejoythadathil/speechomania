@@ -1,134 +1,253 @@
 import { audit } from '../../../../../common-service/audit/service/index.js'
-import { sql } from '../../../../../common-service/db/service/index.js'
-import { json, likePattern, pageOf } from '../../../../../common-service/http/utils/index.js'
-import { alreadyDraft, cannotRemove, draftExists, lessonNotFound, noSteps, onlyDraftsEditable, onlyDraftsPublishable, slugTaken } from '../exception/index.js'
+import { SERIAL } from '../../../../../common-service/db/constants/index.js'
+import { db } from '../../../../../common-service/db/service/index.js'
+import { signAudio } from '../../../../../common-service/voice/service/index.js'
+import { containsText, pageOf } from '../../../../../common-service/http/utils/index.js'
+import {
+  alreadyDraft,
+  cannotRemove,
+  draftExists,
+  lessonNotFound,
+  noSteps,
+  onlyDraftsEditable,
+  onlyDraftsPublishable,
+  slugTaken
+} from '../exception/index.js'
+import { assignedSlugs, lessonView, stepCount } from '../utils/index.js'
 
-function visible(db, user) {
-  if (user.role === 'admin') return db``
-  if (user.role === 'mentor') return db`AND l.status = 'published'`
-  return db`AND l.status = 'published' AND l.slug::text IN (
-    SELECT jsonb_array_elements_text(c.assigned_lessons) FROM children c WHERE c.parent_id = ${user.id} AND c.deleted_at IS NULL
-  )`
+const fields = {
+  id: true,
+  slug: true,
+  version: true,
+  title: true,
+  content: true,
+  status: true,
+  metadata: true,
+  created_at: true,
+  published_at: true,
+  creator: { select: { full_name: true } },
+  publisher: { select: { full_name: true } }
 }
 
-function select(db) {
-  return db`
-    SELECT l.id, l.slug, l.version, l.title, l.content, l.status, l.metadata, l.created_at, l.published_at,
-      jsonb_array_length(l.content -> 'steps') AS step_count,
-      cu.full_name AS created_by_name, pu.full_name AS published_by_name
-    FROM lessons l
-    JOIN users cu ON cu.id = l.created_by
-    LEFT JOIN users pu ON pu.id = l.published_by
-  `
+async function visible(tx, user) {
+  if (user.role === 'admin') return {}
+  if (user.role === 'mentor') return { status: 'published' }
+  const children = await tx.children.findMany({
+    where: { parent_id: user.id, deleted_at: null },
+    select: { assigned_lessons: true }
+  })
+  return { status: 'published', slug: { in: assignedSlugs(children) } }
 }
 
-export async function findLesson(db, user, id) {
-  const [lesson] = await db`${select(db)} WHERE l.id = ${id} ${visible(db, user)}`
+export async function findLesson(tx, user, id) {
+  const lesson = await tx.lessons.findFirst({
+    where: { id, ...(await visible(tx, user)) },
+    select: fields
+  })
+  if (!lesson) throw lessonNotFound()
+  return lessonView(lesson)
+}
+
+export async function listLessons(user, { status, q, ...window }) {
+  const page = await pageOf(
+    db.lessons,
+    {
+      where: {
+        AND: [
+          await visible(db, user),
+          status ? { status } : {},
+          q ? { OR: [{ title: containsText(q) }, { slug: containsText(q) }] } : {}
+        ]
+      },
+      select: {
+        id: true,
+        slug: true,
+        version: true,
+        title: true,
+        status: true,
+        created_at: true,
+        published_at: true,
+        content: true
+      },
+      orderBy: [{ slug: 'asc' }, { version: 'desc' }]
+    },
+    window
+  )
+  return {
+    ...page,
+    items: page.items.map(({ content, ...lesson }) => ({
+      ...lesson,
+      player: content?.player ?? 'story',
+      step_count: stepCount(content)
+    }))
+  }
+}
+
+export async function listVersions(user, id, window) {
+  const lesson = await findLesson(db, user, id)
+  return pageOf(
+    db.lessons,
+    {
+      where: { slug: lesson.slug },
+      select: {
+        id: true,
+        version: true,
+        status: true,
+        title: true,
+        created_at: true,
+        published_at: true
+      },
+      orderBy: { version: 'desc' }
+    },
+    window
+  )
+}
+
+export function createLesson(user, body, ctx) {
+  return db.$transaction(async (tx) => {
+    if (await tx.lessons.count({ where: { slug: body.slug } })) throw slugTaken()
+    const { id } = await tx.lessons.create({
+      data: {
+        slug: body.slug,
+        version: 1,
+        title: body.title,
+        content: body.content,
+        created_by: user.id,
+        metadata: body.metadata ?? {}
+      },
+      select: { id: true }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'lesson.created',
+      entityType: 'lesson',
+      entityId: id,
+      diff: { slug: body.slug },
+      ctx
+    })
+    return findLesson(tx, user, id)
+  })
+}
+
+async function findRaw(tx, id) {
+  const lesson = await tx.lessons.findUnique({ where: { id } })
   if (!lesson) throw lessonNotFound()
   return lesson
 }
 
-export function listLessons(user, { status, q, ...window }) {
-  return pageOf(sql, sql`
-    SELECT l.id, l.slug, l.version, l.title, l.status, l.created_at, l.published_at,
-      jsonb_array_length(l.content -> 'steps') AS step_count
-    FROM lessons l
-    WHERE true ${visible(sql, user)}
-      ${status ? sql`AND l.status = ${status}` : sql``}
-      ${q ? sql`AND (l.title ILIKE ${likePattern(q)} OR l.slug::text ILIKE ${likePattern(q)})` : sql``}
-  `, sql`list.slug, list.version DESC`, window)
-}
-
-export async function listVersions(user, id, window) {
-  const lesson = await findLesson(sql, user, id)
-  return pageOf(sql, sql`
-    SELECT l.id, l.version, l.status, l.title, l.created_at, l.published_at
-    FROM lessons l
-    WHERE l.slug = ${lesson.slug}
-  `, sql`list.version DESC`, window)
-}
-
-export async function createLesson(user, body, ctx) {
-  return sql.begin(async (tx) => {
-    const [existing] = await tx`SELECT id FROM lessons WHERE slug = ${body.slug} LIMIT 1`
-    if (existing) throw slugTaken()
-    const [{ id }] = await tx`
-      INSERT INTO lessons (slug, version, title, content, created_by, metadata)
-      VALUES (${body.slug}, 1, ${body.title}, ${json(body.content)}::jsonb, ${user.id}, ${json(body.metadata ?? {})}::jsonb)
-      RETURNING id
-    `
-    await audit(tx, { actor: user, action: 'lesson.created', entityType: 'lesson', entityId: id, diff: { slug: body.slug }, ctx })
-    return findLesson(tx, user, id)
-  })
-}
-
-export async function updateLesson(user, id, body, ctx) {
-  return sql.begin(async (tx) => {
-    const [current] = await tx`SELECT * FROM lessons WHERE id = ${id} FOR UPDATE`
-    if (!current) throw lessonNotFound()
+export function updateLesson(user, id, body, ctx) {
+  return db.$transaction(async (tx) => {
+    const current = await findRaw(tx, id)
     if (current.status !== 'draft') throw onlyDraftsEditable()
-    await tx`
-      UPDATE lessons SET
-        title = ${body.title ?? current.title},
-        content = ${json(body.content ?? current.content)}::jsonb,
-        metadata = metadata || ${json(body.metadata ?? {})}::jsonb
-      WHERE id = ${id}
-    `
-    await audit(tx, { actor: user, action: 'lesson.updated', entityType: 'lesson', entityId: id, diff: { fields: Object.keys(body) }, ctx })
+    await tx.lessons.update({
+      where: { id },
+      data: {
+        title: body.title,
+        content: body.content,
+        metadata: { ...current.metadata, ...body.metadata }
+      }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'lesson.updated',
+      entityType: 'lesson',
+      entityId: id,
+      diff: { fields: Object.keys(body) },
+      ctx
+    })
     return findLesson(tx, user, id)
-  })
+  }, SERIAL)
 }
 
-export async function publishLesson(user, id, ctx) {
-  return sql.begin(async (tx) => {
-    const [current] = await tx`SELECT * FROM lessons WHERE id = ${id} FOR UPDATE`
-    if (!current) throw lessonNotFound()
+export function publishLesson(user, id, ctx) {
+  return db.$transaction(async (tx) => {
+    const current = await findRaw(tx, id)
     if (current.status !== 'draft') throw onlyDraftsPublishable()
-    if (!current.content?.steps?.length) throw noSteps()
-    await tx`UPDATE lessons SET status = 'superseded' WHERE slug = ${current.slug} AND status = 'published'`
-    await tx`UPDATE lessons SET status = 'published', published_by = ${user.id}, published_at = now() WHERE id = ${id}`
-    await audit(tx, { actor: user, action: 'lesson.published', entityType: 'lesson', entityId: id, diff: { slug: current.slug, version: current.version }, ctx })
+    if (!stepCount(current.content)) throw noSteps()
+    await tx.lessons.updateMany({
+      where: { slug: current.slug, status: 'published' },
+      data: { status: 'superseded' }
+    })
+    await tx.lessons.update({
+      where: { id },
+      data: { status: 'published', published_by: user.id, published_at: new Date() }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'lesson.published',
+      entityType: 'lesson',
+      entityId: id,
+      diff: { slug: current.slug, version: current.version },
+      ctx
+    })
     return findLesson(tx, user, id)
-  })
+  }, SERIAL)
 }
 
 export async function createDraftFrom(tx, user, source, ctx) {
-  const [draft] = await tx`SELECT id FROM lessons WHERE slug = ${source.slug} AND status = 'draft'`
+  const draft = await tx.lessons.findFirst({
+    where: { slug: source.slug, status: 'draft' },
+    select: { id: true }
+  })
   if (draft) return { id: draft.id, created: false }
-  const [{ id }] = await tx`
-    INSERT INTO lessons (slug, version, title, content, created_by)
-    SELECT slug, (SELECT max(version) + 1 FROM lessons WHERE slug = ${source.slug}), title, content, ${user.id}
-    FROM lessons WHERE id = ${source.id}
-    RETURNING id
-  `
-  await audit(tx, { actor: user, action: 'lesson.version_created', entityType: 'lesson', entityId: id, diff: { from: source.id }, ctx })
+  const { _max } = await tx.lessons.aggregate({
+    where: { slug: source.slug },
+    _max: { version: true }
+  })
+  const { id } = await tx.lessons.create({
+    data: {
+      slug: source.slug,
+      version: _max.version + 1,
+      title: source.title,
+      content: source.content,
+      created_by: user.id
+    },
+    select: { id: true }
+  })
+  await audit(tx, {
+    actor: user,
+    action: 'lesson.version_created',
+    entityType: 'lesson',
+    entityId: id,
+    diff: { from: source.id },
+    ctx
+  })
   return { id, created: true }
 }
 
-export async function newVersion(user, id, ctx) {
-  return sql.begin(async (tx) => {
-    const [source] = await tx`SELECT * FROM lessons WHERE id = ${id}`
-    if (!source) throw lessonNotFound()
+export function newVersion(user, id, ctx) {
+  return db.$transaction(async (tx) => {
+    const source = await findRaw(tx, id)
     if (source.status === 'draft') throw alreadyDraft()
     const { id: draftId, created } = await createDraftFrom(tx, user, source, ctx)
     if (!created) throw draftExists()
     return findLesson(tx, user, draftId)
-  })
+  }, SERIAL)
 }
 
 export async function removeLesson(user, id, ctx) {
-  await sql.begin(async (tx) => {
-    const [current] = await tx`SELECT * FROM lessons WHERE id = ${id} FOR UPDATE`
-    if (!current) throw lessonNotFound()
+  await db.$transaction(async (tx) => {
+    const current = await findRaw(tx, id)
     if (current.status === 'draft') {
-      await tx`DELETE FROM lessons WHERE id = ${id}`
+      await tx.lessons.delete({ where: { id } })
     } else if (current.status === 'published') {
-      await tx`UPDATE lessons SET status = 'archived' WHERE id = ${id}`
+      await tx.lessons.update({ where: { id }, data: { status: 'archived' } })
     } else {
       throw cannotRemove()
     }
-    await audit(tx, { actor: user, action: current.status === 'draft' ? 'lesson.draft_deleted' : 'lesson.archived', entityType: 'lesson', entityId: id, diff: { slug: current.slug, version: current.version }, ctx })
-  })
+    await audit(tx, {
+      actor: user,
+      action: current.status === 'draft' ? 'lesson.draft_deleted' : 'lesson.archived',
+      entityType: 'lesson',
+      entityId: id,
+      diff: { slug: current.slug, version: current.version },
+      ctx
+    })
+  }, SERIAL)
 }
 
-export const getLesson = (user, id) => findLesson(sql, user, id)
+export async function getLesson(user, id) {
+  const lesson = await findLesson(db, user, id)
+  signAudio(lesson.content)
+  return lesson
+}

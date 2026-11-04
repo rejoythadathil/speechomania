@@ -12,7 +12,13 @@ export function TopBar({ centre, onGrownUp, onBreak, muted, onMute }) {
       <div className={styles.spacer} />
       {centre ? <div className={styles.centre}>{centre}</div> : null}
       <div className={styles.spacer} />
-      <button type="button" className={styles.round} onClick={onMute} aria-pressed={muted} aria-label={muted ? 'Sound is off' : 'Sound is on'}>
+      <button
+        type="button"
+        className={styles.round}
+        onClick={onMute}
+        aria-pressed={muted}
+        aria-label={muted ? 'Sound is off' : 'Sound is on'}
+      >
         {muted ? <MuteIcon size={34} /> : <SayAgainIcon size={34} />}
       </button>
       <button type="button" className={styles.pill} onClick={onBreak}>
@@ -31,7 +37,9 @@ export function BottomBar({ onSayAgain, next }) {
           <SayAgainIcon size={34} />
           <span className={styles.label}>Say it again</span>
         </button>
-      ) : <span />}
+      ) : (
+        <span />
+      )}
       {next}
     </footer>
   )

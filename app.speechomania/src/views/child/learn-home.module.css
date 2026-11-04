@@ -8,32 +8,6 @@
   --line-soft: rgba(27, 42, 56, 0.1);
 }
 
-.decor {
-  position: absolute;
-  pointer-events: none;
-}
-
-.cloudOne {
-  top: 84px;
-  left: 2%;
-  width: clamp(70px, 9vw, 130px);
-  animation: drift 20s ease-in-out infinite alternate;
-}
-
-.cloudTwo {
-  top: 40%;
-  right: 1%;
-  width: clamp(60px, 7vw, 110px);
-  animation: drift 24s ease-in-out infinite alternate-reverse;
-}
-
-.rainbow {
-  bottom: 12px;
-  left: 1%;
-  width: clamp(70px, 9vw, 130px);
-  opacity: 0.85;
-}
-
 .bar {
   position: relative;
   z-index: 1;
@@ -183,6 +157,18 @@
   padding: 18px 22px 22px;
 }
 
+.checkins {
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1.5px solid var(--line-soft);
+}
+
+.card:disabled {
+  cursor: default;
+  opacity: 0.75;
+  transform: none;
+}
+
 .side {
   padding: 18px 18px 22px;
   border-left: 1.5px solid var(--line-soft);
@@ -262,7 +248,9 @@
   border-radius: 12px;
   background: #fff;
   text-align: left;
-  transition: border-color 150ms ease, transform var(--child-t) var(--child-ease);
+  transition:
+    border-color 150ms ease,
+    transform var(--child-t) var(--child-ease);
 }
 
 .card:hover {
@@ -380,16 +368,6 @@
 
 .medal {
   width: 26px;
-}
-
-@keyframes drift {
-  to {
-    translate: 50px 0;
-  }
-}
-
-:global([data-motion='off']) .decor {
-  animation: none;
 }
 
 @media (max-width: 1100px) {

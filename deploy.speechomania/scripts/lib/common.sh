@@ -19,6 +19,12 @@ load_env() {
   set -a
   . "$ENV_FILE"
   set +a
+  if [ "${SINGLE_HOST:-0}" = 1 ]; then
+    SERVICES="site:single:"
+    APP_FQDN="$BASE_DOMAIN"
+  else
+    APP_FQDN="app.$BASE_DOMAIN"
+  fi
 }
 
 notify() {

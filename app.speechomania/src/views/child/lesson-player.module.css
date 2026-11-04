@@ -43,13 +43,11 @@
 
 .hero img {
   width: min(320px, 30vw);
-  animation: heroBob 5s ease-in-out infinite;
 }
 
 .hero img + img {
   width: min(150px, 14vw);
   margin-left: -6%;
-  animation-delay: -2s;
 }
 
 .intro {
@@ -97,16 +95,6 @@
   width: 34px;
 }
 
-@keyframes heroBob {
-  50% {
-    translate: 0 -12px;
-  }
-}
-
-:global([data-motion='off']) .hero img {
-  animation: none;
-}
-
 .trophy {
   width: 160px;
   animation: pop 800ms var(--child-ease) both;
@@ -147,7 +135,9 @@
   display: block;
   width: 24px;
   opacity: 0.25;
-  transition: opacity var(--child-t) ease, scale var(--child-t) ease;
+  transition:
+    opacity var(--child-t) ease,
+    scale var(--child-t) ease;
 }
 
 .progress .check img {

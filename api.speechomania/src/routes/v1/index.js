@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { requireAuth } from '../../middleware/auth.js'
+import { assessmentsRoute } from './assessments/route/index.js'
 import { auditRoute } from './audit/route/index.js'
 import { authRoute } from './auth/route/index.js'
 import { changeRequestsRoute } from './change-requests/route/index.js'
@@ -18,6 +19,7 @@ export const v1 = new Hono()
   .route('/search', searchRoute)
   .route('/users', usersRoute)
   .route('/', remarksRoute)
+  .route('/', assessmentsRoute)
   .route('/children', childrenRoute)
   .route('/lessons', lessonsRoute)
   .route('/learning', learningRoute)

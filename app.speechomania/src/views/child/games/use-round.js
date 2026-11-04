@@ -13,6 +13,7 @@ export function useRound({ page, step, lines, voice, celebrate, onDone }) {
   const [phase, setPhase] = useState('asking')
   const [wrongs, setWrongs] = useState(0)
   const count = useRef(0)
+  const chosen = useRef(undefined)
   const closed = useRef(false)
   const shownAt = useRef(0)
   const { speak } = voice
@@ -29,29 +30,50 @@ export function useRound({ page, step, lines, voice, celebrate, onDone }) {
     }
   }, [page, speak, step])
 
-  const finish = useCallback(async (correct, line) => {
-    closed.current = true
-    setPhase(correct ? 'right' : 'missed')
-    const result = { correct, wrongs: count.current, latency_ms: Math.round(performance.now() - shownAt.current) }
-    if (line) await speak(line)
-    setTimeout(() => onDone(result), 500)
-  }, [onDone, speak])
+  const finish = useCallback(
+    async (correct, line) => {
+      closed.current = true
+      setPhase(correct ? 'right' : 'missed')
+      const result = {
+        correct,
+        wrongs: count.current,
+        latency_ms: Math.round(performance.now() - shownAt.current),
+        ...(chosen.current === undefined ? {} : { choice: String(chosen.current).slice(0, 60) })
+      }
+      if (line) await speak(line)
+      setTimeout(() => onDone(result), 500)
+    },
+    [onDone, speak]
+  )
 
-  const right = useCallback((element) => {
-    if (closed.current) return
-    celebrate.cheer(element)
-    finish(true, step.praise ?? step.sentence ?? lines.yes)
-  }, [celebrate, finish, lines.yes, step])
+  const right = useCallback(
+    (element, choice) => {
+      if (closed.current) return
+      chosen.current = choice
+      celebrate.cheer(element)
+      finish(true, step.praise ?? step.sentence ?? lines.yes)
+    },
+    [celebrate, finish, lines.yes, step]
+  )
 
-  const wrong = useCallback(() => {
-    if (closed.current) return
-    count.current += 1
-    setWrongs(count.current)
-    celebrate.nudge()
-    if (page.step === 'check') return finish(false, lines.skip)
-    if (page.step === 'learn' && count.current > 1) return finish(false, step.teach)
-    speak(lines.retry).then(() => !closed.current && speak(step))
-  }, [celebrate, finish, lines.retry, lines.skip, page.step, speak, step])
+  const wrong = useCallback(
+    (choice) => {
+      if (closed.current) return
+      chosen.current = choice
+      count.current += 1
+      setWrongs(count.current)
+      celebrate.nudge()
+      if (page.step === 'check') return finish(false, lines.skip)
+      if (page.step === 'assess' && count.current >= page.tries) return finish(false, lines.skip)
+      if (page.step === 'learn' && count.current > 1) return finish(false, step.teach)
+      speak(lines.retry).then(() => !closed.current && speak(step))
+    },
+    [celebrate, finish, lines.retry, lines.skip, page.step, page.tries, speak, step]
+  )
 
-  return { phase, wrongs, hint: wrongs >= 2 || (page.step === 'learn' && wrongs >= 1), open: phase === 'asking', right, wrong }
+  const hint =
+    page.step === 'assess'
+      ? Boolean(page.hints) && wrongs >= 1
+      : wrongs >= 2 || (page.step === 'learn' && wrongs >= 1)
+  return { phase, wrongs, hint, open: phase === 'asking', right, wrong }
 }

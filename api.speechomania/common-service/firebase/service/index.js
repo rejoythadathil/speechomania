@@ -3,9 +3,10 @@ import { getAuth } from 'firebase-admin/auth'
 import { config } from '../../../config/index.js'
 import { EMAIL_EXISTS } from '../constants/index.js'
 
-const options = config.APP_ENV === 'prod'
-  ? { credential: applicationDefault(), projectId: config.FIREBASE_PROJECT_ID }
-  : { projectId: config.FIREBASE_PROJECT_ID }
+const options =
+  config.APP_ENV === 'prod'
+    ? { credential: applicationDefault(), projectId: config.FIREBASE_PROJECT_ID }
+    : { projectId: config.FIREBASE_PROJECT_ID }
 
 const auth = getAuth(getApps()[0] ?? initializeApp(options))
 

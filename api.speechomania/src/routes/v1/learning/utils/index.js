@@ -17,3 +17,30 @@ export function starsFor(events) {
 }
 
 export const badgeStars = (maxStars) => Math.max(1, Math.ceil(maxStars * BADGE_SHARE))
+
+export function maxStars(content) {
+  const steps = content.steps?.length ?? 0
+  if (!content.player || content.player === 'story') return 1
+  if (content.player === 'pick') return steps
+  const available = content.player === 'match' ? Math.floor(steps / PAIRS_PER_BOARD) : steps
+  return Math.min(content.rounds ?? available, available)
+}
+
+export const coverOf = (content) =>
+  content.player === 'pick' ? (content.steps?.[0]?.choices ?? null) : null
+
+export const firstStep = (content, field) =>
+  content.steps?.find((step) => step[field] !== undefined)?.[field] ?? null
+
+export function bestBySlug(groups, slugOf) {
+  const best = new Map()
+  for (const group of groups) {
+    const slug = slugOf.get(group.lesson_id)?.toLowerCase()
+    const current = best.get(slug) ?? { times: 0, stars: null }
+    best.set(slug, {
+      times: current.times + group._count._all,
+      stars: Math.max(current.stars ?? 0, group._max.stars ?? 0)
+    })
+  }
+  return best
+}

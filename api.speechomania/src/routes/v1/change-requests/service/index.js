@@ -1,74 +1,121 @@
 import { audit } from '../../../../../common-service/audit/service/index.js'
-import { sql } from '../../../../../common-service/db/service/index.js'
-import { json, pageOf } from '../../../../../common-service/http/utils/index.js'
+import { SERIAL } from '../../../../../common-service/db/constants/index.js'
+import { db } from '../../../../../common-service/db/service/index.js'
+import { pageOf } from '../../../../../common-service/http/utils/index.js'
 import { createDraftFrom, findLesson } from '../../lessons/service/index.js'
 import { alreadyReviewed, noPublishedVersion, requestNotFound } from '../exception/index.js'
 
-function select(db) {
-  return db`
-    SELECT cr.id, cr.reason, cr.proposed_change, cr.status, cr.review_note, cr.reviewed_at, cr.created_at, cr.metadata,
-      cr.lesson_id, l.slug AS lesson_slug, l.title AS lesson_title, l.version AS lesson_version,
-      cr.requested_by, ru.full_name AS requested_by_name, rv.full_name AS reviewed_by_name
-    FROM change_requests cr
-    JOIN lessons l ON l.id = cr.lesson_id
-    JOIN users ru ON ru.id = cr.requested_by
-    LEFT JOIN users rv ON rv.id = cr.reviewed_by
-  `
+const fields = {
+  id: true,
+  reason: true,
+  proposed_change: true,
+  status: true,
+  review_note: true,
+  reviewed_at: true,
+  created_at: true,
+  metadata: true,
+  lesson_id: true,
+  requested_by: true,
+  lesson: { select: { slug: true, title: true, version: true } },
+  author: { select: { full_name: true } },
+  reviewer: { select: { full_name: true } }
 }
 
-const scope = (db, user) => (user.role === 'admin' ? db`` : db`AND cr.requested_by = ${user.id}`)
-
-export function listRequests(user, { status, ...window }) {
-  return pageOf(sql, sql`
-    ${select(sql)}
-    WHERE true ${scope(sql, user)} ${status ? sql`AND cr.status = ${status}` : sql``}
-  `, sql`list.created_at DESC, list.id`, window)
+function requestView({ lesson, author, reviewer, ...request }) {
+  return {
+    ...request,
+    lesson_slug: lesson.slug,
+    lesson_title: lesson.title,
+    lesson_version: lesson.version,
+    requested_by_name: author.full_name,
+    reviewed_by_name: reviewer?.full_name ?? null
+  }
 }
 
-export async function getRequest(user, id, db = sql) {
-  const [request] = await db`${select(db)} WHERE cr.id = ${id} ${scope(db, user)}`
+const scope = (user) => (user.role === 'admin' ? {} : { requested_by: user.id })
+
+export async function listRequests(user, { status, ...window }) {
+  const page = await pageOf(
+    db.change_requests,
+    {
+      where: { ...scope(user), status },
+      select: fields,
+      orderBy: [{ created_at: 'desc' }, { id: 'asc' }]
+    },
+    window
+  )
+  return { ...page, items: page.items.map(requestView) }
+}
+
+export async function getRequest(user, id, tx = db) {
+  const request = await tx.change_requests.findFirst({
+    where: { id, ...scope(user) },
+    select: fields
+  })
   if (!request) throw requestNotFound()
-  return request
+  return requestView(request)
 }
 
-export async function createRequest(user, body, ctx) {
-  return sql.begin(async (tx) => {
+export function createRequest(user, body, ctx) {
+  return db.$transaction(async (tx) => {
     const lesson = await findLesson(tx, { role: 'mentor' }, body.lesson_id)
-    const [{ id }] = await tx`
-      INSERT INTO change_requests (lesson_id, requested_by, reason, proposed_change)
-      VALUES (${lesson.id}, ${user.id}, ${body.reason}, ${json(body.proposed_change)}::jsonb)
-      RETURNING id
-    `
-    await audit(tx, { actor: user, action: 'change_request.created', entityType: 'change_request', entityId: id, diff: { lesson_id: lesson.id }, ctx })
+    const { id } = await tx.change_requests.create({
+      data: {
+        lesson_id: lesson.id,
+        requested_by: user.id,
+        reason: body.reason,
+        proposed_change: body.proposed_change
+      },
+      select: { id: true }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'change_request.created',
+      entityType: 'change_request',
+      entityId: id,
+      diff: { lesson_id: lesson.id },
+      ctx
+    })
     return getRequest(user, id, tx)
   })
 }
 
-export async function reviewRequest(user, id, { decision, review_note }, ctx) {
-  return sql.begin(async (tx) => {
-    const [current] = await tx`SELECT * FROM change_requests WHERE id = ${id} FOR UPDATE`
+export function reviewRequest(user, id, { decision, review_note }, ctx) {
+  return db.$transaction(async (tx) => {
+    const current = await tx.change_requests.findUnique({
+      where: { id },
+      include: { lesson: { select: { slug: true } } }
+    })
     if (!current) throw requestNotFound()
     if (current.status !== 'pending') throw alreadyReviewed()
     let draft = null
     if (decision === 'approve') {
-      const [source] = await tx`
-        SELECT * FROM lessons
-        WHERE slug = (SELECT slug FROM lessons WHERE id = ${current.lesson_id}) AND status IN ('published', 'draft')
-        ORDER BY version DESC LIMIT 1
-      `
+      const source = await tx.lessons.findFirst({
+        where: { slug: current.lesson.slug, status: { in: ['published', 'draft'] } },
+        orderBy: { version: 'desc' }
+      })
       if (!source) throw noPublishedVersion()
-      draft = source.status === 'draft' ? { id: source.id } : await createDraftFrom(tx, user, source, ctx)
+      draft =
+        source.status === 'draft' ? { id: source.id } : await createDraftFrom(tx, user, source, ctx)
     }
-    await tx`
-      UPDATE change_requests SET
-        status = ${decision === 'approve' ? 'approved' : 'rejected'},
-        reviewed_by = ${user.id},
-        review_note = ${review_note || null},
-        reviewed_at = now(),
-        metadata = metadata || ${json(draft ? { draft_lesson_id: draft.id } : {})}::jsonb
-      WHERE id = ${id}
-    `
-    await audit(tx, { actor: user, action: `change_request.${decision === 'approve' ? 'approved' : 'rejected'}`, entityType: 'change_request', entityId: id, diff: { draft_lesson_id: draft?.id ?? null }, ctx })
+    await tx.change_requests.update({
+      where: { id },
+      data: {
+        status: decision === 'approve' ? 'approved' : 'rejected',
+        reviewed_by: user.id,
+        review_note: review_note || null,
+        reviewed_at: new Date(),
+        metadata: { ...current.metadata, ...(draft ? { draft_lesson_id: draft.id } : {}) }
+      }
+    })
+    await audit(tx, {
+      actor: user,
+      action: `change_request.${decision === 'approve' ? 'approved' : 'rejected'}`,
+      entityType: 'change_request',
+      entityId: id,
+      diff: { draft_lesson_id: draft?.id ?? null },
+      ctx
+    })
     return getRequest(user, id, tx)
-  })
+  }, SERIAL)
 }

@@ -27,7 +27,13 @@ export function ChartTooltip({ tip }) {
     >
       {tip.rows.map((row) => (
         <div key={row.label} className="flex items-center gap-2">
-          {row.color ? <span className="h-0.5 w-3 rounded-full" style={{ background: row.color }} aria-hidden /> : null}
+          {row.color ? (
+            <span
+              className="h-0.5 w-3 rounded-full"
+              style={{ background: row.color }}
+              aria-hidden
+            />
+          ) : null}
           <span className="text-body-2-semibold text-text-primary">{row.value}</span>
           <span className="text-caption-1-medium text-text-tertiary">{row.label}</span>
         </div>

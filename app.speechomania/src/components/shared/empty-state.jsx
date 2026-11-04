@@ -8,7 +8,9 @@ export function EmptyState({ icon: Icon, title, description, action }) {
       ) : null}
       <div className="flex max-w-sm flex-col gap-0.5">
         <h3 className="text-body-medium text-text-primary">{title}</h3>
-        {description ? <p className="text-body-2-regular text-text-secondary">{description}</p> : null}
+        {description ? (
+          <p className="text-body-2-regular text-text-secondary">{description}</p>
+        ) : null}
       </div>
       {action}
     </div>

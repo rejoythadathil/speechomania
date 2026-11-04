@@ -21,7 +21,7 @@
   overflow: hidden;
   background: #dcefff;
   color: var(--child-ink);
-  font-family: "Lexend", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Lexend', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 

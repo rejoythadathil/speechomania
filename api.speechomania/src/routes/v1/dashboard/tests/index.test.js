@@ -1,7 +1,17 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
-import { sql } from '../../../../../common-service/db/service/index.js'
+import { db } from '../../../../../common-service/db/service/index.js'
 import { STALE_DAYS } from '../constants/index.js'
-import { caseload, rank, reasons } from '../utils/index.js'
+import {
+  caseload,
+  enrolmentSeries,
+  monthKeys,
+  quietDays,
+  rank,
+  reasons,
+  remarkSeries,
+  weekKey,
+  weekKeys
+} from '../utils/index.js'
 import { call, makeChild, makeUser } from '../../../../../test/helpers.js'
 
 let admin, mentor, otherMentor, parent, fresh, stale
@@ -14,11 +24,18 @@ beforeAll(async () => {
   fresh = await makeChild(parent, admin, mentor)
   stale = await makeChild(parent, admin, otherMentor)
   await makeChild(parent, admin, null)
-  await call(mentor, 'POST', `/children/${fresh.id}/remarks`, { body: 'Weekly note', visibility: 'shared' })
-  await sql`UPDATE children SET created_at = now() - interval '30 days' WHERE id = ${stale.id}`
+  await call(mentor, 'POST', `/children/${fresh.id}/remarks`, {
+    body: 'Weekly note',
+    visibility: 'shared'
+  })
+  await db.children.update({
+    where: { id: stale.id },
+    data: { created_at: new Date(Date.now() - 30 * 86400000) }
+  })
 })
 
-const reasonsFor = (body, id) => body.items.find((item) => item.id === id)?.reasons.map((reason) => reason.code) ?? []
+const reasonsFor = (body, id) =>
+  body.items.find((item) => item.id === id)?.reasons.map((reason) => reason.code) ?? []
 
 describe('dashboard', () => {
   test('admin sees who needs follow-up and why', async () => {
@@ -28,8 +45,14 @@ describe('dashboard', () => {
     expect(body.remarks_by_week).toHaveLength(12)
     expect(body.kpis.waiting_for_mentor).toBeGreaterThanOrEqual(1)
     expect(body.follow_up_total).toBeGreaterThanOrEqual(2)
-    expect(body.caseload.find((row) => row.id === mentor.id)).toMatchObject({ recent: 1, overdue: 0 })
-    expect(body.caseload.find((row) => row.id === otherMentor.id)).toMatchObject({ recent: 0, overdue: 1 })
+    expect(body.caseload.find((row) => row.id === mentor.id)).toMatchObject({
+      recent: 1,
+      overdue: 0
+    })
+    expect(body.caseload.find((row) => row.id === otherMentor.id)).toMatchObject({
+      recent: 0,
+      overdue: 1
+    })
   })
 
   test('mentor numbers only count their own children and remarks', async () => {
@@ -64,23 +87,74 @@ describe('dashboard', () => {
 
 describe('follow-up rules', () => {
   test('reasons come from mentor, remarks and lessons', () => {
-    expect(reasons({ mentor_id: null, quiet_days: 0, lessons: 1 })).toEqual([{ code: 'no_mentor', days: null }])
-    expect(reasons({ mentor_id: 'm', quiet_days: STALE_DAYS, last_remark_at: null, lessons: 0 }).map((reason) => reason.code)).toEqual(['never_remarked', 'no_lessons'])
-    expect(reasons({ mentor_id: 'm', quiet_days: STALE_DAYS - 1, last_remark_at: 'x', lessons: 2 })).toEqual([])
+    expect(reasons({ mentor_id: null, quiet_days: 0, lessons: 1 })).toEqual([
+      { code: 'no_mentor', days: null }
+    ])
+    expect(
+      reasons({ mentor_id: 'm', quiet_days: STALE_DAYS, last_remark_at: null, lessons: 0 }).map(
+        (reason) => reason.code
+      )
+    ).toEqual(['never_remarked', 'no_lessons'])
+    expect(
+      reasons({ mentor_id: 'm', quiet_days: STALE_DAYS - 1, last_remark_at: 'x', lessons: 2 })
+    ).toEqual([])
   })
 
   test('no mentor outranks no lessons, which outranks a long silence', () => {
     const noMentor = { reasons: [{ code: 'no_mentor', days: null }] }
     const noLessons = { reasons: [{ code: 'no_lessons', days: null }] }
     const quiet = { reasons: [{ code: 'no_recent_remark', days: 300 }] }
-    expect([quiet, noLessons, noMentor].sort((a, b) => rank(b) - rank(a))).toEqual([noMentor, noLessons, quiet])
+    expect([quiet, noLessons, noMentor].sort((a, b) => rank(b) - rank(a))).toEqual([
+      noMentor,
+      noLessons,
+      quiet
+    ])
   })
 
   test('caseload splits each mentor into recent and overdue', () => {
-    const rows = [{ mentor_id: 'a', quiet_days: 1 }, { mentor_id: 'a', quiet_days: STALE_DAYS }, { mentor_id: 'b', quiet_days: 2 }, { mentor_id: null, quiet_days: 99 }]
-    expect(caseload(rows, [{ id: 'b', full_name: 'Bea' }, { id: 'a', full_name: 'Ann' }])).toEqual([
+    const rows = [
+      { mentor_id: 'a', quiet_days: 1 },
+      { mentor_id: 'a', quiet_days: STALE_DAYS },
+      { mentor_id: 'b', quiet_days: 2 },
+      { mentor_id: null, quiet_days: 99 }
+    ]
+    expect(
+      caseload(rows, [
+        { id: 'b', full_name: 'Bea' },
+        { id: 'a', full_name: 'Ann' }
+      ])
+    ).toEqual([
       { id: 'a', name: 'Ann', recent: 1, overdue: 1 },
       { id: 'b', name: 'Bea', recent: 1, overdue: 0 }
     ])
+  })
+})
+
+describe('series helpers', () => {
+  const now = new Date('2026-03-04T10:00:00Z')
+
+  test('months and weeks end at the current one', () => {
+    expect(monthKeys(now, 3)).toEqual(['2026-01', '2026-02', '2026-03'])
+    expect(weekKeys(now, 2)).toEqual(['2026-02-23', '2026-03-02'])
+    expect(weekKey(new Date('2026-03-08T23:00:00Z'))).toBe('2026-03-02')
+  })
+
+  test('series count into their bucket and ignore the rest', () => {
+    expect(
+      enrolmentSeries(
+        ['2026-02', '2026-03'],
+        [new Date('2026-03-01T00:00:00Z'), new Date('2025-01-01T00:00:00Z')]
+      )
+    ).toEqual([
+      { month: '2026-02', count: 0 },
+      { month: '2026-03', count: 1 }
+    ])
+    expect(
+      remarkSeries(
+        ['2026-03-02'],
+        [{ created_at: new Date('2026-03-03T00:00:00Z'), visibility: 'shared' }]
+      )
+    ).toEqual([{ week: '2026-03-02', shared: 1, internal: 0 }])
+    expect(quietDays(new Date('2026-03-01T10:00:00Z'), now)).toBe(3)
   })
 })

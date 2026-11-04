@@ -5,9 +5,12 @@ import { WorkLayout } from '@/layout/work-layout/work-layout.jsx'
 import { AuditView } from '@/views/admin/audit.jsx'
 import { PeopleView } from '@/views/admin/people.jsx'
 import { LoginView } from '@/views/auth/login.jsx'
+import { AssessmentPlayerView } from '@/views/child/assessment-player.jsx'
 import { LearnHomeView } from '@/views/child/learn-home.jsx'
 import { LearnStartView } from '@/views/child/learn-start.jsx'
 import { LessonPlayerView } from '@/views/child/lesson-player.jsx'
+import { AssessmentDetailView } from '@/views/shared/assessment-detail.jsx'
+import { AssessmentsView } from '@/views/shared/assessments.jsx'
 import { ChangeRequestsView } from '@/views/shared/change-requests.jsx'
 import { ChildDetailView } from '@/views/shared/child-detail.jsx'
 import { ChildrenView } from '@/views/shared/children.jsx'
@@ -20,7 +23,14 @@ import { SettingsView } from '@/views/shared/settings.jsx'
 function RequireAuth() {
   const { status } = useAuth()
   if (status === 'loading') {
-    return <div className="flex min-h-dvh items-center justify-center text-body-regular text-text-secondary" aria-busy="true">Loading…</div>
+    return (
+      <div
+        className="flex min-h-dvh items-center justify-center text-body-regular text-text-secondary"
+        aria-busy="true"
+      >
+        Loading…
+      </div>
+    )
   }
   if (status !== 'signed-in') return <Navigate to="/login" replace />
   return <Outlet />
@@ -41,41 +51,50 @@ export const router = createBrowserRouter([
   { path: '/login', element: <LoginView /> },
   {
     element: <RequireAuth />,
-    children: [{
-      element: <RequireRole roles={['parent']} />,
-      children: [{ path: 'learn', element: <LearnStartView /> }, {
-        path: 'learn/:childId',
-        element: <LearningLayout />,
+    children: [
+      {
+        element: <RequireRole roles={['parent']} />,
         children: [
-          { index: true, element: <LearnHomeView /> },
-          { path: 'lessons/:lessonId', element: <LessonPlayerView /> }
+          { path: 'learn', element: <LearnStartView /> },
+          {
+            path: 'learn/:childId',
+            element: <LearningLayout />,
+            children: [
+              { index: true, element: <LearnHomeView /> },
+              { path: 'lessons/:lessonId', element: <LessonPlayerView /> },
+              { path: 'assessments/:assessmentId', element: <AssessmentPlayerView /> }
+            ]
+          }
         ]
-      }]
-    }, {
-      element: <WorkLayout />,
-      children: [
-        { index: true, element: <Home /> },
-        { path: 'dashboard', element: <DashboardView /> },
-        { path: 'children', element: <ChildrenView /> },
-        { path: 'children/:id', element: <ChildDetailView /> },
-        {
-          element: <RequireRole roles={['admin', 'mentor']} />,
-          children: [
-            { path: 'lessons', element: <LessonsView /> },
-            { path: 'lessons/:id', element: <LessonDetailView /> },
-            { path: 'change-requests', element: <ChangeRequestsView /> },
-            { path: 'settings', element: <SettingsView /> }
-          ]
-        },
-        {
-          element: <RequireRole roles={['admin']} />,
-          children: [
-            { path: 'people/:role', element: <PeopleView /> },
-            { path: 'audit', element: <AuditView /> }
-          ]
-        },
-        { path: '*', element: <NotFoundView /> }
-      ]
-    }]
+      },
+      {
+        element: <WorkLayout />,
+        children: [
+          { index: true, element: <Home /> },
+          { path: 'dashboard', element: <DashboardView /> },
+          { path: 'children', element: <ChildrenView /> },
+          { path: 'children/:id', element: <ChildDetailView /> },
+          { path: 'lessons/:id', element: <LessonDetailView /> },
+          {
+            element: <RequireRole roles={['admin', 'mentor']} />,
+            children: [
+              { path: 'lessons', element: <LessonsView /> },
+              { path: 'assessments', element: <AssessmentsView /> },
+              { path: 'assessments/:id', element: <AssessmentDetailView /> },
+              { path: 'change-requests', element: <ChangeRequestsView /> },
+              { path: 'settings', element: <SettingsView /> }
+            ]
+          },
+          {
+            element: <RequireRole roles={['admin']} />,
+            children: [
+              { path: 'people/:role', element: <PeopleView /> },
+              { path: 'audit', element: <AuditView /> }
+            ]
+          },
+          { path: '*', element: <NotFoundView /> }
+        ]
+      }
+    ]
   }
 ])

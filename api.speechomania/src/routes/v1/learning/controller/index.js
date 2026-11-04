@@ -1,7 +1,8 @@
 import { requestCtx } from '../../../../../common-service/http/utils/index.js'
 import * as service from '../service/index.js'
 
-export const child = async (c) => c.json(await service.getLearner(c.get('user'), c.get('valid').params.id))
+export const child = async (c) =>
+  c.json(await service.getLearner(c.get('user'), c.get('valid').params.id))
 
 export async function shelf(c) {
   const { params, query } = c.get('valid')
@@ -15,7 +16,17 @@ export async function lesson(c) {
 
 export async function start(c) {
   const { params, body } = c.get('valid')
-  return c.json(await service.startAttempt(c.get('user'), params.id, body.lesson_id, requestCtx(c)), 201)
+  return c.json(await service.startAttempt(c.get('user'), params.id, body, requestCtx(c)), 201)
+}
+
+export async function assessments(c) {
+  const { params, query } = c.get('valid')
+  return c.json(await service.listLearnerAssessments(c.get('user'), params.id, query))
+}
+
+export async function assessment(c) {
+  const { params } = c.get('valid')
+  return c.json(await service.getPlayableAssessment(c.get('user'), params.id, params.assessmentId))
 }
 
 export async function progress(c) {

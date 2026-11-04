@@ -19,9 +19,15 @@ export function validate(schemas) {
     const valid = {}
     for (const part of ['params', 'query', 'body']) {
       if (!schemas[part]) continue
-      const { value, error } = schemas[part].validate(await readPart(c, part), { abortEarly: false, convert: true })
+      const { value, error } = schemas[part].validate(await readPart(c, part), {
+        abortEarly: false,
+        convert: true
+      })
       if (error) {
-        const details = error.details.map((detail) => ({ field: detail.path.join('.'), message: detail.message.replaceAll('"', '') }))
+        const details = error.details.map((detail) => ({
+          field: detail.path.join('.'),
+          message: detail.message.replaceAll('"', '')
+        }))
         throw invalidFields(details)
       }
       valid[part] = value

@@ -10,7 +10,12 @@ function Sheet({ title, onClose, children }) {
     return () => window.removeEventListener('keydown', close)
   }, [onClose])
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="child-sheet-title">
+    <div
+      className={styles.overlay}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="child-sheet-title"
+    >
       <div className={cx(styles.card, styles.sheet)}>
         <h2 id="child-sheet-title">{title}</h2>
         {children}
@@ -64,14 +69,30 @@ function PinPad({ onUnlock }) {
     <>
       <p>Type your 4-digit PIN.</p>
       <div className={styles.pinDots} aria-label={`${pin.length} of 4 digits`}>
-        {[0, 1, 2, 3].map((index) => <span key={index} className={cx(styles.pinDot, index < pin.length && styles.pinDotOn)} />)}
+        {[0, 1, 2, 3].map((index) => (
+          <span key={index} className={cx(styles.pinDot, index < pin.length && styles.pinDotOn)} />
+        ))}
       </div>
       <div className={styles.pinPad}>
-        {DIGITS.map((key, index) => (key ? (
-          <button key={key} type="button" className={styles.digit} onClick={() => press(key)} aria-label={key === '⌫' ? 'Delete' : key}>{key}</button>
-        ) : <span key={`gap-${index}`} />))}
+        {DIGITS.map((key, index) =>
+          key ? (
+            <button
+              key={key}
+              type="button"
+              className={styles.digit}
+              onClick={() => press(key)}
+              aria-label={key === '⌫' ? 'Delete' : key}
+            >
+              {key}
+            </button>
+          ) : (
+            <span key={`gap-${index}`} />
+          )
+        )}
       </div>
-      <span className={styles.error} role="alert">{error}</span>
+      <span className={styles.error} role="alert">
+        {error}
+      </span>
     </>
   )
 }
@@ -111,7 +132,9 @@ export function GrownUpSheet({ hasPin, onUnlock, onClose }) {
   return (
     <Sheet title="Leaving the lesson?" onClose={onClose}>
       {hasPin ? <PinPad onUnlock={onUnlock} /> : <HoldButton onUnlock={onUnlock} />}
-      <button type="button" className={styles.pill} onClick={onClose}>Keep learning</button>
+      <button type="button" className={styles.pill} onClick={onClose}>
+        Keep learning
+      </button>
     </Sheet>
   )
 }

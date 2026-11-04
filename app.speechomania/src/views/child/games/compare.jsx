@@ -15,23 +15,33 @@ export function CompareGame(props) {
   return (
     <div className={styles.stage}>
       <div className={styles.column}>
-        <img className={cx(styles.scale, picked && (side === 0 ? styles.tipLeft : styles.tipRight))} src={ART.scale} alt="" draggable="false" />
+        <img
+          className={cx(styles.scale, picked && (side === 0 ? styles.tipLeft : styles.tipRight))}
+          src={ART.scale}
+          alt=""
+          draggable="false"
+        />
         <div className={styles.versus}>
           {step.choices.map((choice, index) => (
             <button
               key={choice}
               type="button"
               aria-label={`The ${choice}`}
-              className={cx(styles.versusCard, picked === choice && styles.right, shaking === choice && styles.shake, round.hint && round.open && choice === step.answer && styles.hint)}
+              className={cx(
+                styles.versusCard,
+                picked === choice && styles.right,
+                shaking === choice && styles.shake,
+                round.hint && round.open && choice === step.answer && styles.hint
+              )}
               onAnimationEnd={stop}
               onClick={(event) => {
                 if (!round.open) return
                 if (choice !== step.answer) {
                   shake(choice)
-                  return round.wrong()
+                  return round.wrong(choice)
                 }
                 setPicked(choice)
-                round.right(event.currentTarget)
+                round.right(event.currentTarget, choice)
               }}
             >
               <Art name={step.art[index]} className={styles.versusArt} />

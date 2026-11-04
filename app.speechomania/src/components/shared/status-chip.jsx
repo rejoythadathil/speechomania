@@ -17,9 +17,16 @@ const COLORS = {
   internal: 'purple',
   admin: 'purple',
   mentor: 'cyan',
-  parent: 'orange'
+  parent: 'orange',
+  not_started: 'neutral',
+  in_progress: 'yellow',
+  completed: 'lime'
 }
 
 export function StatusChip({ value }) {
-  return <Chip variant="caption" color={COLORS[value] ?? 'neutral'}>{titleCase(value)}</Chip>
+  return (
+    <Chip variant="caption" color={COLORS[value] ?? 'neutral'}>
+      {titleCase(value)}
+    </Chip>
+  )
 }

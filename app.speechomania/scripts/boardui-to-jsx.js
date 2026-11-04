@@ -16,10 +16,17 @@ function walk(dir, files = []) {
 let converted = 0
 for (const file of roots.flatMap((root) => walk(root))) {
   if (/\.tsx?$/.test(file)) {
-    const output = ts.transpileModule(readFileSync(file, 'utf8'), {
-      fileName: file,
-      compilerOptions: { target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.Preserve, removeComments: true }
-    }).outputText.replace(/^"use client";\n/m, '')
+    const output = ts
+      .transpileModule(readFileSync(file, 'utf8'), {
+        fileName: file,
+        compilerOptions: {
+          target: ts.ScriptTarget.ESNext,
+          module: ts.ModuleKind.ESNext,
+          jsx: ts.JsxEmit.Preserve,
+          removeComments: true
+        }
+      })
+      .outputText.replace(/^"use client";\n/m, '')
     writeFileSync(file.replace(/\.tsx$/, '.jsx').replace(/\.ts$/, '.js'), output)
     unlinkSync(file)
     converted += 1

@@ -5,15 +5,16 @@ on:
     branches: [main]
     paths: ['app.speechomania/**', '.github/workflows/app-*.yml']
 
-defaults:
-  run:
-    working-directory: app.speechomania
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  deploy:
-    if: vars.DEPLOY_ENABLED == 'true'
+  image:
     runs-on: ubuntu-24.04
-    environment: production
+    defaults:
+      run:
+        working-directory: app.speechomania
     steps:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
@@ -22,15 +23,20 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run build
       - run: tar -czf app-dist.tar.gz -C dist .
-      - name: Upload and switch the release on the prod VM
-        env:
-          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
-          SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
-          SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
-        run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          RELEASE=$(git rev-parse --short=12 HEAD)
-          scp app-dist.tar.gz "deploy@$SSH_HOST:/tmp/app-$RELEASE.tar.gz"
-          ssh "deploy@$SSH_HOST" "sudo sh /opt/speechomania/deploy.speechomania/scripts/deploy-app.sh /tmp/app-$RELEASE.tar.gz $RELEASE && rm /tmp/app-$RELEASE.tar.gz"
+      - id: meta
+        run: echo "tag=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
+      - run: printf 'FROM scratch\nCOPY app-dist.tar.gz /app-dist.tar.gz\n' > Dockerfile.release
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: app.speechomania
+          file: app.speechomania/Dockerfile.release
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/speechomania-app:${{ steps.meta.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/speechomania-app:prod

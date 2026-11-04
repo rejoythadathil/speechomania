@@ -6,4 +6,5 @@ export const chooseActive = (label) => new HttpError(400, `Choose an active ${la
 
 export const chooseParent = () => new HttpError(400, 'Choose the parent for this child')
 
-export const lessonsNotPublished = (slugs) => new HttpError(400, `These lessons are not published: ${slugs.join(', ')}`)
+export const lessonsNotPublished = (slugs) =>
+  new HttpError(400, `These lessons are not published: ${slugs.join(', ')}`)

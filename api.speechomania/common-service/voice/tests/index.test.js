@@ -30,7 +30,10 @@ describe('voice utils', () => {
   })
 
   test('every spoken line of a lesson is collected', () => {
-    const content = { lines: { intro: { text: 'a' } }, steps: [{ text: 'b', praise: { text: 'c' }, teach: { text: 'd' } }, { text: 'e' }] }
+    const content = {
+      lines: { intro: { text: 'a' } },
+      steps: [{ text: 'b', praise: { text: 'c' }, teach: { text: 'd' } }, { text: 'e' }]
+    }
     expect(lessonLines(content).map((line) => line.text)).toEqual(['a', 'b', 'c', 'd', 'e'])
   })
 })

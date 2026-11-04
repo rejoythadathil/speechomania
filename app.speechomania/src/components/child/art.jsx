@@ -1,15 +1,21 @@
-const files = import.meta.glob('../../assets/openmoji/*.svg', { eager: true, query: '?url', import: 'default' })
+const files = import.meta.glob('../../assets/openmoji/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default'
+})
 
-export const ART = Object.fromEntries(Object.entries(files).map(([path, url]) => [path.split('/').pop().replace('.svg', ''), url]))
+export const ART = Object.fromEntries(
+  Object.entries(files).map(([path, url]) => [path.split('/').pop().replace('.svg', ''), url])
+)
 
 export const GAME_ART = {
   story: ['book'],
   pick: ['lion', 'snake'],
   shark: ['shark', 'fish'],
-  balloons: ['balloon', 'party'],
+  balloons: ['balloon', 'smiling'],
   bubbles: ['bubbles', 'octopus'],
-  match: ['sparkles', 'chick'],
-  squish: ['clamp', 'turtle'],
+  match: ['cards'],
+  squish: ['clamp'],
   compare: ['scale', 'elephant'],
   place: ['box', 'cat'],
   train: ['engine', 'wagon'],
@@ -33,10 +39,23 @@ export const ACTION_ART = {
 export const FISH = ['fish', 'tropical-fish', 'blowfish']
 
 export function Art({ name, className, alt = '' }) {
-  return ART[name] ? <img className={className} src={ART[name]} alt={alt} data-art={name} draggable="false" /> : null
+  return ART[name] ? (
+    <img className={className} src={ART[name]} alt={alt} data-art={name} draggable="false" />
+  ) : null
 }
 
-export const AVATARS = ['lion', 'rabbit', 'panda', 'fox', 'koala', 'penguin', 'owl', 'frog', 'bear', 'unicorn']
+export const AVATARS = [
+  'lion',
+  'rabbit',
+  'panda',
+  'fox',
+  'koala',
+  'penguin',
+  'owl',
+  'frog',
+  'bear',
+  'unicorn'
+]
 
 export function avatarFor(id) {
   let sum = 0
@@ -48,7 +67,9 @@ export function StepArt({ step, className, artClassName }) {
   if (step.art?.length) {
     return (
       <span className={className} data-count={step.art.length}>
-        {step.art.map((name, index) => <Art key={`${name}-${index}`} name={name} className={artClassName} />)}
+        {step.art.map((name, index) => (
+          <Art key={`${name}-${index}`} name={name} className={artClassName} />
+        ))}
       </span>
     )
   }

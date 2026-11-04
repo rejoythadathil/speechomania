@@ -29,38 +29,63 @@ export function LearningLayout() {
   const { stop } = voice
 
   const closeSheet = useCallback(() => setSheet(null), [])
-  const leave = useCallback(async (pin) => {
-    await api(`/learning/children/${childId}/exit`, { method: 'POST', body: { pin } })
-    stop()
-    navigate(`/children/${childId}`)
-  }, [childId, navigate, stop])
-
-  const bar = useMemo(() => ({
-    muted,
-    onMute: () => setMuted((current) => !current),
-    onBreak: () => {
+  const leave = useCallback(
+    async (pin) => {
+      await api(`/learning/children/${childId}/exit`, { method: 'POST', body: { pin } })
       stop()
-      setSheet('break')
+      navigate(`/children/${childId}`)
     },
-    onGrownUp: () => setSheet('grown-up')
-  }), [muted, stop])
+    [childId, navigate, stop]
+  )
+
+  const bar = useMemo(
+    () => ({
+      muted,
+      onMute: () => setMuted((current) => !current),
+      onBreak: () => {
+        stop()
+        setSheet('break')
+      },
+      onGrownUp: () => setSheet('grown-up')
+    }),
+    [muted, stop]
+  )
 
   return (
     <div className={styles.root} data-motion={motion} data-colour={sensory.colour ?? 'normal'}>
       {learner.data ? (
-        <Outlet context={{ learner: learner.data, reloadLearner: learner.reload, voice, bar, motion, celebrate }} />
+        <Outlet
+          context={{
+            learner: learner.data,
+            reloadLearner: learner.reload,
+            voice,
+            bar,
+            motion,
+            celebrate
+          }}
+        />
       ) : (
         <div className={styles.state} role={learner.error ? 'alert' : 'status'}>
           {learner.error ? (
             <>
-              <p>{learner.error.status === 404 ? 'This learner isn’t available.' : learner.error.message}</p>
-              <button type="button" className={styles.back} onClick={() => navigate('/children')}>Back to my children</button>
+              <p>
+                {learner.error.status === 404
+                  ? 'This learner isn’t available.'
+                  : learner.error.message}
+              </p>
+              <button type="button" className={styles.back} onClick={() => navigate('/children')}>
+                Back to my children
+              </button>
             </>
-          ) : <p>Getting ready…</p>}
+          ) : (
+            <p>Getting ready…</p>
+          )}
         </div>
       )}
       {sheet === 'break' ? <BreakSheet onClose={closeSheet} /> : null}
-      {sheet === 'grown-up' ? <GrownUpSheet hasPin={learner.data?.has_pin} onUnlock={leave} onClose={closeSheet} /> : null}
+      {sheet === 'grown-up' ? (
+        <GrownUpSheet hasPin={learner.data?.has_pin} onUnlock={leave} onClose={closeSheet} />
+      ) : null}
     </div>
   )
 }

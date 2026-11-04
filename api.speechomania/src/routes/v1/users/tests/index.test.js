@@ -16,27 +16,47 @@ describe('users', () => {
 
   test('only admins can list or create users', async () => {
     expect((await call(mentor, 'GET', '/users')).status).toBe(403)
-    expect((await call(parent, 'POST', '/users', { email: 'x@test.speechomania.local', full_name: 'X', role: 'admin' })).status).toBe(403)
+    expect(
+      (
+        await call(parent, 'POST', '/users', {
+          email: 'x@test.speechomania.local',
+          full_name: 'X',
+          role: 'admin'
+        })
+      ).status
+    ).toBe(403)
     expect((await call(admin, 'GET', '/users?role=mentor')).status).toBe(200)
   })
 
   test('admin invites a mentor and gets an invite link', async () => {
     const email = `invite.${crypto.randomUUID().slice(0, 8)}@test.speechomania.local`
-    const created = await call(admin, 'POST', '/users', { email, full_name: 'New Mentor', role: 'mentor' })
+    const created = await call(admin, 'POST', '/users', {
+      email,
+      full_name: 'New Mentor',
+      role: 'mentor'
+    })
     expect(created.status).toBe(201)
     expect(created.body.user.status).toBe('invited')
     expect(created.body.invite_link).toContain('oobCode')
-    expect((await call(admin, 'POST', '/users', { email, full_name: 'Again', role: 'mentor' })).status).toBe(409)
+    expect(
+      (await call(admin, 'POST', '/users', { email, full_name: 'Again', role: 'mentor' })).status
+    ).toBe(409)
   })
 
   test('invalid input lists the fields', async () => {
     const response = await call(admin, 'POST', '/users', { email: 'not-an-email', role: 'owner' })
     expect(response.status).toBe(400)
-    expect(response.body.error.details.map((d) => d.field).sort()).toEqual(['email', 'full_name', 'role'])
+    expect(response.body.error.details.map((d) => d.field).sort()).toEqual([
+      'email',
+      'full_name',
+      'role'
+    ])
   })
 
   test('admin cannot disable or delete their own account', async () => {
-    expect((await call(admin, 'PATCH', `/users/${admin.id}`, { status: 'disabled' })).status).toBe(400)
+    expect((await call(admin, 'PATCH', `/users/${admin.id}`, { status: 'disabled' })).status).toBe(
+      400
+    )
     expect((await call(admin, 'DELETE', `/users/${admin.id}`)).status).toBe(400)
   })
 

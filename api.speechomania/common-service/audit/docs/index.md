@@ -1,6 +1,6 @@
 # audit
 
-`audit(db, { actor, action, entityType, entityId, diff, ctx })` writes one row to `audit_logs`. Call it inside the same transaction as the change (`tx`), so the change and its record commit together.
+`audit(tx, { actor, action, entityType, entityId, diff, ctx })` writes one row to `audit_logs` with Prisma. Call it inside the same transaction as the change (`tx`), so the change and its record commit together.
 
 - `action` is `<entity>.<verb>`, for example `child.updated`, `lesson.published`, `attempt.completed`.
 - `diff` holds field names or from/to values, never secrets (the learning PIN is recorded as the field name `pin` only).
