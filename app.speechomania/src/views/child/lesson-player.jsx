@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router'
-import { GAME_ART } from '@/components/child/art.jsx'
+import { GAME_ART, GAME_SCENES } from '@/components/child/art.jsx'
 import { NextIcon } from '@/components/child/child-icons.jsx'
 import { TopBar } from '@/components/child/chrome.jsx'
 import { sceneFor } from '@/components/child/scenes.js'
@@ -19,6 +19,7 @@ export function lessonCover(lesson, lines) {
   return {
     player,
     art: GAME_ART[player] ?? GAME_ART.story,
+    scene: GAME_SCENES[player],
     intro: lines.intro?.text,
     how: sceneFor(player).how
   }
