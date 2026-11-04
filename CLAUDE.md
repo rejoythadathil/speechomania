@@ -11,7 +11,7 @@ One repo (github.com/rejoythadathil/speechomania) with three apps: `api.speechom
 - Need a new number or chart? Add the query to the API service and a test for it. Never compute fake values or fill gaps in the UI.
 - Empty data shows an empty state. Never a fake fallback.
 - Allowed in the UI: copy (labels, headings, help text) and option lists that mirror database values, for example status filters matching a `CHECK` constraint.
-- The seed runs locally only. It must never run against prod and never contain real children's or parents' data.
+- The seed runs locally, and never contains real children's or parents' data. On prod only its demo mode may run (`bun seeds/dev.js --demo`): demo people get no sign-in, an existing admin owns the lessons and assessments, and every demo row is tagged `metadata.demo` so `seeds/demo-remove.js` deletes it all (lessons are kept). Remove the demo before real families join.
 
 ## Fixed rules
 - JavaScript only, no TypeScript.

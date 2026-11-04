@@ -8,20 +8,37 @@ import {
   withDefaults
 } from '../src/routes/v1/assessments/utils/index.js'
 
-if (config.APP_ENV !== 'local') {
-  console.error('Seeding is only allowed with APP_ENV=local')
+const DEMO = process.argv.includes('--demo')
+if (config.APP_ENV !== 'local' && !DEMO) {
+  console.error('Seeding is only allowed with APP_ENV=local, or with --demo')
   process.exit(1)
 }
+const tag = DEMO ? { demo: true } : {}
 
 const PASSWORD = 'speechomania-local-123'
 const auth = getAuth(getApps()[0] ?? initializeApp({ projectId: config.FIREBASE_PROJECT_ID }))
 
-if (await db.users.count()) {
-  console.log('Database already has users; skipping seed. Reset with docker compose down -v.')
+const seeded = DEMO
+  ? await db.users.count({ where: { metadata: { path: ['demo'], equals: true } } })
+  : await db.users.count()
+if (seeded) {
+  console.log('Database already has seed users; skipping seed.')
   process.exit(0)
+}
+const realAdmin = DEMO
+  ? await db.users.findFirst({
+      where: { role: 'admin', deleted_at: null },
+      orderBy: { created_at: 'asc' },
+      select: { id: true }
+    })
+  : null
+if (DEMO && !realAdmin) {
+  console.error('--demo needs an existing admin to own lessons and assessments')
+  process.exit(1)
 }
 
 async function firebaseUser(email, fullName) {
+  if (DEMO) return `demo:${email}`
   try {
     return (await auth.createUser({ email, password: PASSWORD, displayName: fullName })).uid
   } catch (error) {
@@ -41,7 +58,7 @@ const pick = (list) => list[Math.floor(random() * list.length)]
 const ago = (days, hours = 0) => new Date(Date.now() - (days * 24 + hours) * 3600000)
 
 const staff = [
-  ['admin@speechomania.local', 'Anita Menon', 'admin'],
+  ...(DEMO ? [] : [['admin@speechomania.local', 'Anita Menon', 'admin']]),
   ['mentor.rahul@speechomania.local', 'Rahul Nair', 'mentor'],
   ['mentor.fathima@speechomania.local', 'Fathima Rasheed', 'mentor'],
   ['mentor.arjun@speechomania.local', 'Arjun Pillai', 'mentor'],
@@ -90,6 +107,7 @@ for (const [email, fullName, role] of people) {
       full_name: fullName,
       role,
       status: 'active',
+      metadata: tag,
       created_at: ago(400)
     },
     select: { id: true }
@@ -97,7 +115,7 @@ for (const [email, fullName, role] of people) {
   ids[email] = id
 }
 
-const admin = ids['admin@speechomania.local']
+const admin = DEMO ? realAdmin.id : ids['admin@speechomania.local']
 const mentors = staff.filter(([, , role]) => role === 'mentor').map(([email]) => ids[email])
 const parents = people.filter(([, , role]) => role === 'parent').map(([email]) => ids[email])
 
@@ -562,6 +580,13 @@ const lessons = [
 const games = lessons.filter(([, , , status]) => status === 'published').map(([slug]) => slug)
 const lessonIds = {}
 for (const [slug, title, content, status] of lessons) {
+  const existing = DEMO
+    ? await db.lessons.findFirst({ where: { slug }, select: { id: true } })
+    : null
+  if (existing) {
+    lessonIds[slug] = existing.id
+    continue
+  }
   const published = status === 'published'
   const { id } = await db.lessons.create({
     data: {
@@ -646,6 +671,7 @@ for (const [index, name] of childNames.entries()) {
         index < 2 ? games : index % 11 === 5 ? [] : games.slice(0, 1 + Math.floor(random() * 4)),
       consent_version: 'v1',
       consent_at: ago(daysAgo),
+      metadata: tag,
       created_at: ago(daysAgo)
     },
     select: { id: true }
@@ -678,6 +704,7 @@ for (const [index, child] of withMentor.entries()) {
         body: pick(notes),
         visibility: random() < 0.55 ? 'shared' : 'internal',
         seen_at: daysAgo > 2 ? new Date() : null,
+        metadata: tag,
         created_at: ago(daysAgo, Math.floor(random() * 8))
       }
     })
@@ -704,6 +731,7 @@ for (let day = 0; day < 182; day += 1) {
         action: pick(actions),
         entity_type: 'child',
         entity_id: child.id,
+        metadata: tag,
         created_at: ago(day, Math.floor(random() * 9))
       }
     })
@@ -744,6 +772,7 @@ for (const [slug, mentor, reason, summary, status] of requests) {
       status,
       reviewed_by: pending ? null : admin,
       reviewed_at: pending ? null : ago(3),
+      metadata: tag,
       created_at: ago(6)
     }
   })
@@ -821,6 +850,7 @@ for (const [order, plan] of assessmentPlans.entries()) {
       created_by: admin,
       published_by: published ? admin : null,
       published_at: published ? ago(40 - order * 10) : null,
+      metadata: tag,
       created_at: ago(45 - order * 10)
     },
     select: { id: true }
@@ -878,7 +908,7 @@ for (const [order, plan] of assessmentPlans.entries()) {
         steps_total: items.length,
         steps_completed: finished ? items.length : Math.floor(items.length / 2),
         events: finished ? events : events.slice(0, Math.floor(items.length / 2)),
-        metadata: finished ? { result: scoreAttempt(events, items, settings) } : {},
+        metadata: finished ? { ...tag, result: scoreAttempt(events, items, settings) } : tag,
         started_at: ago(daysAgo, 1),
         completed_at: finished ? ago(daysAgo) : null
       }
@@ -890,5 +920,9 @@ for (const [order, plan] of assessmentPlans.entries()) {
 console.log(
   `Seeded ${people.length} users, ${childIds.length} children, ${lessons.length} lessons, ${assessmentCount} assessments with ${attemptCount} attempts, 12 weeks of remarks and 26 weeks of activity.`
 )
-console.log(`All seed accounts use the password: ${PASSWORD}`)
+console.log(
+  DEMO
+    ? 'Demo people have no sign-in. Remove everything tagged demo with bun seeds/demo-remove.js.'
+    : `All seed accounts use the password: ${PASSWORD}`
+)
 await db.$disconnect()
