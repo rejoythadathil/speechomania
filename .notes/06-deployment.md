@@ -64,4 +64,4 @@ Prod runs on one DigitalOcean Droplet (`speechomania-prod`, BLR1, 2 vCPU, 2 GB, 
 - `scripts/harden.sh <admin> <admin.pub>` runs first: a named admin with sudo, SSH keys only, no root login, fail2ban on SSH, automatic security updates.
 - Every merge to `main` deploys: CI pushes `speechomania-api:prod` and `speechomania-app:prod` to GHCR and the VM's `auto-deploy.sh` cron (every 2 minutes) pulls and deploys whichever changed. No production environment and no SSH secrets in GitHub.
 - Dozzle and Beszel are not public: `ssh -L 8080:127.0.0.1:8080 -L 8083:127.0.0.1:8083 speechomania`.
-- Media goes to Cloudflare R2 (S3 API) through the `S3_*` API settings. Off-site database backups to R2 come later.
+- Media is stored on the Droplet in RustFS (`storage/` stack, S3 API on `127.0.0.1:9000`, bucket `MEDIA_BUCKET`). nginx serves `/<bucket>/` on the same host, so the API's signed URLs (`S3_ENDPOINT=https://<domain>`) work in the browser. The bucket stays private; only signed URLs read it. Media and database backups off the box come later.

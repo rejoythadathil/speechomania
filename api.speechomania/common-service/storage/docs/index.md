@@ -1,6 +1,6 @@
 # storage
 
-The private media bucket (`S3_MEDIA_BUCKET`) through Bun's S3 client. Locally it is RustFS on `S3_ENDPOINT`; in prod an S3 bucket behind a CDN.
+The private media bucket (`S3_MEDIA_BUCKET`) through Bun's S3 client. Locally it is RustFS on `S3_ENDPOINT`; in prod RustFS on the same VM, reached through nginx at `https://<domain>/<bucket>/`.
 
 | File | Exports |
 |---|---|

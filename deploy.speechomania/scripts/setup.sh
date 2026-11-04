@@ -31,6 +31,8 @@ secret() { openssl rand -hex 24; }
 sed -e "s/^PG_ADMIN_PASSWORD=$/PG_ADMIN_PASSWORD=$(secret)/" \
     -e "s/^PG_APP_PASSWORD=$/PG_APP_PASSWORD=$(secret)/" \
     -e "s/^VALKEY_PASSWORD=$/VALKEY_PASSWORD=$(secret)/" \
+    -e "s/^STORAGE_ACCESS_KEY=$/STORAGE_ACCESS_KEY=$(openssl rand -hex 10)/" \
+    -e "s/^STORAGE_SECRET_KEY=$/STORAGE_SECRET_KEY=$(secret)/" \
     -e "s/^BACKUP_ENCRYPTION_PASSPHRASE=$/BACKUP_ENCRYPTION_PASSPHRASE=$(secret)/" \
     "$DEPLOY_DIR/.env.example" > "$ENV_FILE"
 chmod 600 "$ENV_FILE"

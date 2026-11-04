@@ -1,0 +1,23 @@
+name: speechomania-storage
+
+services:
+  rustfs:
+    image: rustfs/rustfs:1.0.3
+    container_name: speechomania-storage
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${STORAGE_SECRET_KEY}
+      RUSTFS_CONSOLE_ENABLE: 'false'
+    ports:
+      - '127.0.0.1:${STORAGE_HOST_PORT}:9000'
+    volumes:
+      - storage-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '3'
+
+volumes:
+  storage-data:
