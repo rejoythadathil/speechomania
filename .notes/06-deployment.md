@@ -73,3 +73,9 @@ sudo docker compose run --rm --no-deps -T -v $PWD/seeds:/app/seeds:ro api-1 bun 
 sudo docker compose run --rm --no-deps -T -v $PWD/seeds:/app/seeds:ro api-1 sh -c 'DATABASE_URL=$DATABASE_OWNER_URL bun seeds/demo-remove.js'
 ```
 Removal runs as the database owner because the app role cannot delete audit entries.
+
+**Lesson audio on prod.** Audio is stored by a hash of the text and voice (`audio/<hash>.mp3` plus `.json` word timings), so clips recorded locally can be reused on prod at no ElevenLabs cost:
+1. Export the local bucket's `audio/` folder (not `lessons/`, which holds old photos) and `aws s3 sync` it into the prod bucket on the server.
+2. On the server: `sudo docker compose run --rm --no-deps -T -e ELEVENLABS_API_KEY=reuse-only api-1 bun scripts/lesson-audio.js <slug>`. The placeholder key makes the run fail instead of paying if a clip is missing. It creates a draft with the audio attached.
+3. Publish the draft (Lessons → Publish, or `publishLesson`). Assignments are by slug, so children keep their lessons and progress.
+Done for all 13 lessons on 2026-11-04 (v2 on prod).

@@ -4,9 +4,22 @@ const files = import.meta.glob('../../assets/openmoji/*.svg', {
   import: 'default'
 })
 
-export const ART = Object.fromEntries(
-  Object.entries(files).map(([path, url]) => [path.split('/').pop().replace('.svg', ''), url])
-)
+const spriteFiles = import.meta.glob('../../assets/sprites/*.webp', {
+  eager: true,
+  query: '?url',
+  import: 'default'
+})
+
+const byName = (found) =>
+  Object.entries(found).map(([path, url]) => [
+    path
+      .split('/')
+      .pop()
+      .replace(/\.\w+$/, ''),
+    url
+  ])
+
+export const ART = Object.fromEntries([...byName(files), ...byName(spriteFiles)])
 
 const sceneFiles = import.meta.glob('../../assets/scenes/*.webp', {
   eager: true,
