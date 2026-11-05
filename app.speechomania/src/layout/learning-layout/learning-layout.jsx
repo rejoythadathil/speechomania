@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router'
-import { BreakSheet, GrownUpSheet } from '@/components/child/sheets.jsx'
+import { BreakSheet, GrownUpSheet, NudgeSheet, RestSheet } from '@/components/child/sheets.jsx'
 import { useCelebrate } from '@/components/child/use-celebrate.js'
+import { useScreenTime } from '@/components/child/use-screen-time.js'
 import { useVoice } from '@/components/child/use-voice.js'
 import { useResource } from '@/hooks/use-resource.js'
 import { api } from '@/services/api.js'
@@ -27,6 +28,12 @@ export function LearningLayout() {
   const voice = useVoice({ sound: sensory.sound, muted })
   const celebrate = useCelebrate({ motion, sound: sensory.sound, muted })
   const { stop } = voice
+  const time = useScreenTime(childId)
+  const interrupted = time.resting || time.nudge
+
+  useEffect(() => {
+    if (interrupted) stop()
+  }, [interrupted, stop])
 
   const closeSheet = useCallback(() => setSheet(null), [])
   const leave = useCallback(
@@ -83,6 +90,18 @@ export function LearningLayout() {
         </div>
       )}
       {sheet === 'break' ? <BreakSheet onClose={closeSheet} /> : null}
+      {time.resting && sheet !== 'grown-up' ? (
+        <RestSheet left={time.restLeft} onGrownUp={() => setSheet('grown-up')} />
+      ) : null}
+      {time.nudge && !sheet ? (
+        <NudgeSheet
+          onKeepPlaying={time.keepPlaying}
+          onStop={() => {
+            time.keepPlaying()
+            setSheet('grown-up')
+          }}
+        />
+      ) : null}
       {sheet === 'grown-up' ? (
         <GrownUpSheet hasPin={learner.data?.has_pin} onUnlock={leave} onClose={closeSheet} />
       ) : null}

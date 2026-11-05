@@ -40,6 +40,46 @@ export function BreakSheet({ onClose }) {
   )
 }
 
+export function NudgeSheet({ onKeepPlaying, onStop }) {
+  return (
+    <Sheet title="Time for a rest?" onClose={onKeepPlaying}>
+      <p>You have played for a while. Rest your eyes, or play a little more.</p>
+      <span className={styles.sheetActions}>
+        <button type="button" className={styles.pill} onClick={onStop}>
+          Stop for now
+        </button>
+        <button type="button" className={styles.go} onClick={onKeepPlaying} autoFocus>
+          Keep playing
+          <NextIcon size={26} />
+        </button>
+      </span>
+    </Sheet>
+  )
+}
+
+const clock = (ms) => {
+  const seconds = Math.ceil(ms / 1000)
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+}
+
+export function RestSheet({ left, onGrownUp }) {
+  return (
+    <Sheet title="Rest time" onClose={() => null}>
+      <div className={styles.breath} aria-hidden="true">
+        <span className={styles.orb} />
+        <b className={styles.breathWord} />
+      </div>
+      <p>You played for an hour. Let’s rest our eyes and move our body.</p>
+      <p className={styles.restClock} role="timer" aria-live="off">
+        Back in {clock(left)}
+      </p>
+      <button type="button" className={styles.pill} onClick={onGrownUp}>
+        Parent
+      </button>
+    </Sheet>
+  )
+}
+
 const DIGITS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫']
 
 function PinPad({ onUnlock }) {
