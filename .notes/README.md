@@ -2,11 +2,12 @@
 
 The plan and runbooks for the Speechomania autism learning platform. The codebase has zero comments, so this folder is where decisions, flows and procedures live.
 
-## Built so far (2026-10-25)
-- **Foundation:** one repo, github.com/rejoythadathil/speechomania, holding `api.speechomania`, `app.speechomania` and `deploy.speechomania`, with a root Git hook and CI workflows.
-- **Docker:** local stack (Postgres 18, Valkey, RustFS, Firebase Auth Emulator) and the prod layout (database with pgBackRest, PgBouncer, Valkey, monitoring, nginx reverse proxy and load balancer, backup and deploy scripts).
-- **Role-based access with full create, read, update and delete:** people, children, lessons with versions, remarks, change requests, audit log. Backend and frontend, with 25 API integration tests.
-- **Not built yet:** child mode, audio and report workers, media uploads, invite emails. See [10-folder-structure.md](10-folder-structure.md#not-built-yet-next-phases).
+## Built so far (2026-11-05)
+- **Foundation:** one repo, github.com/rejoythadathil/speechomania, holding `api.speechomania`, `app.speechomania` and `deploy.speechomania`, with a root Git hook and CI and release workflows.
+- **Work views (admin, mentor, parent):** people, children, lessons with versions, remarks, change requests, assessments, dashboards, global search and the audit log, all role-scoped and paginated.
+- **Child mode:** 12 games with recorded voice and captions, check-ins (assessments), stars and badges, per-child sensory settings, and generated scenes and sprites.
+- **Prod:** live at https://speechomania.deadendengineers.co.in on one DigitalOcean Droplet. Every merge to `main` deploys, and a tagged demo seed is in place for client testing ([06-deployment.md](06-deployment.md)).
+- **Not built yet:** off-box backups for the database and media, audio and report workers, media uploads, invite emails. See [10-folder-structure.md](10-folder-structure.md#not-built-yet-next-phases).
 
 Live diagrams of roles, schema, flows and infra: https://claude.ai/artifact/D8tf1JVd6dCtNDvGS3ioGi
 
