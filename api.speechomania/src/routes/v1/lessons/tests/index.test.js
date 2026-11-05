@@ -26,6 +26,17 @@ describe('lessons', () => {
     expect((await call(admin, 'POST', `/lessons/${draft.body.id}/publish`)).status).toBe(400)
   })
 
+  test('a lesson needs at least 15 activities to publish', async () => {
+    const draft = await call(admin, 'POST', '/lessons', {
+      slug: `short-${crypto.randomUUID().slice(0, 8)}`,
+      title: 'Short',
+      content: { steps: Array.from({ length: 14 }, (_, index) => ({ text: `Page ${index}` })) }
+    })
+    const refused = await call(admin, 'POST', `/lessons/${draft.body.id}/publish`)
+    expect(refused.status).toBe(400)
+    expect(refused.body.error.message).toContain('at least 15 activities')
+  })
+
   test('publishing a new version supersedes the old one', async () => {
     const v1 = await makePublishedLesson(admin)
     expect(
@@ -79,7 +90,7 @@ describe('lessons', () => {
   test('the list says which game each lesson is, and parents only see assigned lessons', async () => {
     const lesson = await makePublishedLesson(admin)
     const list = await call(mentor, 'GET', '/lessons', undefined, { q: lesson.slug })
-    expect(list.body.items[0]).toMatchObject({ id: lesson.id, player: 'story', step_count: 1 })
+    expect(list.body.items[0]).toMatchObject({ id: lesson.id, player: 'story', step_count: 15 })
     expect((await call(parent, 'GET', '/lessons', undefined, { q: lesson.slug })).body.total).toBe(
       0
     )

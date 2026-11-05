@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
-import { call, makeChild, makeUser } from '../../../../../test/helpers.js'
+import { call, makeChild, makeUser, publishFixture } from '../../../../../test/helpers.js'
 import { DEFAULT_SETTINGS } from '../constants/index.js'
 import {
   keepCollected,
@@ -22,7 +22,7 @@ const yesNo = {
 async function publishedLesson(admin, content) {
   const slug = `quiz-${crypto.randomUUID().slice(0, 8)}`
   const { body } = await call(admin, 'POST', '/lessons', { slug, title: 'Quiz source', content })
-  await call(admin, 'POST', `/lessons/${body.id}/publish`)
+  await publishFixture(admin, body.id)
   return body
 }
 

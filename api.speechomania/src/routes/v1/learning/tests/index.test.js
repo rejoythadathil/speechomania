@@ -1,5 +1,11 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
-import { call, makeChild, makePublishedLesson, makeUser } from '../../../../../test/helpers.js'
+import {
+  call,
+  makeChild,
+  makePublishedLesson,
+  makeUser,
+  publishFixture
+} from '../../../../../test/helpers.js'
 import { badgeStars, bestBySlug, maxStars, starsFor, stepsTotal } from '../utils/index.js'
 
 const line = (text) => ({ text })
@@ -52,14 +58,14 @@ beforeAll(async () => {
     title: 'Who can’t?',
     content: pickContent
   })
-  pick = (await call(admin, 'POST', `/lessons/${created.body.id}/publish`)).body
+  pick = await publishFixture(admin, created.body.id)
   story = await makePublishedLesson(admin)
   const game = await call(admin, 'POST', '/lessons', {
     slug: `shark-${crypto.randomUUID().slice(0, 8)}`,
     title: 'Feed the shark',
     content: sharkContent
   })
-  shark = (await call(admin, 'POST', `/lessons/${game.body.id}/publish`)).body
+  shark = await publishFixture(admin, game.body.id)
   await call(admin, 'PUT', `/children/${child.id}/lessons`, { slugs: [pick.slug] })
 })
 
@@ -197,7 +203,7 @@ describe('game lessons', () => {
       (
         await create({
           player: 'train',
-          rounds: 21,
+          rounds: 41,
           steps: [{ text: 'I see … dog.', choices: ['a', 'the'], answer: 'a' }]
         })
       ).status

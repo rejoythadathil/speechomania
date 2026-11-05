@@ -30,7 +30,14 @@ export const LESSON_CHARACTERS = [
   'monkey',
   'boy',
   'bat',
-  'toddler'
+  'toddler',
+  'elephant',
+  'fish',
+  'girl',
+  'penguin',
+  'duck',
+  'snail',
+  'horse'
 ]
 
 export const LESSON_ACTIONS = [
@@ -43,12 +50,17 @@ export const LESSON_ACTIONS = [
   'morning',
   'sing',
   'school',
-  'roar'
+  'roar',
+  'run',
+  'write',
+  'talk'
 ]
 
 export const LESSON_LINES = ['intro', 'quiz', 'retry', 'skip', 'yes', 'outro', 'reward']
 
-export const MAX_ROUNDS = 20
+export const MAX_ROUNDS = 40
+
+export const MIN_ACTIVITIES = 15
 
 export const PAIRS_PER_BOARD = 3
 
