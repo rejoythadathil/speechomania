@@ -60,8 +60,18 @@ a football (soccer ball), a basketball, a tennis ball, a cricket bat with a ball
 
 Names: football, basketball, tennis-ball, cricket, bike, car, engine, wagon, bandage, feather
 
-## Status (2026-11-04)
-Done: sheets C, D, E, F, G, H, J, K. Still needed: A, B, I.
+## Sheet O: girl actions (12)
+Each is the same girl (warm brown skin, black hair in two plaits, yellow dress), full body, doing the action: reading a book, eating rice from a plate with a spoon, jumping with both feet off the ground, waving one hand, sleeping in a bed with a blanket, painting at an easel, dancing, writing with a pencil at a desk, singing with music notes, cooking at a small pot, riding a bicycle, swimming in a small patch of blue water
+
+Names: girl-reading, girl-eating, girl-jumping, girl-waving, girl-sleeping, girl-painting, girl-dancing, girl-writing, girl-singing, girl-cooking, girl-cycling, girl-swimming
+
+## Sheet P: boy actions and more faces (8)
+Grid of 4 columns and 2 rows. The first four are the same boy as Sheet D (warm brown skin, short black hair, blue T-shirt), full body: reading a book, eating rice from a plate with a spoon, jumping with both feet off the ground, waving one hand. Then round yellow faces, same size as Sheet B: tired face with half-closed eyes and droopy mouth, shy face peeking through its fingers, excited face with star eyes and a big open smile, calm face with closed eyes and a small smile
+
+Names: reading, eating, jumping, waving, tired, peek, excited, calm
+
+## Status (2026-11-05)
+Done: sheets C, D, E, F, G, H, J, K. Still needed: A, B, I, O, P. The He and she and They lessons stay drafts until O and P are in.
 
 ## Already done (from the first sheets)
 lion, rabbit, panda, fox, koala, penguin, owl, frog, bear, unicorn, balloon, pop, cloud, cards, octopus, bubbles, box, chair, tree, cat, dog, mouse, duck, bird, star, glowing-star, trophy, medal, scale, tropical-fish, fish, blowfish, seaweed, coral, shell, thumbs-up, thumbs-down, clamp. The realistic shark is replaced by the friendly one on Sheet F.

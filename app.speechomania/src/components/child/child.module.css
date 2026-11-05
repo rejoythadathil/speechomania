@@ -413,3 +413,17 @@
   width: 24%;
   margin: 18% 0 0 -6%;
 }
+
+.sheetActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.sheet .restClock {
+  color: var(--child-blue-700);
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
