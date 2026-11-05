@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 import { db } from '../../../../../common-service/db/service/index.js'
 import { call, makePublishedLesson, makeUser } from '../../../../../test/helpers.js'
+import { versionSummary } from '../utils/index.js'
 
 let admin, mentor, parent
 
@@ -40,6 +41,39 @@ describe('lessons', () => {
     const versions = await call(admin, 'GET', `/lessons/${v1.id}/versions`)
     expect(versions.body.items.map((row) => row.status)).toEqual(['published', 'superseded'])
     expect((await call(parent, 'GET', `/lessons/${v1.id}`)).status).toBe(404)
+  })
+
+  test('the admin list shows one current row per lesson with its version count', async () => {
+    const v1 = await makePublishedLesson(admin)
+    const v2 = await call(admin, 'POST', `/lessons/${v1.id}/draft`)
+    await call(admin, 'POST', `/lessons/${v2.body.id}/publish`)
+    await call(admin, 'POST', `/lessons/${v2.body.id}/draft`)
+    const list = await call(admin, 'GET', '/lessons', undefined, { q: v1.slug })
+    expect(list.body.total).toBe(1)
+    expect(list.body.items[0]).toMatchObject({
+      id: v2.body.id,
+      status: 'published',
+      version_count: 3,
+      has_draft: true
+    })
+    const old = await call(admin, 'GET', '/lessons', undefined, {
+      q: v1.slug,
+      status: 'superseded'
+    })
+    expect(old.body.items.map((row) => row.id)).toEqual([v1.id])
+    const mentorList = await call(mentor, 'GET', '/lessons', undefined, { q: v1.slug })
+    expect(mentorList.body.items.map((row) => row.id)).toEqual([v2.body.id])
+  })
+
+  test('versionSummary counts versions and spots a draft', () => {
+    const counts = [
+      { slug: 'a', status: 'published', _count: { _all: 1 } },
+      { slug: 'a', status: 'superseded', _count: { _all: 2 } },
+      { slug: 'b', status: 'draft', _count: { _all: 1 } }
+    ]
+    expect(versionSummary(counts, 'a')).toEqual({ version_count: 3, has_draft: false })
+    expect(versionSummary(counts, 'b')).toEqual({ version_count: 1, has_draft: true })
+    expect(versionSummary(counts, 'c')).toEqual({ version_count: 0, has_draft: false })
   })
 
   test('the list says which game each lesson is, and parents only see assigned lessons', async () => {

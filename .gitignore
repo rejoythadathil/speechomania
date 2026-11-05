@@ -15,4 +15,4 @@ deploy.speechomania/monitoring/dozzle-users.yml
 deploy.speechomania/nginx/sites-rendered/
 .playwright-mcp/
 images-generated/
-lessons/
+/lessons/

@@ -30,7 +30,7 @@ import { formatDate } from '@/utils/format'
 
 const STATUS_OPTIONS = ['all', 'published', 'draft', 'superseded', 'archived'].map((id) => ({
   id,
-  label: id === 'all' ? 'All versions' : id[0].toUpperCase() + id.slice(1)
+  label: id === 'all' ? 'Current lessons' : id[0].toUpperCase() + id.slice(1)
 }))
 
 const slugify = (text) =>
@@ -135,7 +135,7 @@ export function LessonsView() {
         title="Lessons"
         description={
           isAdmin
-            ? 'Every version of every lesson. Published versions never change; edits go into a new draft.'
+            ? 'One row per lesson, showing its live version. Open a lesson to see every version; edits go into a new draft.'
             : 'Published lessons you can assign to your children.'
         }
         actions={
@@ -183,7 +183,7 @@ export function LessonsView() {
             onPage={setPage}
             pageSize={pageSize}
             onPageSize={setPageSize}
-            noun="lesson versions"
+            noun="lessons"
           />
         }
       >
@@ -197,7 +197,7 @@ export function LessonsView() {
               <TableHeader>
                 <TableColumn isRowHeader>Lesson</TableColumn>
                 <TableColumn>Game</TableColumn>
-                <TableColumn>Version</TableColumn>
+                <TableColumn>Versions</TableColumn>
                 <TableColumn>Steps</TableColumn>
                 <TableColumn>Status</TableColumn>
                 <TableColumn>Published</TableColumn>
@@ -216,7 +216,21 @@ export function LessonsView() {
                     <TableCell>
                       <GameTag player={lesson.player} />
                     </TableCell>
-                    <TableCell>v{lesson.version}</TableCell>
+                    <TableCell>
+                      <span className="flex flex-col">
+                        <span className="text-body-medium text-text-primary">
+                          v{lesson.version}
+                        </span>
+                        {lesson.version_count ? (
+                          <span className="text-caption-1-medium text-text-tertiary">
+                            {lesson.version_count === 1
+                              ? '1 version'
+                              : `${lesson.version_count} versions`}
+                            {lesson.has_draft && lesson.status !== 'draft' ? ' · draft open' : ''}
+                          </span>
+                        ) : null}
+                      </span>
+                    </TableCell>
                     <TableCell>{lesson.step_count}</TableCell>
                     <TableCell>
                       <StatusChip value={lesson.status} />
