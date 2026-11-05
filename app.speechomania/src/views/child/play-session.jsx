@@ -36,7 +36,20 @@ function balancedSides(count) {
   }
 }
 
-export function lessonPages(content, lines) {
+function quizPages(content, check) {
+  const player = content.player ?? 'story'
+  if (!check || player === 'story') return []
+  const order = shuffle(content.steps.map((_, index) => index))
+  if (player === 'match') {
+    const group = order.slice(0, PAIRS_PER_BOARD)
+    return group.length === PAIRS_PER_BOARD ? [{ step: 'quiz', index: group[0], group }] : []
+  }
+  const picked = order.slice(0, check.questions)
+  const sides = balancedSides(picked.length)
+  return picked.map((index, position) => ({ step: 'quiz', index, side: sides[position] }))
+}
+
+export function lessonPages(content, lines, { cards = [], check = null } = {}) {
   const player = content.player ?? 'story'
   const indexes = content.steps.map((_, index) => index)
   const data = (index) => ({
@@ -54,9 +67,9 @@ export function lessonPages(content, lines) {
       const sides = balancedSides(order.length)
       return order.map((index, position) => ({ step, index, side: sides[position] }))
     }
-    pages = [...round('learn'), ...round('check')]
+    pages = cards.length ? round('check') : [...round('learn'), ...round('check')]
     const firstCheck = pages.findIndex((page) => page.step === 'check')
-    pages[firstCheck] = { ...pages[firstCheck], intro: lines.quiz }
+    if (!cards.length) pages[firstCheck] = { ...pages[firstCheck], intro: lines.quiz }
   } else if (player === 'match') {
     const order = shuffle(indexes)
     const boards = Math.floor(order.length / PAIRS_PER_BOARD)
@@ -70,8 +83,23 @@ export function lessonPages(content, lines) {
       .map((index) => ({ step: 'play', index }))
   }
   if (pages.length && lines.intro) pages[0] = { ...pages[0], intro: lines.intro }
-  return pages.map((page) => ({ ...page, player, ...data(page.index) }))
+  const learning = cards.map((card, index) => ({
+    step: 'card',
+    index,
+    player: 'card',
+    step_data: card,
+    steps: [],
+    lines
+  }))
+  const playing = [...pages, ...quizPages(content, check)].map((page) => ({
+    ...page,
+    player,
+    ...data(page.index)
+  }))
+  return [...learning, ...playing]
 }
+
+const kindOf = (page) => (page.step === 'card' ? 'card' : page.step === 'quiz' ? 'quiz' : 'game')
 
 export function assessmentPages(items, settings) {
   const order = items.map((_, index) => index)
@@ -92,7 +120,10 @@ export function assessmentPages(items, settings) {
   })
 }
 
-function Progress({ pages, at }) {
+function Progress({ pages: all, at: position }) {
+  const kind = kindOf(all[position])
+  const pages = all.filter((page) => kindOf(page) === kind)
+  const at = all.slice(0, position).filter((page) => kindOf(page) === kind).length
   return (
     <ol className={styles.progress} aria-label={`Round ${at + 1} of ${pages.length}`}>
       {pages.map((page, index) => (
@@ -166,6 +197,7 @@ export function PlaySession({
   const done = useCallback(
     (outcome) => {
       const page = pages[at]
+      if (page.step === 'card') return setWaiting(true)
       const event = { step: page.step, index: page.index, ...outcome }
       answers.current = [...answers.current, event]
       send({ events: [event], steps_completed: answers.current.length })
@@ -206,10 +238,16 @@ export function PlaySession({
       ) : null}
       <TopBar {...bar} centre={page ? <Progress pages={pages} at={at} /> : null} />
 
-      {page ? (
+      {page && page.step !== 'card' ? (
         <section className={cx(child.card, child.caption)} aria-live="polite">
           <span className={child.kicker}>
-            {page.step === 'learn' ? 'Learn' : page.step === 'check' ? 'Show me' : kicker}
+            {page.step === 'learn'
+              ? 'Learn'
+              : page.step === 'check'
+                ? 'Show me'
+                : page.step === 'quiz'
+                  ? 'Quick check'
+                  : kicker}
           </span>
           <ReadAlong
             text={voice.text || (page.group ? (page.lines.quiz?.text ?? '') : step.text)}
@@ -262,6 +300,11 @@ export function PlaySession({
               {result.got} of {result.total}
             </p>
           ) : null}
+          {result.check ? (
+            <p className={styles.check}>
+              Quick check: {result.check.right} of {result.check.total}
+            </p>
+          ) : null}
           <span className={styles.actions}>
             <button type="button" className={child.pill} onClick={onLeave}>
               {leaveLabel}
@@ -279,7 +322,7 @@ export function PlaySession({
       <BottomBar
         onSayAgain={page ? voice.replay : null}
         next={
-          page?.step === 'story' ? (
+          page?.step === 'story' || page?.step === 'card' ? (
             <button
               type="button"
               className={cx(child.go, !waiting && child.hidden)}

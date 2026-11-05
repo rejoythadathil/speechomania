@@ -12,7 +12,16 @@ import { LINES, PlaySession, lessonPages } from './play-session.jsx'
 import styles from './lesson-player.module.css'
 
 const scored = (answers) =>
-  answers.filter((event) => event.step !== 'learn' && event.step !== 'story')
+  answers.filter((event) => event.step === 'play' || event.step === 'check')
+
+export function checkScore(answers) {
+  const quiz = answers.filter((event) => event.step === 'quiz')
+  if (!quiz.length) return null
+  return {
+    right: quiz.filter((event) => event.correct && !event.wrongs).length,
+    total: quiz.length
+  }
+}
 
 export function lessonCover(lesson, lines) {
   const player = lesson.content.player ?? 'story'
@@ -59,7 +68,8 @@ function Player({ lesson, learner, voice, bar, celebrate, reloadLearner }) {
       const counted = scored(answers)
       return {
         got: saved?.stars ?? counted.filter((event) => event.correct && !event.wrongs).length,
-        total: counted.length
+        total: counted.length,
+        check: checkScore(answers)
       }
     },
     [reloadLearner]
@@ -71,7 +81,7 @@ function Player({ lesson, learner, voice, bar, celebrate, reloadLearner }) {
       kicker={lesson.title}
       cover={lessonCover(lesson, lines)}
       lines={lines}
-      plan={() => lessonPages(lesson.content, lines)}
+      plan={() => lessonPages(lesson.content, lines, { cards: lesson.cards, check: lesson.check })}
       start={attempt.open}
       send={attempt.send}
       summarise={summarise}

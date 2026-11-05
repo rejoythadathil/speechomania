@@ -5,7 +5,7 @@ const PAGE_PLAYERS = ['story', 'pick']
 
 export function stepsTotal(content) {
   const steps = content.steps?.length ?? 0
-  if (content.player === 'pick') return steps * 2
+  if (content.player === 'pick') return steps
   if (!content.player || PAGE_PLAYERS.includes(content.player)) return steps
   const available = content.player === 'match' ? Math.floor(steps / PAIRS_PER_BOARD) : steps
   return Math.min(content.rounds ?? available, available)
@@ -43,4 +43,13 @@ export function bestBySlug(groups, slugOf) {
     })
   }
   return best
+}
+
+export function quizResult(events) {
+  const quiz = events.filter((event) => event.step === 'quiz')
+  if (!quiz.length) return null
+  return {
+    right: quiz.filter((event) => event.correct && !event.wrongs).length,
+    total: quiz.length
+  }
 }

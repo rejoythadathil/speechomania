@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
+import { db } from '../../../../../common-service/db/service/index.js'
 import {
   call,
   makeChild,
@@ -151,15 +152,22 @@ describe('learning scope', () => {
     ).toBe(404)
   })
 
-  test('an assigned lesson opens with learn and check pages counted', async () => {
+  test('an assigned lesson opens with its learn cards and one question page per step', async () => {
     const { status, body } = await call(
       parent,
       'GET',
       `/learning/children/${child.id}/lessons/${pick.id}`
     )
     expect(status).toBe(200)
-    expect(body.steps_total).toBe(4)
+    expect(body.steps_total).toBe(2)
     expect(body.content.steps[0]).toMatchObject({ answer: 'baby', actor: 'swimmer', act: 'swim' })
+    expect(body.cards[0]).toMatchObject({
+      text: 'The baby can’t swim. The swimmer can swim.',
+      art: ['baby', 'swimmer'],
+      keys: ['can’t', 'can']
+    })
+    expect(body.check).toBeNull()
+    expect(body.metadata).toBeUndefined()
   })
 })
 
@@ -385,7 +393,7 @@ describe('attempts', () => {
       lesson_id: pick.id
     })
     expect(started.status).toBe(201)
-    expect(started.body).toMatchObject({ status: 'in_progress', steps_total: 4 })
+    expect(started.body).toMatchObject({ status: 'in_progress', steps_total: 2 })
     const id = started.body.id
     const event = (step, index, correct, wrongs = 0) => ({
       step,
@@ -416,11 +424,18 @@ describe('attempts', () => {
     expect(half.body).toMatchObject({ status: 'in_progress', steps_completed: 2, stars: 0 })
 
     const done = await call(parent, 'PATCH', `/learning/attempts/${id}`, {
-      events: [event('check', 0, true), event('check', 1, false)],
+      events: [
+        event('check', 0, true),
+        event('check', 1, false),
+        event('quiz', 1, true),
+        event('quiz', 0, false)
+      ],
       steps_completed: 9,
       completed: true
     })
-    expect(done.body).toMatchObject({ status: 'completed', steps_completed: 4, stars: 1 })
+    expect(done.body).toMatchObject({ status: 'completed', steps_completed: 2, stars: 1 })
+    const stored = await db.attempts.findUnique({ where: { id }, select: { metadata: true } })
+    expect(stored.metadata.check).toEqual({ right: 1, total: 2 })
 
     expect(
       (await call(parent, 'PATCH', `/learning/attempts/${id}`, { events: [], steps_completed: 4 }))
@@ -445,7 +460,7 @@ describe('badges', () => {
     const check = (index) => ({ step: 'check', index, correct: true, wrongs: 0, latency_ms: 800 })
     await call(parent, 'PATCH', `/learning/attempts/${started.body.id}`, {
       events: [check(0), check(1)],
-      steps_completed: 4,
+      steps_completed: 2,
       completed: true
     })
     const after = (await call(parent, 'GET', `/learning/children/${child.id}`)).body
@@ -480,7 +495,7 @@ describe('leaving learning mode', () => {
 
 describe('learning rules', () => {
   test('a pick lesson has a learn and a check page per step', () => {
-    expect(stepsTotal({ player: 'pick', steps: [{}, {}, {}] })).toBe(6)
+    expect(stepsTotal({ player: 'pick', steps: [{}, {}, {}] })).toBe(3)
     expect(stepsTotal({ player: 'story', steps: [{}, {}] })).toBe(2)
     expect(stepsTotal({})).toBe(0)
   })

@@ -17,6 +17,9 @@ export const tooFewActivities = (count, minimum) =>
     `A lesson needs at least ${minimum} activities to publish; this one has ${count}`
   )
 
+export const onlyCurrentChecks = () =>
+  new HttpError(409, 'Only the draft or the published version can change its check')
+
 export const alreadyDraft = () => new HttpError(409, 'This version is already a draft')
 
 export const draftExists = () =>

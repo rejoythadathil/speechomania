@@ -18,6 +18,11 @@ export async function update(c) {
   return c.json(await service.updateLesson(c.get('user'), params.id, body, requestCtx(c)))
 }
 
+export async function check(c) {
+  const { params, body } = c.get('valid')
+  return c.json(await service.setCheck(c.get('user'), params.id, body, requestCtx(c)))
+}
+
 export const publish = async (c) =>
   c.json(await service.publishLesson(c.get('user'), c.get('valid').params.id, requestCtx(c)))
 

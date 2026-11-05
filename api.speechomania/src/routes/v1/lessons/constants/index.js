@@ -65,3 +65,7 @@ export const MIN_ACTIVITIES = 15
 export const PAIRS_PER_BOARD = 3
 
 export const ART_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+export const CHECK_QUESTIONS = 5
+
+export const CHECK_OPTIONS = [3, 5, 10]
