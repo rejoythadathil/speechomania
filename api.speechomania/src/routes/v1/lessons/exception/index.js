@@ -11,6 +11,12 @@ export const onlyDraftsPublishable = () => new HttpError(409, 'Only drafts can b
 
 export const noSteps = () => new HttpError(400, 'Add at least one step before publishing')
 
+export const tooFewActivities = (count, minimum) =>
+  new HttpError(
+    400,
+    `A lesson needs at least ${minimum} activities to publish; this one has ${count}`
+  )
+
 export const alreadyDraft = () => new HttpError(409, 'This version is already a draft')
 
 export const draftExists = () =>

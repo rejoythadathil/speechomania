@@ -56,7 +56,10 @@ export const ACTION_ART = {
   morning: 'sunrise',
   sing: 'music',
   school: 'school',
-  roar: 'loud'
+  roar: 'loud',
+  run: 'walk',
+  write: 'pen',
+  talk: 'loud'
 }
 
 export const FISH = ['fish', 'tropical-fish', 'blowfish']

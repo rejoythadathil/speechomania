@@ -9,10 +9,12 @@ import {
   draftExists,
   lessonNotFound,
   noSteps,
+  tooFewActivities,
   onlyDraftsEditable,
   onlyDraftsPublishable,
   slugTaken
 } from '../exception/index.js'
+import { MIN_ACTIVITIES } from '../constants/index.js'
 import { assignedSlugs, lessonView, stepCount, versionSummary } from '../utils/index.js'
 
 const fields = {
@@ -182,7 +184,9 @@ export function publishLesson(user, id, ctx) {
   return db.$transaction(async (tx) => {
     const current = await findRaw(tx, id)
     if (current.status !== 'draft') throw onlyDraftsPublishable()
-    if (!stepCount(current.content)) throw noSteps()
+    const steps = stepCount(current.content)
+    if (!steps) throw noSteps()
+    if (steps < MIN_ACTIVITIES) throw tooFewActivities(steps, MIN_ACTIVITIES)
     await tx.lessons.updateMany({
       where: { slug: current.slug, status: 'published' },
       data: { status: 'superseded' }

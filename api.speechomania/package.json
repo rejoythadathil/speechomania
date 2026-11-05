@@ -17,7 +17,8 @@
     "migrate:check": "bun --bun prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
     "migrate:status": "bun --bun prisma migrate status",
     "audio": "bun scripts/lesson-audio.js",
-    "postinstall": "bun --bun prisma generate"
+    "postinstall": "bun --bun prisma generate",
+    "lessons:sync": "bun scripts/lessons-sync.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",

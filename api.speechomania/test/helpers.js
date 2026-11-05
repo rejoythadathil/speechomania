@@ -58,8 +58,16 @@ export async function makePublishedLesson(
   const { body } = await call(admin, 'POST', '/lessons', {
     slug,
     title: 'Test lesson',
-    content: { steps: [{ text: 'Step one' }] }
+    content: { steps: Array.from({ length: 15 }, (_, index) => ({ text: `Step ${index + 1}` })) }
   })
   await call(admin, 'POST', `/lessons/${body.id}/publish`)
   return body
+}
+
+export async function publishFixture(admin, id) {
+  const lesson = await db.lessons.update({
+    where: { id },
+    data: { status: 'published', published_by: admin.id, published_at: new Date() }
+  })
+  return (await call(admin, 'GET', `/lessons/${lesson.id}`)).body
 }
