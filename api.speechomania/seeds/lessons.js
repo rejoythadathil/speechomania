@@ -8,7 +8,9 @@ const play = {
   retry: line('Let’s look again.'),
   yes: line('Yes!'),
   outro: line('You did it!'),
-  reward: line('You earned a trophy!')
+  reward: line('You earned a trophy!'),
+  medal: line('You earned a medal!'),
+  sticker: line('You earned a star! Let’s play again.')
 }
 
 const names = { swimmer: 'big boy' }
@@ -18,12 +20,10 @@ const canAndCant = {
   player: 'pick',
   contrast: cant,
   lines: {
+    ...play,
     intro: line('Let’s read together.'),
     quiz: line('Now, show me.'),
-    retry: line('Let’s look again.'),
-    skip: line('Let’s try another.'),
-    outro: line('The end. Great reading!'),
-    reward: line('You earned a sticker!')
+    skip: line('Let’s try another.')
   },
   steps: [
     ['swim', 'baby', 'swimmer', 'swim'],

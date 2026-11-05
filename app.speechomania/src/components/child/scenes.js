@@ -1,5 +1,6 @@
 export const SCENES = {
   story: {
+    accent: '#e8833a',
     tag: 'Story',
     background: 'linear-gradient(#fff0f0, #ffe2bd)',
     decor: [['books', 3, 82, 110]],
@@ -10,6 +11,7 @@ export const SCENES = {
     ]
   },
   pick: {
+    accent: '#4f9a3a',
     tag: 'Who can’t?',
     background: 'linear-gradient(#e3f6d6, #b5dd94)',
     decor: [['tree', 1, 46, 170]],
@@ -20,6 +22,7 @@ export const SCENES = {
     ]
   },
   shark: {
+    accent: '#2f7ad8',
     tag: 'Feed the shark',
     background: 'linear-gradient(#a9dcf6, #3a9fd6 55%, #1d6fa8)',
     decor: [
@@ -34,6 +37,7 @@ export const SCENES = {
     ]
   },
   balloons: {
+    accent: '#d9548a',
     tag: 'Balloon pop',
     background: 'linear-gradient(#ffd9e6, #fff4f8)',
     decor: [['cloud', 4, 18, 130]],
@@ -44,6 +48,7 @@ export const SCENES = {
     ]
   },
   bubbles: {
+    accent: '#1f9e8f',
     tag: 'Word bubbles',
     background: 'linear-gradient(#d0f4ef, #8fd9d0)',
     decor: [['shell', 86, 84, 64]],
@@ -54,6 +59,7 @@ export const SCENES = {
     ]
   },
   match: {
+    accent: '#4f5fa8',
     tag: 'Memory cards',
     background: 'linear-gradient(#24365f, #4f5fa8)',
     decor: [['moon', 4, 18, 100]],
@@ -64,6 +70,7 @@ export const SCENES = {
     ]
   },
   squish: {
+    accent: '#d99a12',
     tag: 'Word squish',
     background: 'linear-gradient(#fff3d6, #ffd98f)',
     decor: [],
@@ -74,6 +81,7 @@ export const SCENES = {
     ]
   },
   compare: {
+    accent: '#3f9a5b',
     tag: 'Weigh it up',
     background: 'linear-gradient(#e2f6e7, #a7dcb4)',
     decor: [['tree', 1, 48, 170]],
@@ -84,6 +92,7 @@ export const SCENES = {
     ]
   },
   place: {
+    accent: '#5f9e3f',
     tag: 'Put it there',
     background: 'linear-gradient(#eef8dd, #bfe39a)',
     decor: [
@@ -97,6 +106,7 @@ export const SCENES = {
     ]
   },
   train: {
+    accent: '#c8483d',
     tag: 'Word train',
     background: 'linear-gradient(#fdeedd, #f3c79a)',
     decor: [
@@ -110,6 +120,7 @@ export const SCENES = {
     ]
   },
   yesno: {
+    accent: '#8a6ad1',
     tag: 'Yes or no',
     background: 'linear-gradient(#f0e6ff, #cdb9fb)',
     decor: [['teddy', 86, 76, 100]],
@@ -120,6 +131,7 @@ export const SCENES = {
     ]
   },
   why: {
+    accent: '#a0703c',
     tag: 'Detective',
     background: 'linear-gradient(#fbf4e6, #e6d3ad)',
     decor: [['books', 3, 80, 110]],

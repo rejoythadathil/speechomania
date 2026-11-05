@@ -19,7 +19,17 @@ export const LINES = {
   skip: { text: 'Let’s try another.' },
   yes: { text: 'Yes!' },
   outro: { text: 'You did it!' },
-  reward: { text: 'You earned a trophy!' }
+  reward: { text: 'You earned a trophy!' },
+  medal: { text: 'You earned a medal!' },
+  sticker: { text: 'You earned a star! Let’s play again.' }
+}
+
+export function prizeOf(got, total) {
+  if (!total) return { art: 'trophy', title: 'You did it!', line: 'reward', big: true }
+  const share = got / total
+  if (share >= 0.9) return { art: 'trophy', title: 'Super star!', line: 'reward', big: true }
+  if (share >= 0.6) return { art: 'medal', title: 'Well done!', line: 'medal', big: false }
+  return { art: 'star', title: 'Good try!', line: 'sticker', big: false }
 }
 
 function balancedSides(count) {
@@ -185,13 +195,16 @@ export function PlaySession({
   const finish = useCallback(
     async (total) => {
       const saved = await send({ events: [], steps_completed: total, completed: true })
-      setResult(summarise(saved, answers.current))
+      const summary = summarise(saved, answers.current)
+      const prize = prizeOf(summary.got, summary.total)
+      setResult({ ...summary, prize })
       setPages(null)
-      requestAnimationFrame(() => celebrate.finale(trophy.current))
+      requestAnimationFrame(() => celebrate.finale(trophy.current, prize.big))
       if (lines.outro) await speak(lines.outro)
-      if (lines.reward) speak(lines.reward)
+      const reward = lines[prize.line] ?? lines.reward
+      if (reward) speak(reward)
     },
-    [celebrate, lines.outro, lines.reward, send, speak, summarise]
+    [celebrate, lines, send, speak, summarise]
   )
 
   const done = useCallback(
@@ -292,8 +305,14 @@ export function PlaySession({
 
       {result ? (
         <section className={cx(child.card, styles.panel)}>
-          <img ref={trophy} className={styles.trophy} src={ART.trophy} alt="" draggable="false" />
-          <h1>You did it!</h1>
+          <img
+            ref={trophy}
+            className={cx(styles.trophy, !result.prize.big && styles.smallPrize)}
+            src={ART[result.prize.art]}
+            alt={result.prize.art}
+            draggable="false"
+          />
+          <h1>{result.prize.title}</h1>
           {result.total ? (
             <p className={styles.score}>
               <img src={ART.star} alt="" draggable="false" />

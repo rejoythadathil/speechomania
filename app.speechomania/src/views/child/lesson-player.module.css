@@ -108,6 +108,10 @@
   animation: pop 800ms var(--child-ease) both;
 }
 
+.smallPrize {
+  width: 120px;
+}
+
 .score {
   display: flex;
   align-items: center;
