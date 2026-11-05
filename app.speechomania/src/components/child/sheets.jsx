@@ -111,7 +111,7 @@ function HoldButton({ onUnlock }) {
   useEffect(() => () => clearTimeout(timer.current), [])
   return (
     <>
-      <p>Grown-ups: press and hold the button.</p>
+      <p>Parent: press and hold the button.</p>
       <button
         type="button"
         className={cx(styles.go, styles.hold, holding && styles.holding)}

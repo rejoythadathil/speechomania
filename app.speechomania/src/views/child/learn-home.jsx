@@ -175,7 +175,7 @@ export function LearnHomeView() {
           </button>
           <button type="button" className={styles.action} onClick={bar.onGrownUp}>
             <GrownUpIcon size={22} />
-            <span>Grown-ups</span>
+            <span>Parent</span>
           </button>
         </span>
       </header>
@@ -247,7 +247,7 @@ export function LearnHomeView() {
                   </p>
                 ) : null}
                 {shelf.data && !games.length ? (
-                  <p className={styles.note}>No games yet. A grown-up will add some soon.</p>
+                  <p className={styles.note}>No games yet. New games are coming soon.</p>
                 ) : null}
                 {games.length ? (
                   <ul className={styles.grid} aria-label="My games">

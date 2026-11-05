@@ -47,7 +47,7 @@ export function LearnStartView() {
         )}
       </main>
       <Link to="/dashboard" className={cx(child.pill, styles.grownUps)}>
-        Grown-up area
+        Parent area
       </Link>
     </div>
   )

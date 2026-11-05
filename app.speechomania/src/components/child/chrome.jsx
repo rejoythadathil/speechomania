@@ -7,7 +7,7 @@ export function TopBar({ centre, onGrownUp, onBreak, muted, onMute }) {
     <header className={cx(styles.chrome, styles.top)}>
       <button type="button" className={styles.pill} onClick={onGrownUp}>
         <GrownUpIcon size={34} />
-        <span className={styles.label}>Grown-ups</span>
+        <span className={styles.label}>Parent</span>
       </button>
       <div className={styles.spacer} />
       {centre ? <div className={styles.centre}>{centre}</div> : null}
