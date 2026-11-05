@@ -5,8 +5,14 @@ import { useShake } from './parts.jsx'
 import { shuffle, useRound } from './use-round.js'
 import styles from './games.module.css'
 
+const GROWTH = 0.035
+const MAX_GROWTH = 15
+
+export const sharkSize = (wins) => 1 + Math.min(wins, MAX_GROWTH) * GROWTH
+
 export function SharkGame(props) {
-  const { step, steps } = props
+  const { step, steps, tally } = props
+  const wins = tally?.wins ?? 0
   const round = useRound(props)
   const options = useMemo(
     () =>
@@ -17,6 +23,7 @@ export function SharkGame(props) {
   const shark = useRef(null)
   const [eaten, setEaten] = useState(null)
   const [chomp, setChomp] = useState(false)
+  const [fed, setFed] = useState(wins)
   const { shaking, shake, stop } = useShake()
 
   function feed(option, index, event) {
@@ -35,6 +42,7 @@ export function SharkGame(props) {
     })
     setTimeout(() => {
       setChomp(true)
+      setFed(wins + 1)
       round.right(shark.current, option.word)
     }, 700)
   }
@@ -44,6 +52,7 @@ export function SharkGame(props) {
       <img
         ref={shark}
         className={cx(styles.shark, chomp && styles.chomp)}
+        style={{ '--grow': sharkSize(fed) }}
         src={ART.shark}
         alt="Shark"
         draggable="false"

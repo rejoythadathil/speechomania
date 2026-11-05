@@ -37,6 +37,19 @@ export function useCelebrate({ motion, sound, muted }) {
         play('ding')
         burst({ spread: 75, startVelocity: 32, origin: originOf(element) })
       },
+      streak(element) {
+        play('ding')
+        play('win', 0.35)
+        burst({
+          shapes: ['star'],
+          colors: ['#f5b301', '#ffd84d', '#ffe9a3'],
+          particleCount: motion === 'gentle' ? 30 : 70,
+          scalar: 1.4,
+          spread: 100,
+          startVelocity: 30,
+          origin: originOf(element)
+        })
+      },
       nudge() {
         play('soft', 0.4)
       },

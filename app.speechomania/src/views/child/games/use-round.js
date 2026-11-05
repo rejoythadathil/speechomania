@@ -1,5 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+export const STREAK = 3
+
+const ANSWERED = ['play', 'check', 'quiz', 'assess', 'learn']
+
+export function tallyOf(answers) {
+  const answered = answers.filter((event) => ANSWERED.includes(event.step))
+  const wins = answered.filter((event) => event.correct).length
+  let streak = 0
+  for (let index = answered.length - 1; index >= 0; index -= 1) {
+    if (!answered[index].correct || answered[index].wrongs) break
+    streak += 1
+  }
+  return { wins, streak }
+}
+
 export function shuffle(list) {
   const copy = [...list]
   for (let index = copy.length - 1; index > 0; index -= 1) {
@@ -9,7 +24,7 @@ export function shuffle(list) {
   return copy
 }
 
-export function useRound({ page, step, lines, voice, celebrate, onDone }) {
+export function useRound({ page, step, lines, voice, celebrate, tally, onDone }) {
   const [phase, setPhase] = useState('asking')
   const [wrongs, setWrongs] = useState(0)
   const count = useRef(0)
@@ -50,10 +65,12 @@ export function useRound({ page, step, lines, voice, celebrate, onDone }) {
     (element, choice) => {
       if (closed.current) return
       chosen.current = choice
-      celebrate.cheer(element)
+      const streak = count.current ? 0 : (tally?.streak ?? 0) + 1
+      if (streak && streak % STREAK === 0) celebrate.streak(element)
+      else celebrate.cheer(element)
       finish(true, step.praise ?? step.sentence ?? lines.yes)
     },
-    [celebrate, finish, lines.yes, step]
+    [celebrate, finish, lines.yes, step, tally?.streak]
   )
 
   const wrong = useCallback(

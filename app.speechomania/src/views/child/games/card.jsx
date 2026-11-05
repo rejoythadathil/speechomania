@@ -55,17 +55,20 @@ export function CardGame({ step, voice, onDone }) {
           >
             <StepArt step={step} className={styles.learnArt} artClassName={styles.learnArtImg} />
             <span className={styles.learnText}>
-              {words.map((word, index) => (
-                <span
-                  key={index}
-                  className={cx(
-                    keys.includes(bare(word)) && styles.learnKey,
-                    voice.text === step.text && voice.wordIndex === index && styles.learnSpoken
-                  )}
-                >
-                  {word}{' '}
-                </span>
-              ))}
+              {words.map((word, index) => {
+                const [, core, tail] = word.match(/^(.*?)([.,!?]*)$/)
+                return (
+                  <span
+                    key={index}
+                    className={cx(
+                      voice.text === step.text && voice.wordIndex === index && styles.learnSpoken
+                    )}
+                  >
+                    <span className={cx(keys.includes(bare(word)) && styles.learnKey)}>{core}</span>
+                    {tail}{' '}
+                  </span>
+                )
+              })}
             </span>
           </span>
         </span>

@@ -95,7 +95,8 @@
   position: absolute;
   left: 2%;
   bottom: 14%;
-  width: min(30vw, 300px);
+  width: calc(min(26vw, 260px) * var(--grow, 1));
+  transition: width 900ms var(--child-ease);
 }
 
 .chomp {
@@ -104,7 +105,7 @@
 
 .fish {
   position: absolute;
-  width: min(26vw, 230px);
+  width: min(17vw, 190px);
   transition:
     left 700ms ease-in,
     top 700ms ease-in,
@@ -113,18 +114,18 @@
 }
 
 .swim0 {
-  left: 54%;
-  top: 30%;
+  left: 44%;
+  top: 46%;
 }
 
 .swim1 {
-  left: 76%;
-  top: 48%;
+  left: 62%;
+  top: 56%;
 }
 
 .swim2 {
-  left: 54%;
-  top: 66%;
+  left: 80%;
+  top: 46%;
 }
 
 .bob {
@@ -149,6 +150,13 @@
 
 .flip {
   transform: scaleX(-1);
+}
+
+.fish .badge {
+  top: auto;
+  bottom: 84%;
+  left: 18%;
+  width: 64%;
 }
 
 .badge {
@@ -766,22 +774,25 @@
   }
   .shark {
     bottom: 6%;
-    width: 46vw;
+    width: calc(40vw * var(--grow, 1));
   }
   .fish {
-    width: 30vw;
+    width: 28vw;
   }
   .balloon {
     width: 34vw;
   }
   .swim0 {
-    left: 50%;
-  }
-  .swim2 {
-    left: 50%;
+    left: 4%;
+    top: 34%;
   }
   .swim1 {
-    left: 66%;
+    left: 36%;
+    top: 42%;
+  }
+  .swim2 {
+    left: 68%;
+    top: 34%;
   }
 }
 
