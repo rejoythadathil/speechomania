@@ -11,7 +11,10 @@ import {
   badgeStars,
   bestBySlug,
   lockedAfter,
+  friendsFor,
   maxStars,
+  newFriend,
+  prizeOf,
   rewardOf,
   starsFor,
   stepsTotal
@@ -471,7 +474,7 @@ describe('badges', () => {
       steps_completed: 2,
       completed: true
     })
-    expect(finished.body.reward).toEqual({ new_best: true, new_badge: true })
+    expect(finished.body.reward).toEqual({ new_best: true, new_badge: true, new_friend: null })
     const again = await call(parent, 'POST', `/learning/children/${child.id}/attempts`, {
       lesson_id: pick.id
     })
@@ -480,8 +483,18 @@ describe('badges', () => {
       steps_completed: 2,
       completed: true
     })
-    expect(repeat.body.reward).toEqual({ new_best: false, new_badge: false })
+    expect(repeat.body.reward).toEqual({ new_best: false, new_badge: false, new_friend: null })
     const after = (await call(parent, 'GET', `/learning/children/${child.id}`)).body
+    expect(after.trophies).toEqual([
+      {
+        slug: pick.slug,
+        title: 'Who can’t?',
+        player: 'pick',
+        cover: ['baby', 'swimmer'],
+        prize: 'trophy'
+      }
+    ])
+    expect(after.friends).toMatchObject({ earned: [], next: 'lion', total: 20 })
     expect(after.badges).toEqual([
       { slug: pick.slug, title: 'Who can’t?', player: 'pick', cover: ['baby', 'swimmer'] }
     ])
@@ -608,6 +621,27 @@ describe('learning rules', () => {
 })
 
 describe('scoring rules', () => {
+  test('prizeOf gives a trophy, medal or star by the best share, nothing before a play', () => {
+    expect(prizeOf(null, 10)).toBeNull()
+    expect(prizeOf(9, 10)).toBe('trophy')
+    expect(prizeOf(6, 10)).toBe('medal')
+    expect(prizeOf(0, 10)).toBe('star')
+  })
+
+  test('a new animal friend joins every 25 stars, in order, until the book is full', () => {
+    expect(friendsFor(0)).toEqual({ earned: [], next: 'lion', stars_to_next: 25, total: 20 })
+    expect(friendsFor(52)).toMatchObject({
+      earned: ['lion', 'rabbit'],
+      next: 'panda',
+      stars_to_next: 23
+    })
+    expect(friendsFor(10000)).toMatchObject({ next: null, stars_to_next: 0 })
+    expect(friendsFor(10000).earned).toHaveLength(20)
+    expect(newFriend(20, 4)).toBeNull()
+    expect(newFriend(20, 5)).toBe('lion')
+    expect(newFriend(49, 2)).toBe('rabbit')
+  })
+
   test('rewardOf marks a better score and the first time a badge is reached', () => {
     const first = { times: 0, best: 0 }
     expect(rewardOf(3, first, 10)).toEqual({ new_best: false, new_badge: false })

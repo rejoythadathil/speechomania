@@ -269,6 +269,9 @@
 }
 
 [data-motion='off'] .counting img,
+[data-motion='off'] .gift,
+[data-motion='off'] .friendArt,
+[data-motion='off'] .newFriend,
 [data-motion='off'] .newBest,
 [data-motion='off'] .newBadge,
 [data-motion='off'] .trophy {
@@ -279,5 +282,38 @@
   to {
     scale: 1.2;
     rotate: 12deg;
+  }
+}
+
+.newFriend {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 72px;
+  padding: 6px 18px 6px 8px;
+  border-radius: 16px;
+  background: #fff0e6;
+  color: var(--child-ink);
+  font-size: 20px;
+  font-weight: 700;
+  animation: pop 600ms var(--child-ease) both;
+}
+
+.gift {
+  width: 64px;
+  animation: wobble 500ms ease-in-out infinite;
+}
+
+.friendArt {
+  width: 64px;
+  animation: pop 700ms var(--child-ease) both;
+}
+
+@keyframes wobble {
+  25% {
+    rotate: -8deg;
+  }
+  75% {
+    rotate: 8deg;
   }
 }
