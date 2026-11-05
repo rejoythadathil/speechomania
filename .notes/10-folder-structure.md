@@ -96,7 +96,7 @@ app.speechomania/
       child/                     #child mode: characters, scene, actor, read-along, voice hook, sheets, OpenMoji control icons (child-icons.jsx)
     layout/
       work-layout/               #sidebar shell for admin, mentor and parent; menu in navigation.js
-      learning-layout/           #child mode shell: learner, sensory settings, Break and Grown-ups sheets
+      learning-layout/           #child mode shell: learner, sensory settings, Break and Parent sheets
     hooks/                       #use-auth, use-resource, use-debounced
     services/                    #api.js (fetch + Firebase token), firebase.js
     utils/                       #format.js (ours), cx.js and helpers (BoardUI)
