@@ -13,7 +13,7 @@ import {
   onlyDraftsPublishable,
   slugTaken
 } from '../exception/index.js'
-import { assignedSlugs, lessonView, stepCount } from '../utils/index.js'
+import { assignedSlugs, lessonView, stepCount, versionSummary } from '../utils/index.js'
 
 const fields = {
   id: true,
@@ -48,6 +48,19 @@ export async function findLesson(tx, user, id) {
   return lessonView(lesson)
 }
 
+async function currentOnly(tx) {
+  const published = await tx.lessons.findMany({
+    where: { status: 'published' },
+    select: { slug: true }
+  })
+  return {
+    OR: [
+      { status: { in: ['published', 'archived'] } },
+      { status: 'draft', slug: { notIn: published.map((row) => row.slug) } }
+    ]
+  }
+}
+
 export async function listLessons(user, { status, q, ...window }) {
   const page = await pageOf(
     db.lessons,
@@ -55,7 +68,7 @@ export async function listLessons(user, { status, q, ...window }) {
       where: {
         AND: [
           await visible(db, user),
-          status ? { status } : {},
+          status ? { status } : await currentOnly(db),
           q ? { OR: [{ title: containsText(q) }, { slug: containsText(q) }] } : {}
         ]
       },
@@ -73,12 +86,18 @@ export async function listLessons(user, { status, q, ...window }) {
     },
     window
   )
+  const counts = await db.lessons.groupBy({
+    by: ['slug', 'status'],
+    where: { slug: { in: page.items.map((lesson) => lesson.slug) } },
+    _count: { _all: true }
+  })
   return {
     ...page,
     items: page.items.map(({ content, ...lesson }) => ({
       ...lesson,
       player: content?.player ?? 'story',
-      step_count: stepCount(content)
+      step_count: stepCount(content),
+      ...versionSummary(counts, lesson.slug)
     }))
   }
 }

@@ -12,3 +12,11 @@ export function lessonView({ creator, publisher, ...lesson }) {
     published_by_name: publisher?.full_name ?? null
   }
 }
+
+export function versionSummary(counts, slug) {
+  const rows = counts.filter((row) => row.slug === slug)
+  return {
+    version_count: rows.reduce((sum, row) => sum + row._count._all, 0),
+    has_draft: rows.some((row) => row.status === 'draft')
+  }
+}
