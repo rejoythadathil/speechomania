@@ -40,15 +40,15 @@ export function useCelebrate({ motion, sound, muted }) {
       nudge() {
         play('soft', 0.4)
       },
-      finale(element) {
-        play('win')
+      finale(element, big = true) {
+        play('win', big ? 1 : 0.6)
         burst({
-          particleCount: motion === 'gentle' ? 60 : 160,
+          particleCount: (motion === 'gentle' ? 60 : 160) / (big ? 1 : 2),
           spread: 110,
           startVelocity: 45,
           origin: originOf(element)
         })
-        if (motion !== 'full') return
+        if (motion !== 'full' || !big) return
         setTimeout(() => burst({ angle: 60, spread: 60, origin: { x: 0, y: 0.7 } }), 300)
         setTimeout(() => burst({ angle: 120, spread: 60, origin: { x: 1, y: 0.7 } }), 500)
       },

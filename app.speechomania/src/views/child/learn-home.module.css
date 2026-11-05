@@ -239,13 +239,14 @@
 }
 
 .card {
+  --accent: var(--child-blue-500);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 6px 6px 10px;
-  border: 1.5px solid var(--line-soft);
-  border-radius: 12px;
+  padding: 8px 8px 12px;
+  border: 4px solid var(--accent);
+  border-radius: 22px;
   background: #fff;
   text-align: left;
   transition:
@@ -254,13 +255,16 @@
 }
 
 .card:hover {
-  border-color: var(--child-blue-500);
-  transform: translateY(-4px) rotate(-0.4deg);
+  transform: translateY(-4px);
 }
 
 .nextCard {
-  border-color: var(--child-amber);
-  outline: 3px solid var(--child-amber);
+  outline: 4px solid var(--child-amber);
+  outline-offset: 3px;
+}
+
+.picture :global(span) {
+  border-radius: 14px;
 }
 
 .picture {
@@ -302,15 +306,27 @@
 
 .meta {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 0 4px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 6px;
 }
 
 .title {
-  font-size: clamp(16px, 1.6vw, 18px);
+  font-size: clamp(18px, 1.8vw, 21px);
   font-weight: 700;
+  line-height: 1.2;
+}
+
+.prize {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prize > img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .stars {
@@ -320,7 +336,7 @@
 }
 
 .stars img {
-  width: 20px;
+  width: 22px;
   opacity: 0.22;
 }
 

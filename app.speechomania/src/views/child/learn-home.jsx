@@ -22,7 +22,7 @@ const CHECKINS_PER_PAGE = 3
 function rating(lesson) {
   if (!lesson.times_completed) return 0
   const share = lesson.best_stars / Math.max(lesson.max_stars, 1)
-  return share >= 0.9 ? 3 : share >= 0.5 ? 2 : 1
+  return share >= 0.9 ? 3 : share >= 0.6 ? 2 : 1
 }
 
 const gameArt = (game) =>
@@ -45,13 +45,21 @@ function Stat({ art, label, value, of }) {
   )
 }
 
+const PRIZES = [null, null, 'medal', 'trophy']
+
 function GameCard({ lesson, next, onOpen }) {
   const stars = rating(lesson)
+  const scene = sceneFor(lesson.player)
   return (
-    <button type="button" className={cx(styles.card, next && styles.nextCard)} onClick={onOpen}>
+    <button
+      type="button"
+      className={cx(styles.card, next && styles.nextCard)}
+      style={{ '--accent': scene.accent }}
+      onClick={onOpen}
+    >
       <span className={styles.picture}>
         <GameThumb player={lesson.player} cover={lesson.cover} />
-        <span className={styles.tag}>{sceneFor(lesson.player).tag}</span>
+        <span className={styles.tag}>{scene.tag}</span>
         {next ? (
           <span className={styles.playNext}>Play next</span>
         ) : !lesson.times_completed ? (
@@ -60,19 +68,24 @@ function GameCard({ lesson, next, onOpen }) {
       </span>
       <span className={styles.meta}>
         <span className={styles.title}>{lesson.title}</span>
-        <span
-          className={styles.stars}
-          aria-label={lesson.times_completed ? `${stars} of 3 stars` : 'Not played yet'}
-        >
-          {[0, 1, 2].map((index) => (
-            <img
-              key={index}
-              className={cx(index < stars && styles.got)}
-              src={ART.star}
-              alt=""
-              draggable="false"
-            />
-          ))}
+        <span className={styles.prize}>
+          {PRIZES[stars] ? (
+            <img src={ART[PRIZES[stars]]} alt={PRIZES[stars]} draggable="false" />
+          ) : null}
+          <span
+            className={styles.stars}
+            aria-label={lesson.times_completed ? `${stars} of 3 stars` : 'Not played yet'}
+          >
+            {[0, 1, 2].map((index) => (
+              <img
+                key={index}
+                className={cx(index < stars && styles.got)}
+                src={ART.star}
+                alt=""
+                draggable="false"
+              />
+            ))}
+          </span>
         </span>
       </span>
     </button>

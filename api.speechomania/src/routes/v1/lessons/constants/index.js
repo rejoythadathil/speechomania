@@ -56,7 +56,17 @@ export const LESSON_ACTIONS = [
   'talk'
 ]
 
-export const LESSON_LINES = ['intro', 'quiz', 'retry', 'skip', 'yes', 'outro', 'reward']
+export const LESSON_LINES = [
+  'intro',
+  'quiz',
+  'retry',
+  'skip',
+  'yes',
+  'outro',
+  'reward',
+  'medal',
+  'sticker'
+]
 
 export const MAX_ROUNDS = 40
 
