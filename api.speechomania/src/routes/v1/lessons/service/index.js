@@ -9,6 +9,7 @@ import {
   draftExists,
   lessonNotFound,
   noSteps,
+  onlyCurrentChecks,
   tooFewActivities,
   onlyDraftsEditable,
   onlyDraftsPublishable,
@@ -207,6 +208,26 @@ export function publishLesson(user, id, ctx) {
   }, SERIAL)
 }
 
+export function setCheck(user, id, { enabled, questions }, ctx) {
+  return db.$transaction(async (tx) => {
+    const current = await findRaw(tx, id)
+    if (!['draft', 'published'].includes(current.status)) throw onlyCurrentChecks()
+    await tx.lessons.update({
+      where: { id },
+      data: { metadata: { ...current.metadata, check: { enabled, questions } } }
+    })
+    await audit(tx, {
+      actor: user,
+      action: 'lesson.check_changed',
+      entityType: 'lesson',
+      entityId: id,
+      diff: { enabled, questions },
+      ctx
+    })
+    return findLesson(tx, user, id)
+  }, SERIAL)
+}
+
 export async function createDraftFrom(tx, user, source, ctx) {
   const draft = await tx.lessons.findFirst({
     where: { slug: source.slug, status: 'draft' },
@@ -223,6 +244,7 @@ export async function createDraftFrom(tx, user, source, ctx) {
       version: _max.version + 1,
       title: source.title,
       content: source.content,
+      metadata: source.metadata ?? {},
       created_by: user.id
     },
     select: { id: true }

@@ -69,6 +69,7 @@ const verbs = [
   ['juggling', 'juggling'],
   ['surfing', 'surfing']
 ]
+const doer = { dancing: 'She is', hugging: 'They are', clapping: 'We are' }
 const actionWords = {
   player: 'shark',
   lines: { ...play, intro: line('The shark is hungry. Feed it the right fish.') },
@@ -76,7 +77,8 @@ const actionWords = {
     text: `Feed me ${word}!`,
     word,
     art: [art],
-    praise: line(`Yum! ${cap(word)}!`)
+    praise: line(`Yum! ${cap(word)}!`),
+    sentence: line(`${doer[word] ?? 'He is'} ${word}.`)
   }))
 }
 
@@ -104,7 +106,8 @@ const feelings = {
     text: `Pop the ${word} face!`,
     word,
     art: [art],
-    praise: line(`Pop! That face is ${word}.`)
+    praise: line(`Pop! That face is ${word}.`),
+    sentence: line(`This face is ${word}.`)
   }))
 }
 

@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 import { db } from '../../../../../common-service/db/service/index.js'
 import { call, makePublishedLesson, makeUser } from '../../../../../test/helpers.js'
-import { versionSummary } from '../utils/index.js'
+import { learnCards, versionSummary } from '../utils/index.js'
 
 let admin, mentor, parent
 
@@ -74,6 +74,46 @@ describe('lessons', () => {
     expect(old.body.items.map((row) => row.id)).toEqual([v1.id])
     const mentorList = await call(mentor, 'GET', '/lessons', undefined, { q: v1.slug })
     expect(mentorList.body.items.map((row) => row.id)).toEqual([v2.body.id])
+  })
+
+  test('only admins switch the end-of-lesson check, and new versions keep it', async () => {
+    const lesson = await makePublishedLesson(admin)
+    expect(
+      (await call(mentor, 'PATCH', `/lessons/${lesson.id}/check`, { enabled: true })).status
+    ).toBe(403)
+    expect(
+      (await call(admin, 'PATCH', `/lessons/${lesson.id}/check`, { enabled: true, questions: 4 }))
+        .status
+    ).toBe(400)
+    const on = await call(admin, 'PATCH', `/lessons/${lesson.id}/check`, {
+      enabled: true,
+      questions: 3
+    })
+    expect(on.body.check).toEqual({ questions: 3 })
+    const draft = await call(admin, 'POST', `/lessons/${lesson.id}/draft`)
+    expect(draft.body.check).toEqual({ questions: 3 })
+    const off = await call(admin, 'PATCH', `/lessons/${lesson.id}/check`, { enabled: false })
+    expect(off.body.check).toBeNull()
+  })
+
+  test('learn cards come from each game step', () => {
+    const line = (text) => ({ text, audio: null })
+    expect(learnCards({ player: 'story', steps: [{ text: 'Hi' }] })).toEqual([])
+    expect(
+      learnCards({
+        player: 'bubbles',
+        steps: [{ art: ['duck'], answer: 'this', sentence: line('This is a duck.') }]
+      })
+    ).toEqual([{ text: 'This is a duck.', audio: null, art: ['duck'], keys: ['this'] }])
+    expect(
+      learnCards({
+        player: 'match',
+        steps: [{ first: 'hot', second: 'cold', art: ['hot', 'cold'], praise: line('Hot!') }]
+      })[0].keys
+    ).toEqual(['hot', 'cold'])
+    expect(learnCards({ player: 'shark', steps: [{ word: 'running', art: ['running'] }] })).toEqual(
+      []
+    )
   })
 
   test('versionSummary counts versions and spots a draft', () => {

@@ -30,9 +30,11 @@ import {
   coverOf,
   firstStep,
   maxStars,
+  quizResult,
   starsFor,
   stepsTotal
 } from '../utils/index.js'
+import { checkOf, learnCards } from '../../lessons/utils/index.js'
 
 const attemptFields = {
   id: true,
@@ -148,16 +150,17 @@ export async function listShelf(user, id, window) {
 async function findPlayable(tx, child, lessonId) {
   const lesson = await tx.lessons.findFirst({
     where: { id: lessonId, ...playable(child) },
-    select: { id: true, slug: true, version: true, title: true, content: true }
+    select: { id: true, slug: true, version: true, title: true, content: true, metadata: true }
   })
   if (!lesson) throw lessonNotFound()
   return lesson
 }
 
 export async function getPlayableLesson(user, id, lessonId) {
-  const lesson = await findPlayable(db, await findLearner(db, user, id), lessonId)
+  const { metadata, ...lesson } = await findPlayable(db, await findLearner(db, user, id), lessonId)
+  const cards = learnCards(lesson.content)
   signAudio(lesson.content)
-  return { ...lesson, steps_total: stepsTotal(lesson.content) }
+  return { ...lesson, cards, check: checkOf(metadata), steps_total: stepsTotal(lesson.content) }
 }
 
 const assignedIds = (child) =>
@@ -319,6 +322,7 @@ export function recordProgress(user, attemptId, body, ctx) {
         ? scoreAttempt(events, attempt.assessment.items, settings)
         : null
     const stars = body.completed && !attempt.assessment ? starsFor(events) : 0
+    const quiz = body.completed && !attempt.assessment ? quizResult(events) : null
     const saved = await tx.attempts.update({
       where: { id: attemptId },
       data: {
@@ -327,7 +331,11 @@ export function recordProgress(user, attemptId, body, ctx) {
         status: body.completed ? 'completed' : 'in_progress',
         completed_at: body.completed ? new Date() : null,
         stars,
-        metadata: result ? { ...attempt.metadata, result } : undefined
+        metadata: result
+          ? { ...attempt.metadata, result }
+          : quiz
+            ? { ...attempt.metadata, check: quiz }
+            : undefined
       },
       select: attemptFields
     })

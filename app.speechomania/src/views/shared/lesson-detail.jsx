@@ -12,6 +12,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { Button } from '@/components/base/buttons/button'
 import { IconButton } from '@/components/base/buttons/icon-button'
 import { Input } from '@/components/base/input/input'
+import { Switch } from '@/components/base/switch/switch'
 import { Textarea } from '@/components/base/textarea/textarea'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog.jsx'
 import { DataState } from '@/components/shared/data-state.jsx'
@@ -19,6 +20,7 @@ import { FormAlert } from '@/components/shared/form-alert.jsx'
 import { Modal } from '@/components/shared/modal.jsx'
 import { ListFooter } from '@/components/shared/list-footer.jsx'
 import { Panel } from '@/components/shared/panel.jsx'
+import { SelectField } from '@/components/shared/select-field.jsx'
 import { StatusChip } from '@/components/shared/status-chip.jsx'
 import { useToast } from '@/components/shared/toast.jsx'
 import { useAuth } from '@/hooks/use-auth.jsx'
@@ -221,6 +223,78 @@ function RequestChangeModal({ lesson, isOpen, onOpenChange }) {
   )
 }
 
+const QUESTION_OPTIONS = [3, 5, 10].map((count) => ({
+  id: String(count),
+  label: `${count} questions`
+}))
+
+function FlowPanel({ lesson, editable, onChanged }) {
+  const notify = useToast()
+  const [pending, setPending] = useState(false)
+  const story = (lesson.content.player ?? 'story') === 'story'
+
+  async function save(check) {
+    setPending(true)
+    try {
+      await api(`/lessons/${lesson.id}/check`, { method: 'PATCH', body: check })
+      onChanged()
+      notify(check.enabled ? 'Quick check is on' : 'Quick check is off')
+    } catch (error) {
+      notify(error.message, { status: 'error' })
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <Panel title="Lesson flow" description="What a child goes through, in order">
+      <ol className="flex flex-col gap-3 text-body-2-regular text-text-secondary">
+        <li>
+          <span className="text-body-2-medium text-text-primary">1. Learn cards</span> ·{' '}
+          {lesson.cards.length
+            ? `${lesson.cards.length} flip cards, each read aloud`
+            : 'none (story pages are the reading)'}
+        </li>
+        <li>
+          <span className="text-body-2-medium text-text-primary">2. Game</span> ·{' '}
+          {lesson.step_count} activities
+        </li>
+        <li className="flex flex-col gap-2">
+          <span>
+            <span className="text-body-2-medium text-text-primary">3. Quick check</span> ·{' '}
+            {story
+              ? 'not for story lessons'
+              : lesson.check
+                ? `${lesson.check.questions} questions, one try each, no hints`
+                : 'off'}
+          </span>
+          {editable && !story ? (
+            <span className="flex flex-wrap items-center gap-3">
+              <Switch
+                size="sm"
+                isSelected={Boolean(lesson.check)}
+                isDisabled={pending}
+                onChange={(enabled) => save({ enabled, questions: lesson.check?.questions ?? 5 })}
+              >
+                Ask questions at the end
+              </Switch>
+              {lesson.check ? (
+                <SelectField
+                  size="sm"
+                  className="w-40"
+                  options={QUESTION_OPTIONS}
+                  value={String(lesson.check.questions)}
+                  onChange={(value) => save({ enabled: true, questions: Number(value) })}
+                />
+              ) : null}
+            </span>
+          ) : null}
+        </li>
+      </ol>
+    </Panel>
+  )
+}
+
 export function LessonDetailView() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -339,6 +413,11 @@ export function LessonDetailView() {
                 )}
               </div>
               <div className="flex min-w-0 flex-col gap-2.5">
+                <FlowPanel
+                  lesson={data}
+                  editable={isAdmin && ['draft', 'published'].includes(data.status)}
+                  onChanged={lesson.reload}
+                />
                 {isAdmin ? (
                   <Panel
                     title="Versions"

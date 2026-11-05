@@ -63,7 +63,7 @@ export function useRound({ page, step, lines, voice, celebrate, onDone }) {
       count.current += 1
       setWrongs(count.current)
       celebrate.nudge()
-      if (page.step === 'check') return finish(false, lines.skip)
+      if (page.step === 'check' || page.step === 'quiz') return finish(false, lines.skip)
       if (page.step === 'assess' && count.current >= page.tries) return finish(false, lines.skip)
       if (page.step === 'learn' && count.current > 1) return finish(false, step.teach)
       speak(lines.retry).then(() => !closed.current && speak(step))
@@ -74,6 +74,8 @@ export function useRound({ page, step, lines, voice, celebrate, onDone }) {
   const hint =
     page.step === 'assess'
       ? Boolean(page.hints) && wrongs >= 1
-      : wrongs >= 2 || (page.step === 'learn' && wrongs >= 1)
+      : page.step === 'quiz'
+        ? false
+        : wrongs >= 2 || (page.step === 'learn' && wrongs >= 1)
   return { phase, wrongs, hint, open: phase === 'asking', right, wrong }
 }

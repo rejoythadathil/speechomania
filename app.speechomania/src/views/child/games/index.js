@@ -1,5 +1,6 @@
 import { BalloonsGame } from './balloons.jsx'
 import { BubblesGame } from './bubbles.jsx'
+import { CardGame } from './card.jsx'
 import { CompareGame } from './compare.jsx'
 import { MatchGame } from './match.jsx'
 import { PickGame } from './pick.jsx'
@@ -13,6 +14,7 @@ import { YesNoGame } from './yesno.jsx'
 
 export const GAMES = {
   story: StoryGame,
+  card: CardGame,
   pick: PickGame,
   shark: SharkGame,
   balloons: BalloonsGame,

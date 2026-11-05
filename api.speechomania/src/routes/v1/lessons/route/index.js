@@ -2,7 +2,14 @@ import { Hono } from 'hono'
 import { allow } from '../../../../middleware/rbac.js'
 import { validate } from '../../../../middleware/validate.js'
 import * as controller from '../controller/index.js'
-import { createBody, idParams, listQuery, pageOnly, updateBody } from '../validation/index.js'
+import {
+  checkBody,
+  createBody,
+  idParams,
+  listQuery,
+  pageOnly,
+  updateBody
+} from '../validation/index.js'
 
 export const lessonsRoute = new Hono()
   .get('/', validate({ query: listQuery }), controller.list)
@@ -19,6 +26,12 @@ export const lessonsRoute = new Hono()
     allow('admin'),
     validate({ params: idParams, body: updateBody }),
     controller.update
+  )
+  .patch(
+    '/:id/check',
+    allow('admin'),
+    validate({ params: idParams, body: checkBody }),
+    controller.check
   )
   .post('/:id/publish', allow('admin'), validate({ params: idParams }), controller.publish)
   .post('/:id/draft', allow('admin'), validate({ params: idParams }), controller.draft)

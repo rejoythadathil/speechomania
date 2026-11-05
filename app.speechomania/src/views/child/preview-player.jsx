@@ -1,22 +1,26 @@
 import { useCallback, useMemo } from 'react'
 import { PreviewStage } from '@/layout/learning-layout/preview-stage.jsx'
 import { ASSESSMENT_LINES, assessmentCover } from './assessment-player.jsx'
-import { lessonCover } from './lesson-player.jsx'
+import { checkScore, lessonCover } from './lesson-player.jsx'
 import { LINES, PlaySession, assessmentPages, lessonPages } from './play-session.jsx'
 
 const nothing = () => Promise.resolve(null)
 
 function tally(saved, answers) {
-  const scored = answers.filter((event) => event.step !== 'learn' && event.step !== 'story')
+  const scored = answers.filter((event) => event.step === 'play' || event.step === 'check')
   return {
     got: scored.filter((event) => event.correct && !event.wrongs).length,
-    total: scored.length
+    total: scored.length,
+    check: checkScore(answers)
   }
 }
 
 export function LessonPreview({ lesson, onClose }) {
   const lines = useMemo(() => ({ ...LINES, ...lesson.content.lines }), [lesson.content.lines])
-  const plan = useCallback(() => lessonPages(lesson.content, lines), [lesson.content, lines])
+  const plan = useCallback(
+    () => lessonPages(lesson.content, lines, { cards: lesson.cards, check: lesson.check }),
+    [lesson.cards, lesson.check, lesson.content, lines]
+  )
   return (
     <PreviewStage onClose={onClose}>
       {(stage) => (

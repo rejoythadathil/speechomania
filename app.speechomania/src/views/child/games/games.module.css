@@ -784,3 +784,127 @@
     left: 66%;
   }
 }
+
+.learnCard {
+  position: absolute;
+  top: 104px;
+  bottom: 104px;
+  left: 50%;
+  aspect-ratio: 3 / 4;
+  max-width: calc(100% - 32px);
+  translate: -50% 0;
+  perspective: 1400px;
+}
+
+.learnInner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 700ms var(--child-ease);
+}
+
+.learnOpen .learnInner {
+  transform: rotateY(180deg);
+}
+
+.learnFace {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 28px;
+  backface-visibility: hidden;
+}
+
+.learnBack {
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 4px solid #fff;
+}
+
+.learnBack img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.learnFront {
+  --key: #2f7ad8;
+  transform: rotateY(180deg);
+  background: #fff;
+  border: 5px solid var(--key);
+}
+
+.learnFront[data-colour='orange'] {
+  --key: #e8833a;
+}
+
+.learnFront[data-colour='pink'] {
+  --key: #d9548a;
+}
+
+.learnFront[data-colour='green'] {
+  --key: #3f9a5b;
+}
+
+.learnFront[data-colour='red'] {
+  --key: #c8483d;
+}
+
+.learnArt {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  gap: 4%;
+  min-height: 0;
+  padding: 8% 8% 0;
+  background: color-mix(in srgb, var(--key) 8%, #fff);
+}
+
+.learnArtImg {
+  width: 72%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.learnArt[data-count='2'] .learnArtImg {
+  width: 44%;
+}
+
+.learnArt[data-count='3'] .learnArtImg {
+  width: 40%;
+}
+
+.learnText {
+  padding: 18px 16px 22px;
+  border-top: 1px solid color-mix(in srgb, var(--key) 30%, #fff);
+  font-size: clamp(24px, 4.2vh, 40px);
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--child-ink);
+}
+
+.learnKey {
+  color: var(--key);
+}
+
+.learnSpoken {
+  text-decoration: underline;
+  text-decoration-thickness: 4px;
+  text-underline-offset: 6px;
+}
+
+@media (max-width: 760px) {
+  .learnCard {
+    top: 128px;
+    bottom: 96px;
+  }
+}

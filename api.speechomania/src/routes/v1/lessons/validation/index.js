@@ -2,6 +2,8 @@ import Joi from 'joi'
 import { pageQuery } from '../../../../../common-service/http/validation/index.js'
 import {
   ART_NAME,
+  CHECK_OPTIONS,
+  CHECK_QUESTIONS,
   CHOICE_PLAYERS,
   LESSON_ACTIONS,
   LESSON_CHARACTERS,
@@ -159,3 +161,11 @@ export const updateBody = Joi.object({
 }).min(1)
 
 export const pageOnly = Joi.object(pageQuery)
+
+export const checkBody = Joi.object({
+  enabled: Joi.boolean().required(),
+  questions: Joi.number()
+    .integer()
+    .valid(...CHECK_OPTIONS)
+    .default(CHECK_QUESTIONS)
+})
