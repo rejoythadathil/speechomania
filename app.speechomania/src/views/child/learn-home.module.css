@@ -272,36 +272,71 @@
   display: block;
 }
 
-.tag,
 .playNext,
 .fresh {
   position: absolute;
   top: 8px;
-  padding: 3px 9px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.tag {
   left: 8px;
-  background: rgba(255, 255, 255, 0.94);
-  color: var(--child-ink);
-}
-
-.playNext,
-.fresh {
-  right: 8px;
 }
 
 .playNext {
+  padding: 4px 10px;
+  border-radius: 8px;
   background: var(--child-amber);
   color: var(--child-ink);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .fresh {
-  background: var(--child-coral);
-  color: #fff;
+  width: 44px;
+  height: 44px;
+}
+
+.lock {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.lockedCard {
+  border-color: var(--line-soft);
+  cursor: default;
+}
+
+.lockedCard:hover {
+  transform: none;
+}
+
+.lockedCard .picture > :first-child {
+  filter: grayscale(1);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tag {
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 14%, #fff);
+  color: var(--child-ink);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.after {
+  color: var(--child-ink-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
 }
 
 .meta {

@@ -7,7 +7,14 @@ import {
   makeUser,
   publishFixture
 } from '../../../../../test/helpers.js'
-import { badgeStars, bestBySlug, maxStars, starsFor, stepsTotal } from '../utils/index.js'
+import {
+  badgeStars,
+  bestBySlug,
+  lockedAfter,
+  maxStars,
+  starsFor,
+  stepsTotal
+} from '../utils/index.js'
 
 const line = (text) => ({ text })
 const pickContent = {
@@ -471,6 +478,58 @@ describe('badges', () => {
   })
 })
 
+describe('parts', () => {
+  test('part 2 stays locked until part 1 is finished, and only for the child’s own parts', async () => {
+    const first = await makePublishedLesson(admin)
+    const created = await call(admin, 'POST', '/lessons', {
+      slug: `part-two-${crypto.randomUUID().slice(0, 8)}`,
+      title: 'Part two',
+      content: {
+        after: first.slug,
+        steps: Array.from({ length: 15 }, (_, index) => ({ text: `Step ${index + 1}` }))
+      }
+    })
+    expect(created.status).toBe(201)
+    const second = await publishFixture(admin, created.body.id)
+    const learner = await makeChild(parent, admin, mentor)
+    const shelf = async () =>
+      (
+        await call(parent, 'GET', `/learning/children/${learner.id}/lessons`, undefined, {
+          page: 1,
+          page_size: 10
+        })
+      ).body.items.find((item) => item.id === second.id)
+    const start = (lesson) =>
+      call(parent, 'POST', `/learning/children/${learner.id}/attempts`, { lesson_id: lesson.id })
+
+    await call(admin, 'PUT', `/children/${learner.id}/lessons`, { slugs: [second.slug] })
+    expect((await shelf()).locked_after).toBeNull()
+    expect((await start(second)).status).toBe(201)
+
+    await call(admin, 'PUT', `/children/${learner.id}/lessons`, {
+      slugs: [first.slug, second.slug]
+    })
+    expect((await shelf()).locked_after).toEqual({ slug: first.slug, title: 'Test lesson' })
+    expect((await start(second)).status).toBe(403)
+    expect(
+      (
+        await call(otherParent, 'POST', `/learning/children/${learner.id}/attempts`, {
+          lesson_id: second.id
+        })
+      ).status
+    ).toBe(404)
+
+    const begun = await start(first)
+    await call(parent, 'PATCH', `/learning/attempts/${begun.body.id}`, {
+      events: [],
+      steps_completed: 15,
+      completed: true
+    })
+    expect((await shelf()).locked_after).toBeNull()
+    expect((await start(second)).status).toBe(201)
+  })
+})
+
 describe('leaving learning mode', () => {
   test('only the parent sets the PIN, and leaving checks it', async () => {
     expect((await call(admin, 'PATCH', `/children/${child.id}`, { pin: '1234' })).status).toBe(403)
@@ -538,6 +597,14 @@ describe('learning rules', () => {
 })
 
 describe('scoring rules', () => {
+  test('lockedAfter locks only an assigned, unfinished earlier part', () => {
+    const best = new Map([['done', { times: 1, stars: 2 }]])
+    expect(lockedAfter({}, ['one'], best)).toBeNull()
+    expect(lockedAfter({ after: 'one' }, ['two'], best)).toBeNull()
+    expect(lockedAfter({ after: 'one' }, ['one'], best)).toBe('one')
+    expect(lockedAfter({ after: 'done' }, ['done'], best)).toBeNull()
+  })
+
   test('maxStars follows each game', () => {
     const steps = (count) => Array.from({ length: count }, () => ({}))
     expect(maxStars({ steps: steps(4) })).toBe(1)
