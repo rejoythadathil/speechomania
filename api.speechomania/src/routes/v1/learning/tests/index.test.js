@@ -12,6 +12,7 @@ import {
   bestBySlug,
   lockedAfter,
   maxStars,
+  rewardOf,
   starsFor,
   stepsTotal
 } from '../utils/index.js'
@@ -465,11 +466,21 @@ describe('badges', () => {
       lesson_id: pick.id
     })
     const check = (index) => ({ step: 'check', index, correct: true, wrongs: 0, latency_ms: 800 })
-    await call(parent, 'PATCH', `/learning/attempts/${started.body.id}`, {
+    const finished = await call(parent, 'PATCH', `/learning/attempts/${started.body.id}`, {
       events: [check(0), check(1)],
       steps_completed: 2,
       completed: true
     })
+    expect(finished.body.reward).toEqual({ new_best: true, new_badge: true })
+    const again = await call(parent, 'POST', `/learning/children/${child.id}/attempts`, {
+      lesson_id: pick.id
+    })
+    const repeat = await call(parent, 'PATCH', `/learning/attempts/${again.body.id}`, {
+      events: [check(0), check(1)],
+      steps_completed: 2,
+      completed: true
+    })
+    expect(repeat.body.reward).toEqual({ new_best: false, new_badge: false })
     const after = (await call(parent, 'GET', `/learning/children/${child.id}`)).body
     expect(after.badges).toEqual([
       { slug: pick.slug, title: 'Who can’t?', player: 'pick', cover: ['baby', 'swimmer'] }
@@ -597,6 +608,15 @@ describe('learning rules', () => {
 })
 
 describe('scoring rules', () => {
+  test('rewardOf marks a better score and the first time a badge is reached', () => {
+    const first = { times: 0, best: 0 }
+    expect(rewardOf(3, first, 10)).toEqual({ new_best: false, new_badge: false })
+    expect(rewardOf(9, first, 10)).toEqual({ new_best: false, new_badge: true })
+    expect(rewardOf(7, { times: 2, best: 5 }, 10)).toEqual({ new_best: true, new_badge: false })
+    expect(rewardOf(10, { times: 2, best: 9 }, 10)).toEqual({ new_best: true, new_badge: false })
+    expect(rewardOf(9, { times: 1, best: 9 }, 10)).toEqual({ new_best: false, new_badge: false })
+  })
+
   test('lockedAfter locks only an assigned, unfinished earlier part', () => {
     const best = new Map([['done', { times: 1, stars: 2 }]])
     expect(lockedAfter({}, ['one'], best)).toBeNull()

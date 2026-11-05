@@ -32,6 +32,7 @@ import {
   firstStep,
   lockedAfter,
   maxStars,
+  rewardOf,
   quizResult,
   starsFor,
   stepsTotal
@@ -328,6 +329,8 @@ export function recordProgress(user, attemptId, body, ctx) {
         steps_completed: true,
         events: true,
         metadata: true,
+        child_id: true,
+        lesson: { select: { slug: true, content: true } },
         assessment: { select: { items: true, settings: true } }
       }
     })
@@ -349,6 +352,18 @@ export function recordProgress(user, attemptId, body, ctx) {
         : null
     const stars = body.completed && !attempt.assessment ? starsFor(events) : 0
     const quiz = body.completed && !attempt.assessment ? quizResult(events) : null
+    const before =
+      body.completed && attempt.lesson
+        ? await tx.attempts.aggregate({
+            where: {
+              child_id: attempt.child_id,
+              status: 'completed',
+              lesson: { slug: attempt.lesson.slug }
+            },
+            _count: { _all: true },
+            _max: { stars: true }
+          })
+        : null
     const saved = await tx.attempts.update({
       where: { id: attemptId },
       data: {
@@ -375,7 +390,15 @@ export function recordProgress(user, attemptId, body, ctx) {
         ctx
       })
     }
-    return result && settings.visibility.child_score ? { ...saved, result } : saved
+    const reward = before
+      ? rewardOf(
+          stars,
+          { times: before._count._all, best: before._max.stars ?? 0 },
+          maxStars(attempt.lesson.content)
+        )
+      : null
+    if (result && settings.visibility.child_score) return { ...saved, result }
+    return reward ? { ...saved, reward } : saved
   }, SERIAL)
 }
 

@@ -33,6 +33,7 @@ export function useCelebrate({ motion, sound, muted }) {
       })
     }
     return {
+      motion,
       cheer(element) {
         play('ding')
         burst({ spread: 75, startVelocity: 32, origin: originOf(element) })
@@ -57,6 +58,8 @@ export function useCelebrate({ motion, sound, muted }) {
         play('win', big ? 1 : 0.6)
         burst({
           particleCount: (motion === 'gentle' ? 60 : 160) / (big ? 1 : 2),
+          shapes: ['star', 'circle', 'square'],
+          scalar: 1.2,
           spread: 110,
           startVelocity: 45,
           origin: originOf(element)

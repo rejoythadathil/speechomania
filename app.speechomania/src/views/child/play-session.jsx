@@ -10,6 +10,7 @@ import { cx } from '@/utils/cx'
 import { GAMES, shuffle } from './games/index.js'
 import { tallyOf } from './games/use-round.js'
 import styles from './lesson-player.module.css'
+import { RewardReveal } from './reward-reveal.jsx'
 
 const PAIRS_PER_BOARD = 3
 
@@ -174,7 +175,6 @@ export function PlaySession({
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const answers = useRef([])
-  const trophy = useRef(null)
   const { speak, stop } = voice
 
   async function open() {
@@ -200,12 +200,11 @@ export function PlaySession({
       const prize = prizeOf(summary.got, summary.total)
       setResult({ ...summary, prize })
       setPages(null)
-      requestAnimationFrame(() => celebrate.finale(trophy.current, prize.big))
       if (lines.outro) await speak(lines.outro)
       const reward = lines[prize.line] ?? lines.reward
       if (reward) speak(reward)
     },
-    [celebrate, lines, send, speak, summarise]
+    [lines, send, speak, summarise]
   )
 
   const done = useCallback(
@@ -307,20 +306,7 @@ export function PlaySession({
 
       {result ? (
         <section className={cx(child.card, styles.panel)}>
-          <img
-            ref={trophy}
-            className={cx(styles.trophy, !result.prize.big && styles.smallPrize)}
-            src={ART[result.prize.art]}
-            alt={result.prize.art}
-            draggable="false"
-          />
-          <h1>{result.prize.title}</h1>
-          {result.total ? (
-            <p className={styles.score}>
-              <img src={ART.star} alt="" draggable="false" />
-              {result.got} of {result.total}
-            </p>
-          ) : null}
+          <RewardReveal result={result} player={cover.player} celebrate={celebrate} />
           {result.check ? (
             <p className={styles.check}>
               Quick check: {result.check.right} of {result.check.total}
