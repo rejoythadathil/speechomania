@@ -1,5 +1,5 @@
 import { PAIRS_PER_BOARD } from '../../lessons/constants/index.js'
-import { BADGE_SHARE } from '../constants/index.js'
+import { BADGE_SHARE, FRIENDS, MEDAL_SHARE, STARS_PER_FRIEND } from '../constants/index.js'
 
 const PAGE_PLAYERS = ['story', 'pick']
 
@@ -43,6 +43,28 @@ export function bestBySlug(groups, slugOf) {
     })
   }
   return best
+}
+
+export function prizeOf(best, max) {
+  if (best === null) return null
+  const share = best / Math.max(max, 1)
+  return share >= BADGE_SHARE ? 'trophy' : share >= MEDAL_SHARE ? 'medal' : 'star'
+}
+
+export function friendsFor(stars) {
+  const count = Math.min(Math.floor(stars / STARS_PER_FRIEND), FRIENDS.length)
+  return {
+    earned: FRIENDS.slice(0, count),
+    next: FRIENDS[count] ?? null,
+    stars_to_next: count < FRIENDS.length ? (count + 1) * STARS_PER_FRIEND - stars : 0,
+    total: FRIENDS.length
+  }
+}
+
+export function newFriend(before, gained) {
+  const had = friendsFor(before).earned.length
+  const now = friendsFor(before + gained).earned
+  return now.length > had ? now[now.length - 1] : null
 }
 
 export function rewardOf(stars, before, max) {

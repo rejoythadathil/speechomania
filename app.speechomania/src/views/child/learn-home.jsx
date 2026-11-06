@@ -289,31 +289,60 @@ export function LearnHomeView() {
               </section>
             </div>
 
-            <aside className={styles.side} aria-labelledby="badges-title">
+            <aside className={styles.side} aria-labelledby="trophies-title">
               <div className={styles.sectionHead}>
-                <h2 id="badges-title">My badges</h2>
+                <h2 id="trophies-title">My trophies</h2>
                 <span className={styles.count}>
-                  {learner.badges.length} of {learner.games_total}
+                  {learner.trophies.filter((game) => game.prize).length} of {learner.games_total}
                 </span>
               </div>
-              {learner.badges.length ? (
-                <ul className={styles.badges}>
-                  {learner.badges.map((badge) => (
-                    <li key={badge.slug} className={styles.badge}>
+              {learner.trophies.length ? (
+                <ul className={styles.shelf}>
+                  {learner.trophies.map((game) => (
+                    <li
+                      key={game.slug}
+                      className={cx(styles.shelfItem, !game.prize && styles.shelfEmpty)}
+                    >
                       <span
-                        className={styles.badgeArt}
-                        style={{ background: sceneFor(badge.player).background }}
+                        className={styles.shelfArt}
+                        style={{ background: sceneFor(game.player).background }}
                       >
-                        <img src={ART[gameArt(badge)]} alt="" draggable="false" />
+                        <img src={ART[gameArt(game)]} alt="" draggable="false" loading="lazy" />
+                        {game.prize ? (
+                          <img
+                            className={styles.shelfPrize}
+                            src={ART[game.prize]}
+                            alt={game.prize}
+                            draggable="false"
+                          />
+                        ) : null}
                       </span>
-                      <span className={styles.badgeTitle}>{badge.title}</span>
-                      <img className={styles.medal} src={ART.medal} alt="" draggable="false" />
+                      <span className={styles.shelfTitle}>{game.title}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className={styles.note}>Finish a game with three stars to win its badge.</p>
+                <p className={styles.note}>Play a game to win your first trophy.</p>
               )}
+              <div className={cx(styles.sectionHead, styles.friendsHead)}>
+                <h2 id="friends-title">My friends</h2>
+                <span className={styles.count}>
+                  {learner.friends.earned.length} of {learner.friends.total}
+                </span>
+              </div>
+              <ul className={styles.friends} aria-labelledby="friends-title">
+                {learner.friends.earned.map((name) => (
+                  <li key={name} className={styles.friend}>
+                    <img src={ART[name]} alt={name} draggable="false" loading="lazy" />
+                  </li>
+                ))}
+                {learner.friends.next ? (
+                  <li className={cx(styles.friend, styles.nextFriend)}>
+                    <img src={ART[learner.friends.next]} alt="" draggable="false" loading="lazy" />
+                    <span>{learner.friends.stars_to_next} more stars</span>
+                  </li>
+                ) : null}
+              </ul>
             </aside>
           </div>
         </div>

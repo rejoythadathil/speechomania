@@ -31,7 +31,10 @@ import {
   coverOf,
   firstStep,
   lockedAfter,
+  friendsFor,
   maxStars,
+  newFriend,
+  prizeOf,
   rewardOf,
   quizResult,
   starsFor,
@@ -112,7 +115,15 @@ export async function getLearner(user, id) {
     games_played: games.filter((game) => game.best !== null).length,
     badges: games
       .filter((game) => game.best !== null && game.best >= badgeStars(game.max_stars))
-      .map(({ slug, title, player, cover }) => ({ slug, title, player, cover }))
+      .map(({ slug, title, player, cover }) => ({ slug, title, player, cover })),
+    trophies: games.map(({ slug, title, player, cover, best, max_stars }) => ({
+      slug,
+      title,
+      player,
+      cover,
+      prize: prizeOf(best, max_stars)
+    })),
+    friends: friendsFor(_sum.stars ?? 0)
   }
 }
 
@@ -364,6 +375,15 @@ export function recordProgress(user, attemptId, body, ctx) {
             _max: { stars: true }
           })
         : null
+    const starsBefore =
+      body.completed && attempt.lesson
+        ? ((
+            await tx.attempts.aggregate({
+              where: { child_id: attempt.child_id },
+              _sum: { stars: true }
+            })
+          )._sum.stars ?? 0)
+        : 0
     const saved = await tx.attempts.update({
       where: { id: attemptId },
       data: {
@@ -391,11 +411,14 @@ export function recordProgress(user, attemptId, body, ctx) {
       })
     }
     const reward = before
-      ? rewardOf(
-          stars,
-          { times: before._count._all, best: before._max.stars ?? 0 },
-          maxStars(attempt.lesson.content)
-        )
+      ? {
+          ...rewardOf(
+            stars,
+            { times: before._count._all, best: before._max.stars ?? 0 },
+            maxStars(attempt.lesson.content)
+          ),
+          new_friend: newFriend(starsBefore, stars)
+        }
       : null
     if (result && settings.visibility.child_score) return { ...saved, result }
     return reward ? { ...saved, reward } : saved

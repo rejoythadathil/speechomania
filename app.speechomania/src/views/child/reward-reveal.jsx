@@ -6,13 +6,16 @@ import styles from './lesson-player.module.css'
 
 const COUNT_MS = 80
 const EXTRAS_MS = 1100
+const GIFT_MS = 1300
+const OPEN_MS = 1200
 
 export function RewardReveal({ result, player, celebrate }) {
   const still = celebrate.motion === 'off'
   const total = result.got ?? 0
   const [shown, setShown] = useState(still ? total : 0)
-  const [stage, setStage] = useState(still ? 2 : 0)
+  const [stage, setStage] = useState(still ? 4 : 0)
   const prize = useRef(null)
+  const gift = useRef(null)
 
   useEffect(() => {
     const timers = []
@@ -31,6 +34,15 @@ export function RewardReveal({ result, player, celebrate }) {
       setStage(1)
       later(() => celebrate.finale(prize.current, result.prize.big), 60)
       later(() => setStage(2), EXTRAS_MS)
+      if (!result.reward?.new_friend) return
+      later(() => setStage(3), EXTRAS_MS + GIFT_MS)
+      later(
+        () => {
+          setStage(4)
+          celebrate.cheer(gift.current)
+        },
+        EXTRAS_MS + GIFT_MS + OPEN_MS
+      )
     }
     later(tick, 300)
     return () => timers.forEach(clearTimeout)
@@ -60,7 +72,7 @@ export function RewardReveal({ result, player, celebrate }) {
           {shown} of {result.total}
         </p>
       ) : null}
-      {stage === 2 && (reward.new_best || reward.new_badge) ? (
+      {stage >= 2 && (reward.new_best || reward.new_badge) ? (
         <span className={styles.extras}>
           {reward.new_best ? (
             <span className={styles.newBest}>
@@ -77,6 +89,23 @@ export function RewardReveal({ result, player, celebrate }) {
               New badge!
             </span>
           ) : null}
+        </span>
+      ) : null}
+      {stage >= 3 && reward.new_friend ? (
+        <span className={styles.newFriend} ref={gift}>
+          {stage === 3 ? (
+            <img className={styles.gift} src={ART.gift} alt="" draggable="false" />
+          ) : (
+            <>
+              <img
+                className={styles.friendArt}
+                src={ART[reward.new_friend]}
+                alt={reward.new_friend}
+                draggable="false"
+              />
+              New friend!
+            </>
+          )}
         </span>
       ) : null}
     </>
