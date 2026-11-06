@@ -10,7 +10,7 @@ The API behind child mode. Parent only: the child has no login and plays inside 
 | GET | `/learning/children/:id/assessments` | `page`, `page_size` | page of the child's assigned published assessments: `title`, `question_count`, `players`, `due_on`, `done`, `can_start`, and `score` when the assessment shows it to the child |
 | GET | `/learning/children/:id/assessments/:assessmentId` | | the questions (`items`) with signed audio, and the play settings (`tries`, `hints`, `shuffle`, `child_score`) |
 | POST | `/learning/children/:id/attempts` | `lesson_id` or `assessment_id` (exactly one) | new attempt pinned to that lesson version, or to the assessment; 409 when the assessment is finished and retakes are off; 403 when the lesson's earlier part (`after`) is assigned to the child and not finished yet |
-| PATCH | `/learning/attempts/:id` | `events` (max 50 per call), `steps_completed`, `completed` | the attempt; on completion the API sets the stars (lessons) or the score in `metadata.result` (assessments, returned as `result` when the child may see it) |
+| PATCH | `/learning/attempts/:id` | `events` (max 50 per call), `steps_completed`, `completed` | the attempt; on completion the API sets the stars (lessons) or the score in `metadata.result` (assessments, returned as `result` when the child may see it); a finished lesson also returns `reward: { new_best, new_badge }`, compared with earlier finished attempts of the same lesson |
 | POST | `/learning/children/:id/exit` | `pin` | `{ ok: true }` when the PIN matches or none is set |
 
 ## Rules (`utils/index.js`, `constants/index.js`)

@@ -69,7 +69,8 @@ function Player({ lesson, learner, voice, bar, celebrate, reloadLearner }) {
       return {
         got: saved?.stars ?? counted.filter((event) => event.correct && !event.wrongs).length,
         total: counted.length,
-        check: checkScore(answers)
+        check: checkScore(answers),
+        reward: saved?.reward ?? null
       }
     },
     [reloadLearner]

@@ -215,3 +215,69 @@
     width: 14px;
   }
 }
+
+.waiting {
+  visibility: hidden;
+  animation: none;
+}
+
+.counting img {
+  animation: twinkle 400ms ease-in-out infinite alternate;
+}
+
+.extras {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.newBest,
+.newBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 8px;
+  border-radius: 999px;
+  background: #fff4d6;
+  color: var(--child-ink);
+  font-size: 20px;
+  font-weight: 700;
+  animation: pop 700ms var(--child-ease) both;
+}
+
+.newBest img {
+  width: 44px;
+}
+
+.newBadge {
+  border-radius: 16px;
+  background: #eef5ff;
+  animation-delay: 250ms;
+}
+
+.newBadgeArt {
+  position: relative;
+  width: 84px;
+}
+
+.newBadgeArt > img {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  width: 40px;
+}
+
+[data-motion='off'] .counting img,
+[data-motion='off'] .newBest,
+[data-motion='off'] .newBadge,
+[data-motion='off'] .trophy {
+  animation: none;
+}
+
+@keyframes twinkle {
+  to {
+    scale: 1.2;
+    rotate: 12deg;
+  }
+}

@@ -45,6 +45,14 @@ export function bestBySlug(groups, slugOf) {
   return best
 }
 
+export function rewardOf(stars, before, max) {
+  const badge = badgeStars(max)
+  return {
+    new_best: before.times > 0 && stars > before.best,
+    new_badge: stars >= badge && (before.times === 0 || before.best < badge)
+  }
+}
+
 export function lockedAfter(content, assigned, best) {
   const after = content.after
   if (!after || !assigned.includes(after)) return null
