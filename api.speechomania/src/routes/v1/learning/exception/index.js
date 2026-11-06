@@ -14,4 +14,6 @@ export const attemptFinished = () => new HttpError(409, 'This attempt is already
 
 export const tooManyEvents = () => new HttpError(409, 'This attempt has too many events')
 
+export const lessonLocked = () => new HttpError(403, 'Finish the part before this one first')
+
 export const wrongPin = () => new HttpError(400, 'That PIN is not right')

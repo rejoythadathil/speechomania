@@ -111,7 +111,14 @@ const stepsFor = (player) => {
   return storyStep
 }
 
+const slugRule = Joi.string()
+  .trim()
+  .lowercase()
+  .pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+  .max(80)
+
 const content = Joi.object({
+  after: slugRule,
   player: Joi.string()
     .valid(...LESSON_PLAYERS)
     .default('story'),
@@ -142,11 +149,7 @@ export const listQuery = Joi.object({
 })
 
 export const createBody = Joi.object({
-  slug: Joi.string()
-    .trim()
-    .lowercase()
-    .pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-    .max(80)
+  slug: slugRule
     .required()
     .messages({ 'string.pattern.base': 'Use lowercase letters, numbers and single hyphens' }),
   title: Joi.string().trim().min(1).max(160).required(),

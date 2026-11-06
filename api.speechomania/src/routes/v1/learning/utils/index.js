@@ -45,6 +45,12 @@ export function bestBySlug(groups, slugOf) {
   return best
 }
 
+export function lockedAfter(content, assigned, best) {
+  const after = content.after
+  if (!after || !assigned.includes(after)) return null
+  return best.get(after)?.times ? null : after
+}
+
 export function quizResult(events) {
   const quiz = events.filter((event) => event.step === 'quiz')
   if (!quiz.length) return null

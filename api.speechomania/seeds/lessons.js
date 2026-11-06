@@ -595,7 +595,7 @@ export const LESSONS = [
   ['bigger-smaller', 'Bigger and smaller', biggerSmaller, 'published'],
   ['where-is-it', 'Where is it?', whereIsIt, 'published'],
   ['a-or-an', 'Articles, part 1: a or an', aOrAn, 'published'],
-  ['a-or-the', 'Articles, part 2: a or the', aOrThe, 'published'],
+  ['a-or-the', 'Articles, part 2: a or the', { ...aOrThe, after: 'a-or-an' }, 'published'],
   ['ask-me', 'Ask me', askMe, 'published'],
   ['why', 'Why?', why, 'published'],
   ['this-these', 'This and these', thisOrThese, 'published'],

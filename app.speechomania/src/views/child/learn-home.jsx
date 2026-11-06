@@ -50,42 +50,55 @@ const PRIZES = [null, null, 'medal', 'trophy']
 function GameCard({ lesson, next, onOpen }) {
   const stars = rating(lesson)
   const scene = sceneFor(lesson.player)
+  const locked = lesson.locked_after
   return (
     <button
       type="button"
-      className={cx(styles.card, next && styles.nextCard)}
+      className={cx(styles.card, next && styles.nextCard, locked && styles.lockedCard)}
       style={{ '--accent': scene.accent }}
       onClick={onOpen}
+      disabled={Boolean(locked)}
+      aria-label={locked ? `${lesson.title}. Finish ${locked.title} first.` : undefined}
     >
       <span className={styles.picture}>
         <GameThumb player={lesson.player} cover={lesson.cover} />
-        <span className={styles.tag}>{scene.tag}</span>
-        {next ? (
+        {locked ? (
+          <span className={styles.lock}>
+            <GrownUpIcon size={56} />
+          </span>
+        ) : next ? (
           <span className={styles.playNext}>Play next</span>
         ) : !lesson.times_completed ? (
-          <span className={styles.fresh}>New</span>
+          <img className={styles.fresh} src={ART.new} alt="New" draggable="false" />
         ) : null}
       </span>
       <span className={styles.meta}>
         <span className={styles.title}>{lesson.title}</span>
-        <span className={styles.prize}>
-          {PRIZES[stars] ? (
-            <img src={ART[PRIZES[stars]]} alt={PRIZES[stars]} draggable="false" />
-          ) : null}
-          <span
-            className={styles.stars}
-            aria-label={lesson.times_completed ? `${stars} of 3 stars` : 'Not played yet'}
-          >
-            {[0, 1, 2].map((index) => (
-              <img
-                key={index}
-                className={cx(index < stars && styles.got)}
-                src={ART.star}
-                alt=""
-                draggable="false"
-              />
-            ))}
-          </span>
+        <span className={styles.foot}>
+          <span className={styles.tag}>{scene.tag}</span>
+          {locked ? (
+            <span className={styles.after}>Finish {locked.title} first</span>
+          ) : (
+            <span className={styles.prize}>
+              {PRIZES[stars] ? (
+                <img src={ART[PRIZES[stars]]} alt={PRIZES[stars]} draggable="false" />
+              ) : null}
+              <span
+                className={styles.stars}
+                aria-label={lesson.times_completed ? `${stars} of 3 stars` : 'Not played yet'}
+              >
+                {[0, 1, 2].map((index) => (
+                  <img
+                    key={index}
+                    className={cx(index < stars && styles.got)}
+                    src={ART.star}
+                    alt=""
+                    draggable="false"
+                  />
+                ))}
+              </span>
+            </span>
+          )}
         </span>
       </span>
     </button>
@@ -102,19 +115,17 @@ function CheckinCard({ checkin, onOpen }) {
     >
       <span className={styles.picture}>
         <GameThumb player={checkin.players[0] ?? 'story'} />
-        <span className={styles.tag}>Check-in</span>
-        {checkin.done ? (
-          <span className={styles.fresh}>Done</span>
-        ) : (
-          <span className={styles.playNext}>Ready</span>
-        )}
+        {checkin.done ? null : <span className={styles.playNext}>Ready</span>}
       </span>
       <span className={styles.meta}>
         <span className={styles.title}>{checkin.title}</span>
-        <span className={styles.count}>
-          {checkin.score
-            ? `${checkin.score.score} of ${checkin.score.max_score}`
-            : `${checkin.question_count} questions`}
+        <span className={styles.foot}>
+          <span className={styles.tag}>{checkin.done ? 'Done' : 'Check-in'}</span>
+          <span className={styles.count}>
+            {checkin.score
+              ? `${checkin.score.score} of ${checkin.score.max_score}`
+              : `${checkin.question_count} questions`}
+          </span>
         </span>
       </span>
     </button>
@@ -162,7 +173,7 @@ export function LearnHomeView() {
     page_size: PAGE_SIZE
   })
   const games = shelf.data?.items ?? []
-  const next = games.find((lesson) => !lesson.times_completed) ?? null
+  const next = games.find((lesson) => !lesson.times_completed && !lesson.locked_after) ?? null
   const toTry = learner.games_total - learner.games_played
 
   return (

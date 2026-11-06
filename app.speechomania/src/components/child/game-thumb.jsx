@@ -6,7 +6,14 @@ export function GameThumb({ player, cover }) {
   if (GAME_SCENES[player]) {
     return (
       <span className={styles.thumb} aria-hidden="true">
-        <img className={styles.thumbScene} src={GAME_SCENES[player]} alt="" draggable="false" />
+        <img
+          className={styles.thumbScene}
+          src={GAME_SCENES[player]}
+          alt=""
+          draggable="false"
+          loading="lazy"
+          decoding="async"
+        />
       </span>
     )
   }
@@ -14,16 +21,17 @@ export function GameThumb({ player, cover }) {
   const art = player === 'pick' && cover ? cover : (GAME_ART[player] ?? GAME_ART.story)
   return (
     <span className={styles.thumb} style={{ background: scene.background }} aria-hidden="true">
-      {scene.decor.slice(0, 4).map(([name, left, top, size], index) => (
+      {scene.decor.slice(0, 2).map(([name, left, , size], index) => (
         <img
           key={`${name}-${index}`}
           className={styles.thumbDecor}
           src={ART[name]}
           alt=""
           draggable="false"
+          loading="lazy"
           style={{
             left: `${left}%`,
-            top: `${Math.min(top, 82)}%`,
+            bottom: '4%',
             width: `${Math.round(size / 4.5)}%`
           }}
         />
