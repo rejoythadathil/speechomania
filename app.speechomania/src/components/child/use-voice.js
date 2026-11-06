@@ -16,6 +16,8 @@ export function estimateWords(text) {
   return { words, duration: time }
 }
 
+const SAFETY_SECONDS = 2
+
 export function useVoice({ sound = 'normal', muted = false }) {
   const [line, setLine] = useState({ text: '', index: -1 })
   const playing = useRef(null)
@@ -41,6 +43,7 @@ export function useVoice({ sound = 'normal', muted = false }) {
     playing.current = null
     if (!current) return
     cancelAnimationFrame(current.frame)
+    clearTimeout(current.safety)
     current.audio?.pause()
     if ('speechSynthesis' in window) window.speechSynthesis.cancel()
     current.finish()
@@ -66,6 +69,7 @@ export function useVoice({ sound = 'normal', muted = false }) {
         if (playing.current !== current) return
         playing.current = null
         cancelAnimationFrame(current.frame)
+        clearTimeout(current.safety)
         setLine((value) => ({ ...value, index: -1 }))
         finish()
       }
@@ -98,6 +102,7 @@ export function useVoice({ sound = 'normal', muted = false }) {
         window.speechSynthesis.speak(utterance)
       }
       current.frame = requestAnimationFrame(tick)
+      current.safety = setTimeout(end, (timing.duration + SAFETY_SECONDS) * 1000)
       return done
     },
     [stop]
