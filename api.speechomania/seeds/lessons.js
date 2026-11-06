@@ -29,7 +29,7 @@ const canAndCant = {
     ['swim', 'baby', 'swimmer', 'swim'],
     ['walk', 'snake', 'dog', 'walk'],
     ['fly', 'snake', 'bird', 'fly'],
-    ['bark', 'cat', 'dog', 'bark'],
+    ['bark', 'bird', 'dog', 'bark'],
     ['climb a tree', 'elephant', 'monkey', 'climb'],
     ['ride a cycle', 'cat', 'boy', 'ride'],
     ['sing', 'fish', 'bird', 'sing'],
