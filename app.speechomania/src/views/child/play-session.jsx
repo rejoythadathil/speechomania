@@ -8,6 +8,7 @@ import { Scenery } from '@/components/child/scenery.jsx'
 import child from '@/components/child/child.module.css'
 import { cx } from '@/utils/cx'
 import { GAMES, shuffle } from './games/index.js'
+import { tallyOf } from './games/use-round.js'
 import styles from './lesson-player.module.css'
 
 const PAIRS_PER_BOARD = 3
@@ -246,6 +247,7 @@ export function PlaySession({
           lines={page.lines}
           voice={voice}
           celebrate={celebrate}
+          tally={tallyOf(answers.current)}
           onDone={done}
         />
       ) : null}
