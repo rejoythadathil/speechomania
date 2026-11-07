@@ -231,7 +231,9 @@ const QUESTION_OPTIONS = [3, 5, 10].map((count) => ({
 function FlowPanel({ lesson, editable, onChanged }) {
   const notify = useToast()
   const [pending, setPending] = useState(false)
-  const story = (lesson.content.player ?? 'story') === 'story'
+  const player = lesson.content.player ?? 'story'
+  const story = player === 'story'
+  const after = lesson.content.after
 
   async function save(check) {
     setPending(true)
@@ -249,19 +251,27 @@ function FlowPanel({ lesson, editable, onChanged }) {
   return (
     <Panel title="Lesson flow" description="What a child goes through, in order">
       <ol className="flex flex-col gap-3 text-body-2-regular text-text-secondary">
-        <li>
-          <span className="text-body-2-medium text-text-primary">1. Learn cards</span> ·{' '}
-          {lesson.cards.length
-            ? `${lesson.cards.length} flip cards, each read aloud`
-            : 'none (story pages are the reading)'}
-        </li>
-        <li>
-          <span className="text-body-2-medium text-text-primary">2. Game</span> ·{' '}
-          {lesson.step_count} activities
-        </li>
-        <li className="flex flex-col gap-2">
+        {after ? (
+          <li>
+            <span className="text-body-2-medium text-text-primary">Opens after</span> · {after},
+            once the child has finished it
+          </li>
+        ) : null}
+        {player === 'cards' ? (
+          <li>
+            <span className="text-body-2-medium text-text-primary">Flashcards</span> ·{' '}
+            {lesson.cards.length} cards, each flips and is read aloud. The game is the part 2
+            lesson.
+          </li>
+        ) : (
+          <li>
+            <span className="text-body-2-medium text-text-primary">{story ? 'Story' : 'Game'}</span>{' '}
+            · {lesson.step_count} {story ? 'pages' : 'activities'}
+          </li>
+        )}
+        <li className={player === 'cards' ? 'hidden' : 'flex flex-col gap-2'}>
           <span>
-            <span className="text-body-2-medium text-text-primary">3. Quick check</span> ·{' '}
+            <span className="text-body-2-medium text-text-primary">Quick check</span> ·{' '}
             {story
               ? 'not for story lessons'
               : lesson.check

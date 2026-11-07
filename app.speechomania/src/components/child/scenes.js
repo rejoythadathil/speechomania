@@ -1,4 +1,15 @@
 export const SCENES = {
+  cards: {
+    accent: '#2f7ad8',
+    tag: 'Flashcards',
+    background: 'linear-gradient(#eef6ff, #ffeccc)',
+    decor: [['books', 78, 80, 100]],
+    how: [
+      ['sound-on', 'Listen'],
+      ['cards', 'Look at the card'],
+      ['arrow-right', 'Next card']
+    ]
+  },
   story: {
     accent: '#e8833a',
     tag: 'Story',
@@ -96,7 +107,7 @@ export const SCENES = {
     tag: 'Put it there',
     background: 'linear-gradient(#eef8dd, #bfe39a)',
     decor: [
-      ['tree', 84, 46, 170],
+      ['sun', 86, 12, 110],
       ['flower', 6, 84, 64]
     ],
     how: [
@@ -143,4 +154,4 @@ export const SCENES = {
   }
 }
 
-export const sceneFor = (player) => SCENES[player] ?? SCENES.story
+export const sceneFor = (player) => SCENES[player === 'card' ? 'cards' : player] ?? SCENES.story

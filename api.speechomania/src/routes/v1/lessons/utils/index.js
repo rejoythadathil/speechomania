@@ -25,36 +25,17 @@ export function versionSummary(counts, slug) {
   }
 }
 
-const cardLine = (player, step) => {
-  if (player === 'pick') return step.teach
-  if (player === 'match') return step.praise
-  return step.sentence ?? step.praise
-}
-
-const cardArt = (player, step) => (player === 'pick' ? [step.answer, step.actor] : (step.art ?? []))
-
-const cardKeys = (player, step) => {
-  if (player === 'pick') return ['can’t', 'can']
-  if (player === 'match') return [step.first, step.second]
-  if (player === 'yesno') return []
-  return [step.answer ?? step.word].filter((key) => typeof key === 'string')
-}
-
 export function learnCards(content) {
-  const player = content?.player ?? 'story'
-  if (player === 'story') return []
-  return (content.steps ?? []).flatMap((step) => {
-    const line = cardLine(player, step)
-    if (!line?.text) return []
-    return [
-      {
-        text: line.text,
-        audio: line.audio ?? null,
-        art: cardArt(player, step),
-        keys: cardKeys(player, step)
-      }
-    ]
-  })
+  if (content?.player !== 'cards') return []
+  return (content.steps ?? []).map((step) => ({
+    text: step.text,
+    audio: step.audio ?? null,
+    art: step.art ?? [],
+    keys: step.keys ?? [],
+    colours: step.colours ?? [],
+    layout: step.layout ?? 'row',
+    sizes: step.sizes ?? []
+  }))
 }
 
 export const checkOf = (metadata) =>

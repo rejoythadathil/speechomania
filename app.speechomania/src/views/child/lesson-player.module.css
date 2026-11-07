@@ -175,6 +175,36 @@
   scale: 1.2;
 }
 
+.progress .missed img {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.dots {
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+}
+
+.dots li {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #d4e3f2;
+  transition:
+    background var(--child-t) ease,
+    scale var(--child-t) ease;
+}
+
+.dots .done {
+  background: #2f7ad8;
+}
+
+.dots .now {
+  background: #2f7ad8;
+  scale: 1.4;
+}
+
 @keyframes pop {
   from {
     scale: 0;

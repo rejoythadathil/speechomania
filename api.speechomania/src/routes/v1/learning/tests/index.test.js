@@ -163,7 +163,7 @@ describe('learning scope', () => {
     ).toBe(404)
   })
 
-  test('an assigned lesson opens with its learn cards and one question page per step', async () => {
+  test('an assigned game lesson opens with one question page per step and no cards', async () => {
     const { status, body } = await call(
       parent,
       'GET',
@@ -172,11 +172,7 @@ describe('learning scope', () => {
     expect(status).toBe(200)
     expect(body.steps_total).toBe(2)
     expect(body.content.steps[0]).toMatchObject({ answer: 'baby', actor: 'swimmer', act: 'swim' })
-    expect(body.cards[0]).toMatchObject({
-      text: 'The baby can’t swim. The swimmer can swim.',
-      art: ['baby', 'swimmer'],
-      keys: ['can’t', 'can']
-    })
+    expect(body.cards).toEqual([])
     expect(body.check).toBeNull()
     expect(body.metadata).toBeUndefined()
   })
@@ -577,7 +573,7 @@ describe('leaving learning mode', () => {
 })
 
 describe('learning rules', () => {
-  test('a pick lesson has a learn and a check page per step', () => {
+  test('a pick lesson has one question page per step', () => {
     expect(stepsTotal({ player: 'pick', steps: [{}, {}, {}] })).toBe(3)
     expect(stepsTotal({ player: 'story', steps: [{}, {}] })).toBe(2)
     expect(stepsTotal({})).toBe(0)
@@ -651,12 +647,13 @@ describe('scoring rules', () => {
     expect(rewardOf(9, { times: 1, best: 9 }, 10)).toEqual({ new_best: false, new_badge: false })
   })
 
-  test('lockedAfter locks only an assigned, unfinished earlier part', () => {
+  test('lockedAfter locks only an assigned, unfinished earlier part, never a game already played', () => {
     const best = new Map([['done', { times: 1, stars: 2 }]])
     expect(lockedAfter({}, ['one'], best)).toBeNull()
     expect(lockedAfter({ after: 'one' }, ['two'], best)).toBeNull()
     expect(lockedAfter({ after: 'one' }, ['one'], best)).toBe('one')
     expect(lockedAfter({ after: 'done' }, ['done'], best)).toBeNull()
+    expect(lockedAfter({ after: 'one' }, ['one'], best, 'done')).toBeNull()
   })
 
   test('maxStars follows each game', () => {

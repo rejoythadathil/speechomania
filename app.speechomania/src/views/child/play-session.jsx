@@ -50,7 +50,7 @@ function balancedSides(count) {
 
 function quizPages(content, check) {
   const player = content.player ?? 'story'
-  if (!check || player === 'story') return []
+  if (!check || ['story', 'cards'].includes(player)) return []
   const order = shuffle(content.steps.map((_, index) => index))
   if (player === 'match') {
     const group = order.slice(0, PAIRS_PER_BOARD)
@@ -71,7 +71,9 @@ export function lessonPages(content, lines, { cards = [], check = null } = {}) {
     lines
   })
   let pages
-  if (player === 'story') {
+  if (player === 'cards') {
+    pages = []
+  } else if (player === 'story') {
     pages = indexes.map((index) => ({ step: 'story', index }))
   } else if (player === 'pick') {
     const round = (step) => {
@@ -79,9 +81,7 @@ export function lessonPages(content, lines, { cards = [], check = null } = {}) {
       const sides = balancedSides(order.length)
       return order.map((index, position) => ({ step, index, side: sides[position] }))
     }
-    pages = cards.length ? round('check') : [...round('learn'), ...round('check')]
-    const firstCheck = pages.findIndex((page) => page.step === 'check')
-    if (!cards.length) pages[firstCheck] = { ...pages[firstCheck], intro: lines.quiz }
+    pages = round('play')
   } else if (player === 'match') {
     const order = shuffle(indexes)
     const boards = Math.floor(order.length / PAIRS_PER_BOARD)
@@ -132,24 +132,33 @@ export function assessmentPages(items, settings) {
   })
 }
 
-function Progress({ pages: all, at: position }) {
+function Progress({ pages: all, at: position, answers }) {
   const kind = kindOf(all[position])
   const pages = all.filter((page) => kindOf(page) === kind)
   const at = all.slice(0, position).filter((page) => kindOf(page) === kind).length
+  const results = answers.filter((answer) => kindOf(answer) === kind)
+  const cards = kind === 'card'
   return (
-    <ol className={styles.progress} aria-label={`Round ${at + 1} of ${pages.length}`}>
-      {pages.map((page, index) => (
-        <li
-          key={index}
-          className={cx(
-            index < at && styles.done,
-            index === at && styles.now,
-            page.step === 'check' && styles.check
-          )}
-        >
-          <img src={ART.star} alt="" draggable="false" />
-        </li>
-      ))}
+    <ol
+      className={cx(styles.progress, cards && styles.dots)}
+      aria-label={`${cards ? 'Card' : 'Round'} ${at + 1} of ${pages.length}`}
+    >
+      {pages.map((page, index) => {
+        const result = results[index]
+        return (
+          <li
+            key={index}
+            className={cx(
+              index < at && styles.done,
+              index < at && result && (!result.correct || result.wrongs) && styles.missed,
+              index === at && styles.now,
+              page.step === 'check' && styles.check
+            )}
+          >
+            {cards ? null : <img src={ART.star} alt="" draggable="false" />}
+          </li>
+        )
+      })}
     </ol>
   )
 }
@@ -250,7 +259,10 @@ export function PlaySession({
           onDone={done}
         />
       ) : null}
-      <TopBar {...bar} centre={page ? <Progress pages={pages} at={at} /> : null} />
+      <TopBar
+        {...bar}
+        centre={page ? <Progress pages={pages} at={at} answers={answers.current} /> : null}
+      />
 
       {page && page.step !== 'card' ? (
         <section className={cx(child.card, child.caption)} aria-live="polite">

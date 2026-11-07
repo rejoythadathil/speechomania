@@ -18,7 +18,8 @@ export function GameThumb({ player, cover }) {
     )
   }
   const scene = sceneFor(player)
-  const art = player === 'pick' && cover ? cover : (GAME_ART[player] ?? GAME_ART.story)
+  const art =
+    ['pick', 'cards'].includes(player) && cover ? cover : (GAME_ART[player] ?? GAME_ART.story)
   return (
     <span className={styles.thumb} style={{ background: scene.background }} aria-hidden="true">
       {scene.decor.slice(0, 2).map(([name, left, , size], index) => (

@@ -2,6 +2,7 @@ import { ART } from '@/components/child/art.jsx'
 import { cx } from '@/utils/cx'
 import { Picture, WordChoices } from './parts.jsx'
 import { useRound } from './use-round.js'
+import { longForm } from './words.js'
 import styles from './games.module.css'
 
 export function SquishGame(props) {
@@ -11,8 +12,9 @@ export function SquishGame(props) {
   const mark = step.answer.search(/[’']/)
   return (
     <div className={styles.stage}>
-      <div className={styles.column}>
-        <Picture step={step} className={styles.small} />
+      <div className={cx(styles.column, styles.squishColumn)}>
+        <Picture step={step} className={styles.tiny} />
+        {longForm(step) ? <p className={styles.context}>{longForm(step)}</p> : null}
         <div className={cx(styles.press, squished && styles.squished)}>
           <img className={styles.clamp} src={ART.clamp} alt="" draggable="false" />
           <span className={styles.block}>{step.first}</span>

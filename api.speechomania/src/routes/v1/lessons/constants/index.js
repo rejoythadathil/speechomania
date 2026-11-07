@@ -12,8 +12,13 @@ export const LESSON_PLAYERS = [
   'place',
   'train',
   'yesno',
-  'why'
+  'why',
+  'cards'
 ]
+
+export const CARD_LAYOUTS = ['row', 'in', 'on', 'under', 'beside', 'behind', 'in front of']
+
+export const CARD_COLOURS = ['blue', 'orange', 'pink', 'green', 'red']
 
 export const PICTURE_PLAYERS = ['shark', 'balloons']
 

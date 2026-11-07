@@ -25,6 +25,7 @@ export function roundsLabel(content) {
   const player = playerOf(content)
   const steps = content.steps?.length ?? 0
   if (player === 'story') return `${steps} pages`
+  if (player === 'cards') return `${steps} flashcards`
   if (player === 'pick') return `${steps} questions`
   const pool = player === 'match' ? Math.floor(steps / PAIRS_PER_BOARD) : steps
   const rounds = Math.min(content.rounds ?? pool, pool)
@@ -78,6 +79,40 @@ function Choices({ choices, answer }) {
 }
 
 function StepBody({ player, step }) {
+  if (player === 'cards') {
+    const layout = step.layout ?? 'row'
+    return (
+      <>
+        <div className="flex flex-wrap gap-1.5">
+          {step.art.map((name, index) => (
+            <Picture
+              key={`${name}-${index}`}
+              name={name}
+              label={
+                layout !== 'row'
+                  ? index
+                    ? 'Place'
+                    : `Shown ${layout}`
+                  : step.sizes?.[index]
+                    ? `${step.sizes[index]}× size`
+                    : null
+              }
+            />
+          ))}
+        </div>
+        {step.keys?.length ? (
+          <p className="flex flex-wrap items-center gap-1.5 text-body-2-regular text-text-secondary">
+            <span className="text-caption-1-semibold text-text-tertiary uppercase">Coloured</span>
+            {step.keys.map((key, index) => (
+              <Chip key={key} variant="caption" color="neutral">
+                {key} · {step.colours?.[index] ?? 'blue'}
+              </Chip>
+            ))}
+          </p>
+        ) : null}
+      </>
+    )
+  }
   if (player === 'pick') {
     return (
       <>
@@ -175,7 +210,7 @@ export function StepCard({ player, step, index }) {
         <Voice line={step} />
       </div>
       <StepBody player={player} step={step} />
-      {player === 'pick' ? null : (
+      {['pick', 'cards'].includes(player) ? null : (
         <Said
           label={player === 'story' ? 'Says' : 'Then says'}
           line={step.praise ?? step.sentence}
@@ -266,24 +301,36 @@ export function StepsPanel({ lesson }) {
     total_pages: Math.max(1, Math.ceil(steps.length / STEPS_PER_PAGE))
   }
   const noun =
-    player === 'story'
-      ? 'pages'
-      : player === 'match'
-        ? 'pairs'
-        : player === 'pick'
-          ? 'questions'
-          : 'pictures'
+    player === 'cards'
+      ? 'flashcards'
+      : player === 'story'
+        ? 'pages'
+        : player === 'match'
+          ? 'pairs'
+          : player === 'pick'
+            ? 'questions'
+            : 'pictures'
   return (
     <Panel
-      title={player === 'story' ? 'Pages' : player === 'pick' ? 'Questions' : 'Rounds'}
-      description={
-        player === 'story'
-          ? 'Read in this order'
-          : player === 'match'
-            ? `Cards come in boards of ${PAIRS_PER_BOARD} pairs`
+      title={
+        player === 'cards'
+          ? 'Flashcards'
+          : player === 'story'
+            ? 'Pages'
             : player === 'pick'
-              ? 'Asked in this order; the right answer is highlighted'
-              : 'Each round is picked from this set; the right answer is highlighted'
+              ? 'Questions'
+              : 'Rounds'
+      }
+      description={
+        player === 'cards'
+          ? 'Shown in this order; each card flips and is read aloud'
+          : player === 'story'
+            ? 'Read in this order'
+            : player === 'match'
+              ? `Cards come in boards of ${PAIRS_PER_BOARD} pairs`
+              : player === 'pick'
+                ? 'Asked in this order; the right answer is highlighted'
+                : 'Each round is picked from this set; the right answer is highlighted'
       }
       footer={<ListFooter data={data} page={page} onPage={setPage} noun={noun} />}
     >

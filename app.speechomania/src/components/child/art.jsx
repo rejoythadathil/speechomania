@@ -43,7 +43,8 @@ export const GAME_ART = {
   place: ['box', 'cat'],
   train: ['engine', 'wagon'],
   yesno: ['thumbs-up', 'thumbs-down'],
-  why: ['detective', 'magnifier']
+  why: ['detective', 'magnifier'],
+  cards: ['cards']
 }
 
 export const ACTION_ART = {
@@ -64,9 +65,16 @@ export const ACTION_ART = {
 
 export const FISH = ['fish', 'tropical-fish', 'blowfish']
 
-export function Art({ name, className, alt = '' }) {
+export function Art({ name, className, alt = '', style }) {
   return ART[name] ? (
-    <img className={className} src={ART[name]} alt={alt} data-art={name} draggable="false" />
+    <img
+      className={className}
+      src={ART[name]}
+      alt={alt}
+      data-art={name}
+      style={style}
+      draggable="false"
+    />
   ) : null
 }
 

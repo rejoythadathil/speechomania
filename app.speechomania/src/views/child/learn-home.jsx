@@ -26,7 +26,7 @@ function rating(lesson) {
 }
 
 const gameArt = (game) =>
-  game.player === 'pick' && game.cover
+  ['pick', 'cards'].includes(game.player) && game.cover
     ? game.cover[0]
     : (GAME_ART[game.player] ?? GAME_ART.story)[0]
 
