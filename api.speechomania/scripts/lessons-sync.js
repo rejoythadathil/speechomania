@@ -43,6 +43,29 @@ function carryAudio(content, from) {
   return content
 }
 
+const partOne = new Map()
+for (const [game, , content] of LESSONS) {
+  if (content.after) partOne.set(content.after, [...(partOne.get(content.after) ?? []), game])
+}
+
+async function give(slug, wanted) {
+  const children = await db.children.findMany({
+    where: { deleted_at: null, NOT: { assigned_lessons: { equals: [] } } },
+    select: { id: true, assigned_lessons: true }
+  })
+  let added = 0
+  for (const child of children) {
+    const lessons = child.assigned_lessons ?? []
+    if (lessons.includes(slug) || !wanted(lessons)) continue
+    await db.children.update({
+      where: { id: child.id },
+      data: { assigned_lessons: [...lessons, slug] }
+    })
+    added += 1
+  }
+  console.log(`assigned   ${slug} to ${added} more children`)
+}
+
 for (const [slug, title, source, status] of LESSONS) {
   const { value, error } = createBody.validate({ slug, title, content: source })
   if (error) {
@@ -92,26 +115,14 @@ for (const [slug, title, source, status] of LESSONS) {
     const missing = lessonLines(content).filter((line) => !line.audio).length
     await publishLesson(owner, draftId, {})
     console.log(`published  ${slug}${missing ? ` (${missing} lines without voice)` : ''}`)
-    if (assign && !live) {
-      const games = LESSONS.filter(([, , game]) => game.after === slug).map(([game]) => game)
-      const children = await db.children.findMany({
-        where: {
-          deleted_at: null,
-          ...(games.length
-            ? { assigned_lessons: { hasSome: games } }
-            : { NOT: { assigned_lessons: { equals: [] } } })
-        },
-        select: { id: true, assigned_lessons: true }
-      })
-      for (const child of children) {
-        if (child.assigned_lessons.includes(slug)) continue
-        await db.children.update({
-          where: { id: child.id },
-          data: { assigned_lessons: [...child.assigned_lessons, slug] }
-        })
-      }
-      console.log(`assigned   ${slug} to ${children.length} children`)
-    }
+    if (assign && !live && !partOne.has(slug)) await give(slug, () => true)
+  }
+}
+
+if (assign && publish) {
+  for (const [slug, games] of partOne) {
+    if (!(await db.lessons.findFirst({ where: { slug, status: 'published' } }))) continue
+    await give(slug, (lessons) => lessons.some((lesson) => games.includes(lesson)))
   }
 }
 await db.$disconnect()
