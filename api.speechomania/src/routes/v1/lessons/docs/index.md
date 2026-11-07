@@ -16,6 +16,7 @@ Versioned lessons. One row per version (`slug` + `version`); at most one draft a
 ## Content
 - `player: 'story'`: `steps: [{ text, image_key?, audio? }]`.
 - Any lesson may set `after: '<slug>'`: when the child also has that lesson, this one stays locked until that one is finished once (part 1 before part 2).
+- `player: 'cards'` (a part 1 flashcard lesson): steps are cards with `text` (read aloud), `art` (1–3 names), optional `keys` (words to colour), `colours` (one per key: `blue`, `orange`, `pink`, `green`, `red`), `layout` (`row` by default; a place word such as `in` or `under` needs `art: [thing, place]` and draws the thing in that spot) and `sizes` (one scale per picture, 0.3–2, for bigger and smaller). The API returns them as `cards`; other players return `cards: []`.
 - `player: 'pick'`: `contrast` (the coloured word, e.g. `can’t`), `lines` (`intro`, `quiz`, `retry`, `skip`, `outro`, `reward`), and steps with `text` (the question), `choices` (two of `LESSON_CHARACTERS`), `answer`, `actor` (who acts it out), `act` (one of `LESSON_ACTIONS`), `praise`, `teach`.
 - Games (`rounds` 1–20, how many steps one play uses; any step may add `praise` and `sentence` lines):
   - Pictures: `art` (1–3 illustration names, lowercase with hyphens, matching files in the app's OpenMoji library) or `image_key` (an S3 key).

@@ -93,8 +93,14 @@ for (const [slug, title, source, status] of LESSONS) {
     await publishLesson(owner, draftId, {})
     console.log(`published  ${slug}${missing ? ` (${missing} lines without voice)` : ''}`)
     if (assign && !live) {
+      const games = LESSONS.filter(([, , game]) => game.after === slug).map(([game]) => game)
       const children = await db.children.findMany({
-        where: { deleted_at: null, NOT: { assigned_lessons: { equals: [] } } },
+        where: {
+          deleted_at: null,
+          ...(games.length
+            ? { assigned_lessons: { hasSome: games } }
+            : { NOT: { assigned_lessons: { equals: [] } } })
+        },
         select: { id: true, assigned_lessons: true }
       })
       for (const child of children) {

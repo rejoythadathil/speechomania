@@ -143,7 +143,9 @@ export async function listShelf(user, id, window) {
   ])
   const assigned = child.assigned_lessons ?? []
   const afters = [
-    ...new Set(page.items.map((item) => lockedAfter(item.content, assigned, best)).filter(Boolean))
+    ...new Set(
+      page.items.map((item) => lockedAfter(item.content, assigned, best, item.slug)).filter(Boolean)
+    )
   ]
   const titles = new Map(
     (
@@ -157,7 +159,7 @@ export async function listShelf(user, id, window) {
     ...page,
     items: page.items.map(({ content, ...lesson }) => {
       const score = best.get(lesson.slug.toLowerCase())
-      const after = lockedAfter(content, assigned, best)
+      const after = lockedAfter(content, assigned, best, lesson.slug)
       return {
         locked_after: after ? { slug: after, title: titles.get(after) ?? after } : null,
         ...lesson,
@@ -276,14 +278,10 @@ async function startAssessment(tx, child, assessmentId) {
 async function startLesson(tx, child, lessonId) {
   const lesson = await findPlayable(tx, child, lessonId)
   if (lesson.content.after && (child.assigned_lessons ?? []).includes(lesson.content.after)) {
-    const done = await tx.attempts.count({
-      where: {
-        child_id: child.id,
-        status: 'completed',
-        lesson: { slug: lesson.content.after }
-      }
-    })
-    if (!done) throw lessonLocked()
+    const finished = (slug) =>
+      tx.attempts.count({ where: { child_id: child.id, status: 'completed', lesson: { slug } } })
+    if (!(await finished(lesson.content.after)) && !(await finished(lesson.slug)))
+      throw lessonLocked()
   }
   return { lesson_id: lesson.id, steps_total: stepsTotal(lesson.content) }
 }

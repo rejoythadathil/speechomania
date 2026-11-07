@@ -45,6 +45,15 @@
   width: min(230px, 28vh, 56vw);
 }
 
+.tiny {
+  width: min(170px, 20vh, 44vw);
+}
+
+.squishColumn {
+  gap: clamp(8px, 1.6vh, 16px);
+  padding: 200px 0 90px;
+}
+
 .choices {
   display: flex;
   flex-wrap: wrap;
@@ -251,7 +260,14 @@
   gap: 14px;
   min-width: 300px;
   height: 104px;
-  margin-top: 40px;
+  margin-top: 78px;
+}
+
+.context {
+  margin: 0;
+  color: var(--child-ink-soft);
+  font-size: clamp(20px, 2.6vw, 26px);
+  font-weight: 600;
 }
 
 .clamp {
@@ -367,6 +383,13 @@
   transform: translateY(-14px);
 }
 
+.versusCard.right,
+.thumb.right {
+  outline: 5px solid #2fb36b;
+  background: #e3f6ea;
+  color: var(--child-ink);
+}
+
 .placeScene {
   position: relative;
   width: min(300px, 34vh, 52vw);
@@ -443,6 +466,11 @@
 
 .thing.placed {
   width: 40%;
+}
+
+.target.at-behind {
+  top: 4%;
+  left: 96%;
 }
 
 .thing.at-behind {
@@ -644,7 +672,22 @@
 }
 
 .animal > img {
-  width: 76%;
+  width: 66%;
+}
+
+.animalName {
+  position: absolute;
+  bottom: 6%;
+  left: 0;
+  right: 0;
+  color: var(--child-ink);
+  font-size: clamp(18px, 2.4vw, 24px);
+  font-weight: 700;
+  text-align: center;
+}
+
+.animal > img:first-child {
+  margin-bottom: 14%;
 }
 
 .animal.right {
@@ -905,6 +948,63 @@
 
 .learnKey {
   color: var(--key);
+}
+
+.learnKey[data-colour='blue'] {
+  color: #2f7ad8;
+}
+
+.learnKey[data-colour='orange'] {
+  color: #e8833a;
+}
+
+.learnKey[data-colour='pink'] {
+  color: #d9548a;
+}
+
+.learnKey[data-colour='green'] {
+  color: #3f9a5b;
+}
+
+.learnKey[data-colour='red'] {
+  color: #c8483d;
+}
+
+.learnPlace {
+  position: relative;
+  width: 60%;
+  aspect-ratio: 1;
+  margin: 10% 0 6%;
+}
+
+.learnPlace .thing {
+  width: 46%;
+  transition: none;
+}
+
+.learnPlace .thing.at-in {
+  width: 38%;
+}
+
+.learnPlace .thing.at-on {
+  top: 6%;
+}
+
+.learnPlace .thing.at-under {
+  top: 94%;
+}
+
+.learnPlace .thing.at-beside {
+  left: 118%;
+}
+
+[data-spot='chair'] .thing.at-under {
+  top: 80%;
+  width: 34%;
+}
+
+[data-spot='chair'] .thing.at-on {
+  top: 30%;
 }
 
 .learnSpoken {

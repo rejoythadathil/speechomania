@@ -5,6 +5,8 @@ import { useShake } from './parts.jsx'
 import { useRound } from './use-round.js'
 import styles from './games.module.css'
 
+const NAMES = { swimmer: 'big boy' }
+
 export function PickGame(props) {
   const { page, step, contrast } = props
   const round = useRound(props)
@@ -40,6 +42,7 @@ export function PickGame(props) {
             }}
           >
             <img src={ART[id]} alt="" draggable="false" />
+            <span className={styles.animalName}>{NAMES[id] ?? id}</span>
             {revealed && id === step.actor ? (
               <img
                 className={styles.prop}

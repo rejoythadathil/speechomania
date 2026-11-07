@@ -69,7 +69,7 @@ const verbs = [
   ['juggling', 'juggling'],
   ['surfing', 'surfing']
 ]
-const doer = { dancing: 'She is', hugging: 'They are', clapping: 'We are' }
+const doer = { walking: 'She is', dancing: 'She is', hugging: 'They are', clapping: 'We are' }
 const actionWords = {
   player: 'shark',
   lines: { ...play, intro: line('The shark is hungry. Feed it the right fish.') },
@@ -114,8 +114,8 @@ const feelings = {
 const things = [
   ['hot', 'fire', 'The fire is hot.'],
   ['cold', 'ice', 'The ice is cold.'],
-  ['wet', 'umbrella', 'The umbrella is wet.'],
   ['soft', 'teddy', 'The teddy is soft.'],
+  ['wet', 'umbrella', 'The umbrella is wet.'],
   ['sharp', 'scissors', 'The scissors are sharp.'],
   ['sweet', 'candy', 'The toffee is sweet.'],
   ['sour', 'lemon', 'The lemon is sour.'],
@@ -378,6 +378,7 @@ const questions = [
   ['car', 'car', true],
   ['fish', 'bird', false, 'No. This is a bird.']
 ]
+const article = (word) => (/^[aeiou]/.test(word) ? 'an' : 'a')
 const askMe = {
   player: 'yesno',
   lines: { ...play, intro: line('Look and listen. Say yes or no.') },
@@ -385,7 +386,7 @@ const askMe = {
     text: `Is this a ${thing}?`,
     art: [art],
     answer,
-    sentence: line(answer ? `Yes. This is a ${thing}.` : no)
+    sentence: line(answer ? `Yes. This is ${article(thing)} ${thing}.` : no)
   }))
 }
 
@@ -585,20 +586,135 @@ const they = pronoun(
   ]
 )
 
+const cards = (steps) => ({
+  player: 'cards',
+  lines: { ...play, intro: line('Look at each card and listen.') },
+  steps
+})
+const card = (text, art, keys = [], extra = {}) => ({ text, art, keys, ...extra })
+
+const canAndCantCards = cards(
+  canAndCant.steps.map((step) =>
+    card(step.teach.text, [step.answer, step.actor], [cant, 'can'], { colours: ['red', 'green'] })
+  )
+)
+
+const actionWordsCards = cards(
+  verbs.map(([word, art]) => card(`${doer[word] ?? 'He is'} ${word}.`, [art], [word]))
+)
+
+const feelingsCards = cards(
+  moods.map(([word, art]) => card(`This face is ${word}.`, [art], [word]))
+)
+
+const describingCards = cards(things.map(([word, art, sentence]) => card(sentence, [art], [word])))
+
+const oppositeSizes = { big: [1.3, 0.6], tall: [1.3, 0.65] }
+const oppositesCards = cards(
+  pairs.map(([first, second, one, two]) =>
+    card(`${cap(first)} and ${second} are opposites.`, [one, two], [first, second], {
+      colours: ['blue', 'orange'],
+      ...(oppositeSizes[first] ? { sizes: oppositeSizes[first] } : {})
+    })
+  )
+)
+
+const shortCards = cards(
+  contractions.map(([first, second, word, sentence, art]) =>
+    card(`${cap(word)} means ${first} ${second}. ${sentence}`, art, [word])
+  )
+)
+
+const sizeOf = { taller: [1.3, 0.65], bigger: [1.3, 0.6], longer: [1.3, 0.6], smaller: [0.55, 1.2] }
+const biggerCards = cards(
+  comparisons.map(([, , answerArt, , otherArt, sentence]) => {
+    const word = sentence.match(/(\w+) than/)[1]
+    return card(
+      sentence,
+      [answerArt, otherArt],
+      [word],
+      sizeOf[word] ? { sizes: sizeOf[word] } : {}
+    )
+  })
+)
+
+const placeCards = cards(
+  places.map(([thing, spot, answer]) =>
+    card(
+      `The ${thing} is ${answer} the ${spot}.`,
+      [placeArt[thing] ?? thing, placeArt[spot] ?? spot],
+      answer.split(' '),
+      { layout: answer }
+    )
+  )
+)
+
+const articleColour = { a: 'blue', an: 'orange', the: 'green' }
+const articleCards = (game) =>
+  cards(
+    game.steps.map((step) =>
+      card(step.sentence.text, step.art, [step.answer], { colours: [articleColour[step.answer]] })
+    )
+  )
+
+const askCards = cards(
+  questions.map(([thing, art, answer, no]) => {
+    const name = answer ? thing : no.match(/This is an? (.+)\./)[1]
+    return card(`This is ${article(name)} ${name}.`, [art], [name])
+  })
+)
+
+const PEOPLE = ['girl', 'boy', 'sleeping', 'running', 'walking', 'dancing']
+const whyCards = cards(
+  reasons.map(([, art, , , sentence]) => {
+    const person = sentence.startsWith('She ') ? 'girl' : sentence.startsWith('He ') ? 'boy' : null
+    const withPerson =
+      person && !art.some((name) => PEOPLE.includes(name)) ? [person, ...art].slice(0, 3) : art
+    return card(sentence, withPerson, ['because', 'so'])
+  })
+)
+
+const thisTheseCards = cards(
+  thisOrThese.steps.map((step) =>
+    card(step.sentence.text, step.art, [step.answer], {
+      colours: [step.answer === 'these' ? 'orange' : 'blue']
+    })
+  )
+)
+
+const parts = (slug, title, flash, game, gameName, status = 'published', after = null) => [
+  [`${slug}-cards`, `${title}, part 1: flashcards`, after ? { ...flash, after } : flash, status],
+  [slug, `${title}, part 2: ${gameName}`, { ...game, after: `${slug}-cards` }, status]
+]
+
 export const LESSONS = [
-  ['can-and-cant', 'Can and can’t', canAndCant, 'published'],
-  ['action-words', 'Action words', actionWords, 'published'],
-  ['feelings', 'Feelings', feelings, 'published'],
-  ['describing-words', 'Describing words', describingWords, 'published'],
-  ['opposites', 'Opposites', opposites, 'published'],
-  ['short-words', 'Short words', shortWords, 'published'],
-  ['bigger-smaller', 'Bigger and smaller', biggerSmaller, 'published'],
-  ['where-is-it', 'Where is it?', whereIsIt, 'published'],
-  ['a-or-an', 'Articles, part 1: a or an', aOrAn, 'published'],
-  ['a-or-the', 'Articles, part 2: a or the', { ...aOrThe, after: 'a-or-an' }, 'published'],
-  ['ask-me', 'Ask me', askMe, 'published'],
-  ['why', 'Why?', why, 'published'],
-  ['this-these', 'This and these', thisOrThese, 'published'],
+  ...parts('can-and-cant', 'Can and can’t', canAndCantCards, canAndCant, 'Who can’t?'),
+  ...parts('action-words', 'Action words', actionWordsCards, actionWords, 'Feed the shark'),
+  ...parts('feelings', 'Feelings', feelingsCards, feelings, 'Balloon pop'),
+  ...parts(
+    'describing-words',
+    'Describing words',
+    describingCards,
+    describingWords,
+    'Word bubbles'
+  ),
+  ...parts('opposites', 'Opposites', oppositesCards, opposites, 'Memory cards'),
+  ...parts('short-words', 'Short words', shortCards, shortWords, 'Word squish'),
+  ...parts('bigger-smaller', 'Bigger and smaller', biggerCards, biggerSmaller, 'Weigh it up'),
+  ...parts('where-is-it', 'Where is it?', placeCards, whereIsIt, 'Put it there'),
+  ...parts('a-or-an', 'A or an', articleCards(aOrAn), aOrAn, 'Word train'),
+  ...parts(
+    'a-or-the',
+    'A or the',
+    articleCards(aOrThe),
+    aOrThe,
+    'Word train',
+    'published',
+    'a-or-an'
+  ),
+  ...parts('ask-me', 'Ask me', askCards, askMe, 'Yes or no'),
+  ...parts('why', 'Why?', whyCards, why, 'Find the reason'),
+  ...parts('this-these', 'This and these', thisTheseCards, thisOrThese, 'Word bubbles'),
   ['he-she', 'He and she', heOrShe, 'draft'],
   ['they', 'He, she and they', they, 'draft'],
   [

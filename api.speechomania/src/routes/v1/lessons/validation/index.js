@@ -2,6 +2,8 @@ import Joi from 'joi'
 import { pageQuery } from '../../../../../common-service/http/validation/index.js'
 import {
   ART_NAME,
+  CARD_COLOURS,
+  CARD_LAYOUTS,
   CHECK_OPTIONS,
   CHECK_QUESTIONS,
   CHOICE_PLAYERS,
@@ -100,7 +102,28 @@ const matchStep = gameStep.keys({
 
 const yesNoStep = gameStep.keys({ answer: Joi.boolean().required() }).or('art', 'image_key')
 
+const cardStep = storyStep
+  .keys({
+    art: art.required(),
+    keys: Joi.array().items(word).max(4),
+    colours: Joi.array()
+      .items(Joi.string().valid(...CARD_COLOURS))
+      .max(4),
+    layout: Joi.string()
+      .valid(...CARD_LAYOUTS)
+      .default('row'),
+    sizes: Joi.array().items(Joi.number().min(0.3).max(2)).max(3)
+  })
+  .custom((value, helpers) => {
+    if (value.layout !== 'row' && value.art.length !== 2)
+      return helpers.message('A placed card needs two pictures: the thing and the place')
+    if (value.colours && value.colours.length > (value.keys?.length ?? 0))
+      return helpers.message('Give one colour per highlighted word')
+    return value
+  })
+
 const stepsFor = (player) => {
+  if (player === 'cards') return cardStep
   if (player === 'pick') return pickStep
   if (player === 'yesno') return yesNoStep
   if (player === 'match') return matchStep

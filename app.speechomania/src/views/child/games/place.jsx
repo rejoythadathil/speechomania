@@ -18,7 +18,7 @@ export function PlaceGame(props) {
   return (
     <div className={styles.stage}>
       <div className={styles.column}>
-        <div className={styles.placeScene}>
+        <div className={styles.placeScene} data-spot={spot}>
           <Art name={spot} className={styles.placeSpot} />
           {order.map((choice) => (
             <button

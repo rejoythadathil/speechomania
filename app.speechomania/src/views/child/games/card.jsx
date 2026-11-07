@@ -1,23 +1,51 @@
 import { useEffect, useState } from 'react'
-import { ART, StepArt } from '@/components/child/art.jsx'
+import { ART, Art } from '@/components/child/art.jsx'
 import { cx } from '@/utils/cx'
 import styles from './games.module.css'
 
-const COLOURS = { these: 'orange', she: 'pink', they: 'green', 'can’t': 'red', an: 'orange' }
-
 const bare = (word) => word.toLowerCase().replace(/[^a-z’']/g, '')
 
-function colourOf(keys, text) {
-  const words = text.split(/\s+/).map(bare)
-  const found = keys.map((key) => key.toLowerCase()).find((key) => words.includes(key))
-  return found ? (COLOURS[found] ?? 'blue') : 'blue'
+const spotClass = (layout) => styles[`at-${layout.replace(/\s+/g, '-')}`]
+
+function CardArt({ step }) {
+  const art = step.art ?? []
+  const layout = step.layout ?? 'row'
+  if (layout !== 'row') {
+    const [thing, spot] = art
+    return (
+      <span className={styles.learnArt}>
+        <span className={styles.learnPlace} data-spot={spot}>
+          <Art name={spot} className={styles.placeSpot} />
+          <Art
+            name={thing}
+            className={cx(styles.thing, styles.placed, spotClass(layout))}
+            alt={thing}
+          />
+        </span>
+      </span>
+    )
+  }
+  return (
+    <span className={styles.learnArt} data-count={art.length}>
+      {art.map((name, index) => (
+        <Art
+          key={`${name}-${index}`}
+          name={name}
+          className={styles.learnArtImg}
+          style={step.sizes?.[index] ? { scale: step.sizes[index] } : undefined}
+        />
+      ))}
+    </span>
+  )
 }
 
 export function CardGame({ step, voice, onDone }) {
   const [open, setOpen] = useState(false)
   const { speak } = voice
   const keys = (step.keys ?? []).map((key) => key.toLowerCase())
-  const colour = colourOf(step.keys ?? [], step.text)
+  const colourOf = (word) => step.colours?.[keys.indexOf(bare(word))] ?? 'blue'
+  const words = step.text.split(/\s+/)
+  const first = words.find((word) => keys.includes(bare(word)))
 
   useEffect(() => {
     let active = true
@@ -35,7 +63,6 @@ export function CardGame({ step, voice, onDone }) {
     }
   }, [onDone, speak, step])
 
-  const words = step.text.split(/\s+/)
   return (
     <div className={styles.stage}>
       <button
@@ -50,22 +77,29 @@ export function CardGame({ step, voice, onDone }) {
           </span>
           <span
             className={cx(styles.learnFace, styles.learnFront)}
-            data-colour={colour}
+            data-colour={first ? colourOf(first) : 'blue'}
             aria-hidden="true"
           >
-            <StepArt step={step} className={styles.learnArt} artClassName={styles.learnArtImg} />
+            <CardArt step={step} />
             <span className={styles.learnText}>
               {words.map((word, index) => {
                 const [, core, tail] = word.match(/^(.*?)([.,!?]*)$/)
+                const key = keys.includes(bare(word))
                 return (
-                  <span
-                    key={index}
-                    className={cx(
-                      voice.text === step.text && voice.wordIndex === index && styles.learnSpoken
-                    )}
-                  >
-                    <span className={cx(keys.includes(bare(word)) && styles.learnKey)}>{core}</span>
-                    {tail}{' '}
+                  <span key={index}>
+                    <span
+                      className={cx(
+                        voice.text === step.text && voice.wordIndex === index && styles.learnSpoken
+                      )}
+                    >
+                      <span
+                        className={cx(key && styles.learnKey)}
+                        data-colour={key ? colourOf(word) : undefined}
+                      >
+                        {core}
+                      </span>
+                      {tail}
+                    </span>{' '}
                   </span>
                 )
               })}

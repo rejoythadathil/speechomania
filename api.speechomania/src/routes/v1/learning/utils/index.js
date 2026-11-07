@@ -1,7 +1,7 @@
 import { PAIRS_PER_BOARD } from '../../lessons/constants/index.js'
 import { BADGE_SHARE, FRIENDS, MEDAL_SHARE, STARS_PER_FRIEND } from '../constants/index.js'
 
-const PAGE_PLAYERS = ['story', 'pick']
+const PAGE_PLAYERS = ['story', 'pick', 'cards']
 
 export function stepsTotal(content) {
   const steps = content.steps?.length ?? 0
@@ -20,14 +20,17 @@ export const badgeStars = (maxStars) => Math.max(1, Math.ceil(maxStars * BADGE_S
 
 export function maxStars(content) {
   const steps = content.steps?.length ?? 0
-  if (!content.player || content.player === 'story') return 1
+  if (!content.player || ['story', 'cards'].includes(content.player)) return 1
   if (content.player === 'pick') return steps
   const available = content.player === 'match' ? Math.floor(steps / PAIRS_PER_BOARD) : steps
   return Math.min(content.rounds ?? available, available)
 }
 
-export const coverOf = (content) =>
-  content.player === 'pick' ? (content.steps?.[0]?.choices ?? null) : null
+export const coverOf = (content) => {
+  if (content.player === 'pick') return content.steps?.[0]?.choices ?? null
+  if (content.player === 'cards') return content.steps?.[0]?.art?.slice(0, 2) ?? null
+  return null
+}
 
 export const firstStep = (content, field) =>
   content.steps?.find((step) => step[field] !== undefined)?.[field] ?? null
@@ -75,9 +78,10 @@ export function rewardOf(stars, before, max) {
   }
 }
 
-export function lockedAfter(content, assigned, best) {
+export function lockedAfter(content, assigned, best, slug) {
   const after = content.after
   if (!after || !assigned.includes(after)) return null
+  if (slug && best.get(slug)?.times) return null
   return best.get(after)?.times ? null : after
 }
 

@@ -96,24 +96,49 @@ describe('lessons', () => {
     expect(off.body.check).toBeNull()
   })
 
-  test('learn cards come from each game step', () => {
-    const line = (text) => ({ text, audio: null })
+  test('only a flashcard lesson has learn cards, each written out', () => {
     expect(learnCards({ player: 'story', steps: [{ text: 'Hi' }] })).toEqual([])
     expect(
-      learnCards({
-        player: 'bubbles',
-        steps: [{ art: ['duck'], answer: 'this', sentence: line('This is a duck.') }]
-      })
-    ).toEqual([{ text: 'This is a duck.', audio: null, art: ['duck'], keys: ['this'] }])
+      learnCards({ player: 'bubbles', steps: [{ art: ['duck'], answer: 'this', text: 'Pop' }] })
+    ).toEqual([])
     expect(
       learnCards({
-        player: 'match',
-        steps: [{ first: 'hot', second: 'cold', art: ['hot', 'cold'], praise: line('Hot!') }]
-      })[0].keys
-    ).toEqual(['hot', 'cold'])
-    expect(learnCards({ player: 'shark', steps: [{ word: 'running', art: ['running'] }] })).toEqual(
-      []
-    )
+        player: 'cards',
+        steps: [
+          {
+            text: 'The cat is in the box.',
+            art: ['cat', 'box'],
+            keys: ['in'],
+            layout: 'in'
+          }
+        ]
+      })
+    ).toEqual([
+      {
+        text: 'The cat is in the box.',
+        audio: null,
+        art: ['cat', 'box'],
+        keys: ['in'],
+        colours: [],
+        layout: 'in',
+        sizes: []
+      }
+    ])
+  })
+
+  test('a flashcard lesson checks its cards', async () => {
+    const card = (extra) => ({ text: 'The cat is in the box.', art: ['cat', 'box'], ...extra })
+    const create = (step) =>
+      call(admin, 'POST', '/lessons', {
+        slug: `cards-${crypto.randomUUID().slice(0, 8)}`,
+        title: 'Cards',
+        content: { player: 'cards', steps: [step] }
+      })
+    expect((await create(card({ layout: 'in', keys: ['in'], colours: ['blue'] }))).status).toBe(201)
+    expect((await create(card({ layout: 'in', art: ['cat'] }))).status).toBe(400)
+    expect((await create(card({ keys: ['in'], colours: ['blue', 'red'] }))).status).toBe(400)
+    expect((await create(card({ layout: 'sideways' }))).status).toBe(400)
+    expect((await create({ text: 'No picture' })).status).toBe(400)
   })
 
   test('versionSummary counts versions and spots a draft', () => {
