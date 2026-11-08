@@ -338,9 +338,7 @@ export function ChildDetailView() {
                       </Detail>
                     ) : null}
                     <Detail label="Mentor">{data.mentor_name ?? 'Not assigned'}</Detail>
-                    <Detail label="Consent">
-                      Version {data.consent_version} · {formatDate(data.consent_at)}
-                    </Detail>
+                    <Detail label="Parent consent">Given {formatDate(data.consent_at)}</Detail>
                     <Detail label="Enrolled">{formatDate(data.created_at)}</Detail>
                   </dl>
                   <div className="mt-3 flex flex-col gap-1.5 border-t border-[var(--line)] pt-3">
@@ -373,26 +371,28 @@ export function ChildDetailView() {
                 >
                   {data.assigned_lessons.length ? (
                     <ol className="flex flex-col gap-1.5">
-                      {data.assigned_lessons.map((slug, index) => (
-                        <li key={slug} className="flex items-center gap-3">
-                          <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-accent-50 text-caption-1-semibold text-accent-700">
-                            {index + 1}
-                          </span>
-                          {lessonFor(slug) ? (
-                            <Link
-                              to={`/lessons/${lessonFor(slug).id}`}
-                              className="flex flex-1 flex-wrap items-center justify-between gap-2 text-body-regular text-text-primary hover:text-accent-700"
-                            >
-                              {titleFor(slug)}
-                              <GameTag player={lessonFor(slug).player} />
-                            </Link>
-                          ) : (
-                            <span className="text-body-regular text-text-primary">
-                              {titleFor(slug)}
+                      {[...data.assigned_lessons]
+                        .sort((a, b) => titleFor(a).localeCompare(titleFor(b)))
+                        .map((slug, index) => (
+                          <li key={slug} className="flex items-center gap-3">
+                            <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-accent-50 text-caption-1-semibold text-accent-700">
+                              {index + 1}
                             </span>
-                          )}
-                        </li>
-                      ))}
+                            {lessonFor(slug) ? (
+                              <Link
+                                to={`/lessons/${lessonFor(slug).id}`}
+                                className="flex min-w-0 flex-1 items-center justify-between gap-2 text-body-regular text-text-primary hover:text-accent-700"
+                              >
+                                <span className="min-w-0 truncate">{titleFor(slug)}</span>
+                                <GameTag player={lessonFor(slug).player} />
+                              </Link>
+                            ) : (
+                              <span className="text-body-regular text-text-primary">
+                                {titleFor(slug)}
+                              </span>
+                            )}
+                          </li>
+                        ))}
                     </ol>
                   ) : (
                     <EmptyState
