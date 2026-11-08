@@ -155,14 +155,24 @@
 }
 
 .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   min-width: 22px;
   padding: 1px 6px;
-  border-radius: 6px;
-  background: var(--viz-warn-soft);
-  color: var(--viz-warn);
+  border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
-  text-align: center;
+}
+
+.warn {
+  background: var(--viz-warn-soft);
+  color: var(--viz-warn);
+}
+
+.info {
+  background: var(--viz-info-soft);
+  color: var(--viz-info);
 }
 
 .active .badge {

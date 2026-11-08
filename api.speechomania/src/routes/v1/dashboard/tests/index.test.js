@@ -4,6 +4,7 @@ import { STALE_DAYS } from '../constants/index.js'
 import {
   caseload,
   enrolmentSeries,
+  learningSeries,
   monthKeys,
   quietDays,
   rank,
@@ -12,7 +13,7 @@ import {
   weekKey,
   weekKeys
 } from '../utils/index.js'
-import { call, makeChild, makeUser } from '../../../../../test/helpers.js'
+import { call, makeChild, makePublishedLesson, makeUser } from '../../../../../test/helpers.js'
 
 let admin, mentor, otherMentor, parent, fresh, stale
 
@@ -27,6 +28,17 @@ beforeAll(async () => {
   await call(mentor, 'POST', `/children/${fresh.id}/remarks`, {
     body: 'Weekly note',
     visibility: 'shared'
+  })
+  const lesson = await makePublishedLesson(admin)
+  await db.attempts.create({
+    data: {
+      child_id: fresh.id,
+      lesson_id: lesson.id,
+      status: 'completed',
+      steps_total: 2,
+      steps_completed: 2,
+      completed_at: new Date()
+    }
   })
   await db.children.update({
     where: { id: stale.id },
@@ -43,6 +55,9 @@ describe('dashboard', () => {
     expect(status).toBe(200)
     expect(body.enrolments_by_month).toHaveLength(12)
     expect(body.remarks_by_week).toHaveLength(12)
+    expect(body.learning_by_week).toHaveLength(12)
+    expect(body.learning_by_week.at(-1).games).toBeGreaterThanOrEqual(1)
+    expect(body.kpis.learning_this_week).toBeGreaterThanOrEqual(1)
     expect(body.kpis.waiting_for_mentor).toBeGreaterThanOrEqual(1)
     expect(body.follow_up_total).toBeGreaterThanOrEqual(2)
     expect(body.caseload.find((row) => row.id === mentor.id)).toMatchObject({
@@ -69,6 +84,8 @@ describe('dashboard', () => {
     expect(reasonsFor(mineFollowUp.body, fresh.id)).toEqual(['no_lessons'])
     expect(mineFollowUp.body).toMatchObject({ page: 1, page_size: 25, total: 1, total_pages: 1 })
     expect(other.body.remarks_by_week.at(-1).shared).toBe(0)
+    expect(body.learning_by_week.at(-1)).toMatchObject({ games: 1, children: 1 })
+    expect(other.body.learning_by_week.at(-1)).toMatchObject({ games: 0, children: 0 })
   })
 
   test('badges are scoped and parents get none', async () => {
@@ -155,6 +172,20 @@ describe('series helpers', () => {
         [{ created_at: new Date('2026-03-03T00:00:00Z'), visibility: 'shared' }]
       )
     ).toEqual([{ week: '2026-03-02', shared: 1, internal: 0 }])
+    expect(
+      learningSeries(
+        ['2026-02-23', '2026-03-02'],
+        [
+          { child_id: 'a', completed_at: new Date('2026-03-03T00:00:00Z') },
+          { child_id: 'a', completed_at: new Date('2026-03-04T00:00:00Z') },
+          { child_id: 'b', completed_at: new Date('2026-03-04T00:00:00Z') },
+          { child_id: 'c', completed_at: new Date('2025-01-01T00:00:00Z') }
+        ]
+      )
+    ).toEqual([
+      { week: '2026-02-23', games: 0, children: 0 },
+      { week: '2026-03-02', games: 3, children: 2 }
+    ])
     expect(quietDays(new Date('2026-03-01T10:00:00Z'), now)).toBe(3)
   })
 })

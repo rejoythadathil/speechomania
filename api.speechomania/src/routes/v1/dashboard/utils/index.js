@@ -78,3 +78,14 @@ export function remarkSeries(keys, remarks) {
   }
   return [...rows.values()]
 }
+
+export function learningSeries(keys, plays) {
+  const rows = new Map(keys.map((week) => [week, { week, games: 0, children: new Set() }]))
+  for (const play of plays) {
+    const row = rows.get(weekKey(play.completed_at))
+    if (!row) continue
+    row.games += 1
+    row.children.add(play.child_id)
+  }
+  return [...rows.values()].map((row) => ({ ...row, children: row.children.size }))
+}

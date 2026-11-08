@@ -4,7 +4,7 @@ Role-aware counts built around "which child needs attention today".
 
 | Method | Path | Roles | Input | Returns |
 |---|---|---|---|---|
-| GET | `/dashboard` | all | | admin and mentor: KPIs, caseload, remarks per week, enrolments; parent: their summary |
+| GET | `/dashboard` | all | | admin and mentor: KPIs (including `learning_this_week`, children who finished a game this week), caseload, remarks per week, enrolments, `learning_by_week` (`{ week, games, children }`, games finished and children who played); parent: their summary |
 | GET | `/dashboard/badges` | all | | sidebar counts `{ '/children': n, '/change-requests': n }` (empty for parents) |
 | GET | `/dashboard/follow-up` | admin, mentor | `page`, `page_size` | page of children needing follow-up, most urgent first |
 

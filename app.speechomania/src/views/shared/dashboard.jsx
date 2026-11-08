@@ -2,6 +2,7 @@ import {
   RiBookOpenLine,
   RiChat3Line,
   RiEditBoxLine,
+  RiGamepadLine,
   RiUserHeartLine,
   RiUserUnfollowLine
 } from '@remixicon/react'
@@ -20,15 +21,11 @@ import { ListFooter } from '@/components/shared/list-footer.jsx'
 import { Panel } from '@/components/shared/panel.jsx'
 import { RouterButton } from '@/components/shared/router-button.jsx'
 import { StatStrip } from '@/components/shared/stat-card.jsx'
-import { useToast } from '@/components/shared/toast.jsx'
 import { UserAvatar } from '@/components/shared/user-avatar.jsx'
 import { useAuth } from '@/hooks/use-auth.jsx'
 import { useResource } from '@/hooks/use-resource.js'
-import { api } from '@/services/api.js'
-import { age, formatDateTime, initials } from '@/utils/format'
+import { age, initials } from '@/utils/format'
 
-const monthShort = new Intl.DateTimeFormat('en-IN', { month: 'short' })
-const monthLong = new Intl.DateTimeFormat('en-IN', { month: 'long', year: 'numeric' })
 const weekShort = new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' })
 
 const REASON = {
@@ -47,23 +44,35 @@ function greeting() {
 
 function Kpis({ data, role }) {
   const k = data.kpis
+  const admin = role === 'admin'
   return (
     <StatStrip className="grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 [&>*:last-child]:col-span-1">
-      <KpiTile
-        label={role === 'admin' ? 'Active children' : 'My children'}
-        icon={RiUserHeartLine}
-        value={k.children}
-        note={`${data.follow_up_total} need follow-up`}
-        to="/children"
-      />
-      {role === 'admin' ? (
+      {admin ? (
+        <KpiTile
+          label="Learning this week"
+          icon={RiGamepadLine}
+          value={k.learning_this_week}
+          note={`of ${k.children} children finished a game`}
+          to="/children"
+        />
+      ) : (
+        <KpiTile
+          label="My children"
+          icon={RiUserHeartLine}
+          value={k.children}
+          note={`${data.follow_up_total} need follow-up`}
+          to="/children"
+        />
+      )}
+      {admin ? (
         <KpiTile
           label="Waiting for a mentor"
           icon={RiUserUnfollowLine}
           value={k.waiting_for_mentor}
-          note="Assign one so lessons can start"
+          note="Lessons can't start until a mentor is assigned"
+          tone="danger"
+          status="Blocks lessons"
           to="/children?unassigned=1"
-          attention
         />
       ) : (
         <KpiTile
@@ -71,7 +80,8 @@ function Kpis({ data, role }) {
           icon={RiBookOpenLine}
           value={k.no_lessons}
           note="Assign lessons from the child's page"
-          attention
+          tone="danger"
+          status="Blocks learning"
         />
       )}
       <KpiTile
@@ -79,13 +89,16 @@ function Kpis({ data, role }) {
         icon={RiChat3Line}
         value={k.needs_remark}
         note={`No remark in the last ${data.stale_days} days`}
-        attention
+        tone="warn"
+        status="Overdue"
       />
       <KpiTile
-        label={role === 'admin' ? 'Lesson suggestions' : 'My suggestions'}
+        label={admin ? 'Lesson suggestions' : 'My suggestions'}
         icon={RiEditBoxLine}
         value={k.pending_requests}
-        note={role === 'admin' ? 'Waiting for your answer' : 'Waiting for an admin'}
+        note={admin ? 'From mentors, waiting for your answer' : 'Waiting for an admin'}
+        tone="info"
+        status={admin ? 'To answer' : 'Waiting'}
         to="/change-requests"
       />
     </StatStrip>
@@ -170,8 +183,8 @@ function CaseloadPanel({ caseload, staleDays }) {
   ]
   return (
     <Panel
-      title="Children per mentor"
-      description="Children per mentor, split by remark status"
+      title="Mentor workload"
+      description="Children per mentor, and how many are overdue for a note"
       actions={
         <RouterButton to="/people/mentor" variant="secondary" size="xs">
           Mentors
@@ -243,145 +256,46 @@ function RemarksPanel({ series, role }) {
   )
 }
 
-function EnrolmentsPanel({ series }) {
-  const total = series.reduce((sum, month) => sum + month.count, 0)
-  const data = series.map((month) => {
-    const date = new Date(`${month.month}-01`)
-    return {
-      key: month.month,
-      label: monthShort.format(date).slice(0, 3),
-      detail: monthLong.format(date),
-      values: { count: month.count }
-    }
-  })
+function LearningPanel({ series, total }) {
+  const data = series.map((week) => ({
+    key: week.week,
+    label: weekShort.format(new Date(week.week)),
+    detail: `week of ${weekShort.format(new Date(week.week))}, ${week.games} games finished`,
+    values: { children: week.children }
+  }))
+  const thisWeek = series.at(-1)
+  const lastWeek = series.at(-2)
   return (
     <ChartPanel
-      title="New children"
-      description="New children per month"
+      title="Learning per week"
+      description="Children who finished at least one game · the current week is still in progress"
       headline={
         <>
-          <span className="text-title-2-semibold text-text-primary">{total}</span>
+          <span className="text-title-2-semibold text-text-primary">
+            {thisWeek.children} of {total}
+          </span>
           <span className="text-body-2-regular text-text-tertiary">
-            children joined in the last 12 months
+            children played this week ({lastWeek.children} last week)
           </span>
         </>
       }
       table={{
-        columns: ['Month', 'New children'],
-        rows: data.map((point) => [point.detail, point.values.count])
+        columns: ['Week of', 'Children who played', 'Games finished'],
+        rows: series.map((week) => [
+          weekShort.format(new Date(week.week)),
+          week.children,
+          week.games
+        ])
       }}
     >
       <ColumnChart
         data={data}
-        series={[{ key: 'count', label: 'New children', color: 'var(--viz-blue)' }]}
-        unit="new children"
-        height={180}
-        ariaLabel={`New children per month. ${data.map((point) => `${point.detail}: ${point.values.count}`).join(', ')}`}
+        series={[{ key: 'children', label: 'Children who played', color: 'var(--viz-blue)' }]}
+        unit="children"
+        height={200}
+        ariaLabel={`Children who played each week for 12 weeks. This week ${thisWeek.children} children finished ${thisWeek.games} games.`}
       />
     </ChartPanel>
-  )
-}
-
-function UnreadRemarks() {
-  const notify = useToast()
-  const [page, setPage] = useState(1)
-  const remarks = useResource('/remarks/unread', { page, page_size: 6 })
-  async function markSeen(id) {
-    await api(`/remarks/${id}/seen`, { method: 'POST' })
-    notify('Marked as read')
-    remarks.reload()
-  }
-  return (
-    <Panel
-      title="New remarks"
-      description={remarks.data ? `${remarks.data.total} unread` : undefined}
-      footer={<ListFooter data={remarks.data} page={page} onPage={setPage} noun="unread" />}
-      bodyClassName="p-0"
-    >
-      <DataState
-        loading={remarks.loading && !remarks.data}
-        error={remarks.error}
-        onRetry={remarks.reload}
-      >
-        {remarks.data?.items.length ? (
-          <ul className="hairlines flex flex-col">
-            {remarks.data.items.map((remark) => (
-              <li key={remark.id} className="flex items-start gap-2.5 px-3 py-2.5">
-                <UserAvatar seed={remark.author_avatar} name={remark.author_name} size={28} />
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-body-2-semibold text-text-primary">
-                    {remark.author_name} ·{' '}
-                    <Link
-                      className="text-accent-700 hover:underline"
-                      to={`/children/${remark.child_id}`}
-                    >
-                      {remark.child_name}
-                    </Link>
-                  </span>
-                  <p className="line-clamp-2 text-caption-1-medium text-text-secondary">
-                    {remark.preview}
-                  </p>
-                </div>
-                <Button variant="secondary" size="xs" onClick={() => markSeen(remark.id)}>
-                  Read
-                </Button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <EmptyState
-            icon={RiChat3Line}
-            title="All caught up"
-            description="New mentor remarks appear here."
-          />
-        )}
-      </DataState>
-    </Panel>
-  )
-}
-
-function PendingRequests() {
-  const requests = useResource('/change-requests', { status: 'pending', page_size: 5 })
-  return (
-    <Panel
-      title="Waiting for review"
-      actions={
-        <RouterButton to="/change-requests" variant="secondary" size="xs">
-          Review
-        </RouterButton>
-      }
-      bodyClassName="p-0"
-    >
-      <DataState
-        loading={requests.loading && !requests.data}
-        error={requests.error}
-        onRetry={requests.reload}
-      >
-        {requests.data?.items.length ? (
-          <ul className="hairlines flex flex-col">
-            {requests.data.items.map((request) => (
-              <li key={request.id} className="flex flex-col gap-0.5 px-3 py-2.5">
-                <span className="text-body-2-semibold text-text-primary">
-                  {request.lesson_title} · v{request.lesson_version}
-                </span>
-                <p className="line-clamp-2 text-caption-1-medium text-text-secondary">
-                  {request.proposed_change.summary}
-                </p>
-                <span className="text-caption-1-medium text-text-tertiary">
-                  {request.requested_by_name} · {formatDateTime(request.created_at)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <EmptyState
-            icon={RiEditBoxLine}
-            title="Nothing waiting"
-            description="Lesson suggestions from mentors appear here."
-          />
-        )}
-      </DataState>
-    </Panel>
   )
 }
 
@@ -456,7 +370,9 @@ export function DashboardView() {
         description={
           user.role === 'parent'
             ? 'Here is how your children are doing at Speechomania.'
-            : 'Children who need you today, then how the centre is doing.'
+            : admin
+              ? 'What needs you today, and how the children are learning.'
+              : 'Children who need you today, then how the centre is doing.'
         }
         large
       />
@@ -464,27 +380,19 @@ export function DashboardView() {
         {data && user.role !== 'parent' ? (
           <>
             <Kpis data={data} role={user.role} />
-            <div className="grid items-start gap-2.5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-              <FollowUp />
-              {admin ? (
-                <CaseloadPanel caseload={data.caseload} staleDays={data.stale_days} />
-              ) : (
-                <RemarksPanel series={data.remarks_by_week} role={user.role} />
-              )}
-            </div>
             {admin ? (
-              <>
-                <div className="grid items-stretch gap-2.5 lg:grid-cols-2">
-                  <RemarksPanel series={data.remarks_by_week} role={user.role} />
-                  <EnrolmentsPanel series={data.enrolments_by_month} />
-                </div>
-                <div className="grid items-start gap-2.5 lg:grid-cols-2">
-                  <UnreadRemarks />
-                  <PendingRequests />
-                </div>
-              </>
+              <div className="grid items-start gap-2.5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+                <LearningPanel series={data.learning_by_week} total={data.kpis.children} />
+                <CaseloadPanel caseload={data.caseload} staleDays={data.stale_days} />
+              </div>
             ) : (
-              <MyChildren />
+              <>
+                <div className="grid items-start gap-2.5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+                  <FollowUp />
+                  <RemarksPanel series={data.remarks_by_week} role={user.role} />
+                </div>
+                <MyChildren />
+              </>
             )}
           </>
         ) : null}
