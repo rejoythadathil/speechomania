@@ -7,6 +7,7 @@ import {
   attemptParams,
   childParams,
   exitBody,
+  gamesQuery,
   lessonParams,
   progressBody,
   shelfQuery,
@@ -18,7 +19,7 @@ export const learningRoute = new Hono()
   .get('/children/:id', validate({ params: childParams }), controller.child)
   .get(
     '/children/:id/lessons',
-    validate({ params: childParams, query: shelfQuery }),
+    validate({ params: childParams, query: gamesQuery }),
     controller.shelf
   )
   .get('/children/:id/lessons/:lessonId', validate({ params: lessonParams }), controller.lesson)

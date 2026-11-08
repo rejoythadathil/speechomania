@@ -36,6 +36,7 @@ import {
   newFriend,
   prizeOf,
   rewardOf,
+  shelfSlugs,
   quizResult,
   starsFor,
   stepsTotal
@@ -129,19 +130,33 @@ export async function getLearner(user, id) {
 
 export async function listShelf(user, id, window) {
   const child = await findLearner(db, user, id)
-  const [page, best] = await Promise.all([
-    pageOf(
-      db.lessons,
-      {
-        where: playable(child),
-        select: { id: true, slug: true, title: true, content: true },
-        orderBy: [{ title: 'asc' }, { id: 'asc' }]
-      },
-      window
-    ),
-    bestScores(id)
-  ])
   const assigned = child.assigned_lessons ?? []
+  const best = await bestScores(id)
+  const cards = ['cards', 'games'].includes(window.show)
+    ? await db.lessons.findMany({
+        where: { ...playable(child), content: { path: ['player'], equals: 'cards' } },
+        select: { slug: true }
+      })
+    : []
+  const slugs = shelfSlugs(
+    assigned,
+    window.show,
+    new Set(best.keys()),
+    new Set(cards.map((lesson) => lesson.slug))
+  )
+  const page = await pageOf(
+    db.lessons,
+    {
+      where: {
+        status: 'published',
+        slug: { in: slugs },
+        ...(window.q ? { title: { contains: window.q, mode: 'insensitive' } } : {})
+      },
+      select: { id: true, slug: true, title: true, content: true },
+      orderBy: [{ title: 'asc' }, { id: 'asc' }]
+    },
+    window
+  )
   const afters = [
     ...new Set(
       page.items.map((item) => lockedAfter(item.content, assigned, best, item.slug)).filter(Boolean)
