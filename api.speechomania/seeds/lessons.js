@@ -527,7 +527,7 @@ const thisOrThese = {
       art: Array.from({ length: count }, () => art),
       choices: ['this', 'these'],
       answer,
-      sentence: line(count === 1 ? `This is a ${one}.` : `These are ${many}.`)
+      sentence: line(count === 1 ? `This is ${article(one)} ${one}.` : `These are ${many}.`)
     }
   })
 }
@@ -625,7 +625,14 @@ const shortCards = cards(
   )
 )
 
-const sizeOf = { taller: [1.3, 0.65], bigger: [1.3, 0.6], longer: [1.3, 0.6], smaller: [0.55, 1.2] }
+const sizeOf = {
+  taller: [1.3, 0.65],
+  bigger: [1.3, 0.6],
+  longer: [1.3, 0.6],
+  smaller: [0.55, 1.2],
+  heavier: [1.3, 0.65],
+  lighter: [0.7, 1.2]
+}
 const biggerCards = cards(
   comparisons.map(([, , answerArt, , otherArt, sentence]) => {
     const word = sentence.match(/(\w+) than/)[1]

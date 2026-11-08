@@ -1007,6 +1007,11 @@
   top: 30%;
 }
 
+.learnPlace[data-spot='house'] .thing.at-behind {
+  top: 34%;
+  left: 70%;
+}
+
 .learnSpoken {
   text-decoration: underline;
   text-decoration-thickness: 4px;
