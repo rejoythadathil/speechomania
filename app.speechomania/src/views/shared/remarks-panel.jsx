@@ -182,7 +182,7 @@ export function RemarksPanel({ childId }) {
         isOpen={Boolean(removing)}
         onOpenChange={(open) => !open && setRemoving(null)}
         title="Delete this remark?"
-        message="It will no longer be visible to anyone. The audit log keeps a record that it was deleted."
+        message="It will no longer be visible to anyone. The activity history keeps a record that it was deleted."
         confirmLabel="Delete remark"
         onConfirm={async () => {
           await api(`/remarks/${removing.id}`, { method: 'DELETE' })

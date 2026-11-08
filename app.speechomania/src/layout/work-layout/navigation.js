@@ -27,10 +27,10 @@ export const NAVIGATION = {
       items: [
         { to: '/lessons', label: 'Lessons', icon: RiBookOpenLine },
         { to: '/assessments', label: 'Assessments', icon: RiClipboardLine },
-        { to: '/change-requests', label: 'Change requests', icon: RiEditBoxLine }
+        { to: '/change-requests', label: 'Lesson suggestions', icon: RiEditBoxLine }
       ]
     },
-    { label: 'System', items: [{ to: '/audit', label: 'Audit log', icon: RiFileListLine }] }
+    { label: 'System', items: [{ to: '/audit', label: 'Activity history', icon: RiFileListLine }] }
   ],
   mentor: [
     { label: 'Overview', items: [{ to: '/dashboard', label: 'Dashboard', icon: RiDashboardLine }] },
@@ -40,7 +40,7 @@ export const NAVIGATION = {
         { to: '/children', label: 'My children', icon: RiUserHeartLine },
         { to: '/lessons', label: 'Lessons', icon: RiBookOpenLine },
         { to: '/assessments', label: 'Assessments', icon: RiClipboardLine },
-        { to: '/change-requests', label: 'Change requests', icon: RiEditBoxLine }
+        { to: '/change-requests', label: 'Lesson suggestions', icon: RiEditBoxLine }
       ]
     }
   ],

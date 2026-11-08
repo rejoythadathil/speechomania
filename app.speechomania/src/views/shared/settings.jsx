@@ -29,11 +29,11 @@ const STATS = {
   mentor: [
     { key: 'children', label: 'Children assigned', icon: RiUserHeartLine },
     { key: 'remarks', label: 'Remarks written', icon: RiChat3Line },
-    { key: 'change_requests', label: 'Change requests sent', icon: RiEditBoxLine }
+    { key: 'change_requests', label: 'Suggestions sent', icon: RiEditBoxLine }
   ],
   admin: [
     { key: 'remarks', label: 'Remarks written', icon: RiChat3Line },
-    { key: 'reviews', label: 'Change requests reviewed', icon: RiCheckDoubleLine }
+    { key: 'reviews', label: 'Suggestions reviewed', icon: RiCheckDoubleLine }
   ]
 }
 

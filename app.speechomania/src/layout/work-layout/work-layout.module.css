@@ -158,8 +158,8 @@
   min-width: 22px;
   padding: 1px 6px;
   border-radius: 6px;
-  background: #eef0f3;
-  color: var(--color-text-secondary);
+  background: var(--viz-warn-soft);
+  color: var(--viz-warn);
   font-size: 0.75rem;
   font-weight: 600;
   text-align: center;

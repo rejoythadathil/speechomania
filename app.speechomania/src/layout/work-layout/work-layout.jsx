@@ -66,7 +66,11 @@ function NavItem({ item, pathname, count }) {
       <item.icon className="size-[18px] shrink-0" aria-hidden />
       <span className="flex-1 truncate">{item.label}</span>
       {count ? (
-        <span className={styles.badge} aria-label={`${count} need attention`}>
+        <span
+          className={styles.badge}
+          aria-label={`${count} need attention`}
+          title={`${count} need attention`}
+        >
           {count}
         </span>
       ) : null}
@@ -168,7 +172,7 @@ export function WorkLayout() {
                       size="small"
                       leadingIcon={RiPulseLine}
                     >
-                      Audit log
+                      Activity history
                     </RouterButton>
                   ) : null}
                   <RouterButton

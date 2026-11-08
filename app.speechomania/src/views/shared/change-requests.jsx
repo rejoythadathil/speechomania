@@ -46,7 +46,7 @@ function ReviewModal({ request, onClose, onDone }) {
     <Modal
       isOpen
       onOpenChange={onClose}
-      title="Review change request"
+      title="Review suggestion"
       description={`${request.lesson_title} · v${request.lesson_version}, from ${request.requested_by_name}`}
       footer={
         <>
@@ -54,7 +54,7 @@ function ReviewModal({ request, onClose, onDone }) {
             {pending === 'reject' ? 'Rejecting…' : 'Reject'}
           </Button>
           <Button onClick={() => decide('approve')} disabled={Boolean(pending)}>
-            {pending === 'approve' ? 'Approving…' : 'Approve and open draft'}
+            {pending === 'approve' ? 'Approving…' : 'Approve and edit'}
           </Button>
         </>
       }
@@ -97,11 +97,11 @@ export function ChangeRequestsView() {
   return (
     <>
       <PageHeader
-        title="Change requests"
+        title="Lesson suggestions"
         description={
           isAdmin
-            ? 'Mentors suggest lesson changes here. Approving creates a new draft version for you to edit and publish.'
-            : 'Your suggestions for lesson changes and what Speechomania decided. Start a new request from any lesson.'
+            ? 'Mentors suggest lesson changes here. Approve one to get an editable copy of the lesson, then publish it.'
+            : 'Your suggestions for lesson changes and what Speechomania decided. Suggest a change from any lesson page.'
         }
         actions={
           !isAdmin ? (
@@ -201,8 +201,8 @@ export function ChangeRequestsView() {
               title="Nothing here"
               description={
                 status === 'pending'
-                  ? 'No requests are waiting for a decision.'
-                  : 'No requests with this status yet.'
+                  ? 'No suggestions are waiting for an answer.'
+                  : 'No suggestions here yet.'
               }
             />
           </div>
@@ -216,8 +216,8 @@ export function ChangeRequestsView() {
             setReviewing(null)
             notify(
               decision === 'approve'
-                ? 'Approved. A new draft is ready to edit.'
-                : 'Request rejected'
+                ? 'Approved. An editable copy is ready.'
+                : 'Suggestion declined'
             )
             requests.reload()
           }}

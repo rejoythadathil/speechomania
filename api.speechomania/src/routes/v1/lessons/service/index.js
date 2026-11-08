@@ -294,5 +294,12 @@ export async function removeLesson(user, id, ctx) {
 export async function getLesson(user, id) {
   const lesson = await findLesson(db, user, id)
   signAudio(lesson.content)
-  return lesson
+  const after = lesson.content.after
+    ? await db.lessons.findFirst({
+        where: { slug: lesson.content.after, ...(await visible(db, user)) },
+        select: { title: true },
+        orderBy: { version: 'desc' }
+      })
+    : null
+  return { ...lesson, after_title: after?.title ?? null }
 }

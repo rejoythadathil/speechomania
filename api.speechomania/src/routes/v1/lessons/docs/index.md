@@ -6,7 +6,7 @@ Versioned lessons. One row per version (`slug` + `version`); at most one draft a
 |---|---|---|---|---|
 | GET | `/lessons` | all | `status`, `q`, `page`, `page_size` | page of lessons with `player` (the game) and `step_count`; mentors see published, parents only lessons assigned to their children |
 | POST | `/lessons` | admin | `slug`, `title`, `content`, `metadata` | draft version 1 |
-| GET | `/lessons/:id` | all (same visibility) | | lesson with content; voiced lines carry a signed `audio.url` so the lesson page can play a preview |
+| GET | `/lessons/:id` | all (same visibility) | | lesson with content; voiced lines carry a signed `audio.url` so the lesson page can play a preview, and `after_title` names the lesson it unlocks after (or `null`) |
 | GET | `/lessons/:id/versions` | admin | `page`, `page_size` | page of versions |
 | PATCH | `/lessons/:id` | admin | `title`, `content`, `metadata` | the draft |
 | POST | `/lessons/:id/publish` | admin | | published; the previous one becomes `superseded` |

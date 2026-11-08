@@ -375,7 +375,7 @@ export function PeopleView() {
         message={
           role === 'mentor'
             ? 'They can no longer sign in, and their children become unassigned. Their remarks stay on each child’s record.'
-            : 'They can no longer sign in. Their history stays in the audit log.'
+            : 'They can no longer sign in. Their history stays in the activity history.'
         }
         confirmLabel="Remove"
         onConfirm={async () => {
