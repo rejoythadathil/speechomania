@@ -325,6 +325,40 @@ for (const [slug, mentor, reason, summary, status] of requests) {
 const lessonRows = new Map(
   (await db.lessons.findMany({ where: { status: 'published' } })).map((row) => [row.slug, row])
 )
+let playCount = 0
+for (const [index, child] of withMentor.entries()) {
+  if (index % 5 === 4) continue
+  const { assigned_lessons: assigned } = await db.children.findUnique({
+    where: { id: child.id },
+    select: { assigned_lessons: true }
+  })
+  const playable = assigned.map((slug) => lessonRows.get(slug)).filter(Boolean)
+  if (!playable.length) continue
+  const keen = 0.35 + random() * 0.5
+  for (let week = Math.min(11, Math.floor(child.daysAgo / 7)); week >= 0; week -= 1) {
+    if (random() > keen) continue
+    for (let play = 1 + Math.floor(random() * 3); play > 0; play -= 1) {
+      const lesson = pick(playable)
+      const steps = lesson.content.steps?.length ?? 1
+      const daysAgo = week * 7 + Math.floor(random() * 7)
+      await db.attempts.create({
+        data: {
+          child_id: child.id,
+          lesson_id: lesson.id,
+          status: 'completed',
+          steps_total: steps,
+          steps_completed: steps,
+          stars: Math.round(steps * (0.5 + random() * 0.5)),
+          metadata: tag,
+          started_at: ago(daysAgo, 1),
+          completed_at: ago(daysAgo)
+        }
+      })
+      playCount += 1
+    }
+  }
+}
+
 const pickItems = (picks) =>
   picks.map(([slug, index, points]) => snapshotItem(lessonRows.get(slug), index, points))
 const assessmentPlans = [
@@ -462,7 +496,7 @@ for (const [order, plan] of assessmentPlans.entries()) {
 }
 
 console.log(
-  `Seeded ${people.length} users, ${childIds.length} children, ${lessons.length} lessons, ${assessmentCount} assessments with ${attemptCount} attempts, 12 weeks of remarks and 26 weeks of activity.`
+  `Seeded ${people.length} users, ${childIds.length} children, ${lessons.length} lessons, ${assessmentCount} assessments with ${attemptCount} attempts, ${playCount} game plays over 12 weeks, 12 weeks of remarks and 26 weeks of activity.`
 )
 console.log(
   DEMO

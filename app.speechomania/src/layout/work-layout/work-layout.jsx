@@ -1,4 +1,6 @@
 import {
+  RiErrorWarningFill,
+  RiTimeFill,
   RiCloseLine,
   RiLogoutBoxRLine,
   RiMenuLine,
@@ -48,7 +50,13 @@ function pageTitle(role, pathname) {
   )
 }
 
+const BADGES = {
+  '/children': { tone: 'warn', icon: RiErrorWarningFill, label: 'need attention' },
+  '/change-requests': { tone: 'info', icon: RiTimeFill, label: 'waiting for an answer' }
+}
+
 function NavItem({ item, pathname, count }) {
+  const badge = BADGES[item.to] ?? BADGES['/children']
   const active = pathname === item.to || pathname.startsWith(`${item.to}/`)
   return (
     <NavLink
@@ -67,10 +75,11 @@ function NavItem({ item, pathname, count }) {
       <span className="flex-1 truncate">{item.label}</span>
       {count ? (
         <span
-          className={styles.badge}
-          aria-label={`${count} need attention`}
-          title={`${count} need attention`}
+          className={cx(styles.badge, styles[badge.tone])}
+          aria-label={`${count} ${badge.label}`}
+          title={`${count} ${badge.label}`}
         >
+          <badge.icon className="size-3" aria-hidden />
           {count}
         </span>
       ) : null}

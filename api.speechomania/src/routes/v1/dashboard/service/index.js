@@ -4,6 +4,7 @@ import { SERIES_LENGTH, STALE_DAYS } from '../constants/index.js'
 import {
   caseload,
   enrolmentSeries,
+  learningSeries,
   monthKeys,
   quietDays,
   rank,
@@ -91,6 +92,20 @@ async function remarksByWeek(user) {
   return remarkSeries(keys, remarks)
 }
 
+async function learningByWeek(user) {
+  const keys = weekKeys(new Date(), SERIES_LENGTH)
+  const plays = await db.attempts.findMany({
+    where: {
+      status: 'completed',
+      lesson_id: { not: null },
+      completed_at: { gte: new Date(`${keys[0]}T00:00:00Z`) },
+      child: { deleted_at: null, ...childScope(user) }
+    },
+    select: { child_id: true, completed_at: true }
+  })
+  return learningSeries(keys, plays)
+}
+
 const pendingRequests = (user) =>
   db.change_requests.count({ where: { status: 'pending', ...requestScope(user) } })
 
@@ -110,10 +125,11 @@ async function parentSummary(user) {
 
 export async function summary(user) {
   if (user.role === 'parent') return parentSummary(user)
-  const [care, enrolments, remarks, pending, mentors] = await Promise.all([
+  const [care, enrolments, remarks, learning, pending, mentors] = await Promise.all([
     followUp(user),
     enrolmentsByMonth(user),
     remarksByWeek(user),
+    learningByWeek(user),
     pendingRequests(user),
     user.role === 'admin'
       ? db.users.findMany({
@@ -128,6 +144,7 @@ export async function summary(user) {
     stale_days: STALE_DAYS,
     kpis: {
       children: care.rows.length,
+      learning_this_week: learning.at(-1).children,
       waiting_for_mentor: count('no_mentor'),
       needs_remark: count('no_recent_remark') + count('never_remarked'),
       no_lessons: count('no_lessons'),
@@ -136,7 +153,8 @@ export async function summary(user) {
     follow_up_total: care.items.length,
     caseload: mentors ? caseload(care.rows, mentors) : null,
     enrolments_by_month: enrolments,
-    remarks_by_week: remarks
+    remarks_by_week: remarks,
+    learning_by_week: learning
   }
 }
 

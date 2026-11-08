@@ -140,5 +140,11 @@ body {
   --viz-violet: #7c5cf0;
   --viz-warn: #c97a0e;
   --viz-warn-soft: #fdf3e3;
+  --viz-danger: #c8412c;
+  --viz-danger-soft: #fdece8;
+  --viz-good: #1f8a4c;
+  --viz-good-soft: #e6f4ec;
+  --viz-info: #1677b3;
+  --viz-info-soft: #e8f3fb;
   --viz-grid: #eef0f3;
 }
