@@ -349,7 +349,7 @@ export function StepsPanel({ lesson }) {
 
 export function GameTag({ player, cover }) {
   return (
-    <span className="flex items-center gap-2">
+    <span className="flex shrink-0 items-center gap-2">
       <span className="w-14 shrink-0">
         <GameThumb player={player ?? 'story'} cover={cover} />
       </span>
