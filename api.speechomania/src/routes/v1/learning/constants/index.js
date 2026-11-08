@@ -30,3 +30,5 @@ export const FRIENDS = [
   'leopard',
   'teddy'
 ]
+
+export const SHELF_SHOWS = ['all', 'new', 'played', 'cards', 'games']

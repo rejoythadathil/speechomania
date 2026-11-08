@@ -93,3 +93,13 @@ export function quizResult(events) {
     total: quiz.length
   }
 }
+
+export function shelfSlugs(assigned, show, played, cards) {
+  const keep = {
+    new: (slug) => !played.has(slug.toLowerCase()),
+    played: (slug) => played.has(slug.toLowerCase()),
+    cards: (slug) => cards.has(slug),
+    games: (slug) => !cards.has(slug)
+  }[show]
+  return keep ? assigned.filter(keep) : assigned
+}

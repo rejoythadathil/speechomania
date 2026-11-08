@@ -16,6 +16,7 @@ import {
   newFriend,
   prizeOf,
   rewardOf,
+  shelfSlugs,
   starsFor,
   stepsTotal
 } from '../utils/index.js'
@@ -148,6 +149,48 @@ describe('learning scope', () => {
       cover: ['baby', 'swimmer'],
       times_completed: 0
     })
+  })
+
+  test('the shelf searches titles and filters by played, new and kind, only inside the child', async () => {
+    const shelf = async (query) =>
+      (
+        await call(parent, 'GET', `/learning/children/${child.id}/lessons`, undefined, {
+          page: 1,
+          page_size: 10,
+          ...query
+        })
+      ).body.items.map((lesson) => lesson.id)
+    expect(await shelf({ q: 'CAN' })).toEqual([pick.id])
+    expect(await shelf({ q: 'shark' })).toEqual([])
+    expect(await shelf({ show: 'new' })).toEqual([pick.id])
+    expect(await shelf({ show: 'played' })).toEqual([])
+    expect(await shelf({ show: 'games' })).toEqual([pick.id])
+    expect(await shelf({ show: 'cards' })).toEqual([])
+    expect(
+      (
+        await call(otherParent, 'GET', `/learning/children/${child.id}/lessons`, undefined, {
+          q: 'can'
+        })
+      ).status
+    ).toBe(404)
+    expect(
+      (
+        await call(parent, 'GET', `/learning/children/${child.id}/lessons`, undefined, {
+          show: 'everything'
+        })
+      ).status
+    ).toBe(400)
+  })
+
+  test('shelfSlugs keeps the assigned slugs that match the chosen filter', () => {
+    const assigned = ['a', 'b-cards', 'c']
+    const played = new Set(['a'])
+    const cards = new Set(['b-cards'])
+    expect(shelfSlugs(assigned, 'all', played, cards)).toEqual(assigned)
+    expect(shelfSlugs(assigned, 'new', played, cards)).toEqual(['b-cards', 'c'])
+    expect(shelfSlugs(assigned, 'played', played, cards)).toEqual(['a'])
+    expect(shelfSlugs(assigned, 'cards', played, cards)).toEqual(['b-cards'])
+    expect(shelfSlugs(assigned, 'games', played, cards)).toEqual(['a', 'c'])
   })
 
   test('a lesson that is not assigned cannot be opened or started', async () => {

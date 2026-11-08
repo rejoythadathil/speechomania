@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useDeferredValue, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router'
 import { ART, GAME_ART, avatarFor } from '@/components/child/art.jsx'
 import {
@@ -7,7 +7,8 @@ import {
   GrownUpIcon,
   MuteIcon,
   NextIcon,
-  SayAgainIcon
+  SayAgainIcon,
+  SearchIcon
 } from '@/components/child/child-icons.jsx'
 import { GameThumb } from '@/components/child/game-thumb.jsx'
 import { sceneFor } from '@/components/child/scenes.js'
@@ -18,6 +19,13 @@ import styles from './learn-home.module.css'
 
 const PAGE_SIZE = 6
 const CHECKINS_PER_PAGE = 3
+const SHOWS = [
+  ['all', 'All'],
+  ['new', 'New'],
+  ['played', 'Played'],
+  ['cards', 'Flashcards'],
+  ['games', 'Games']
+]
 
 function rating(lesson) {
   if (!lesson.times_completed) return 0
@@ -168,10 +176,16 @@ export function LearnHomeView() {
     page: checkPage,
     page_size: CHECKINS_PER_PAGE
   })
+  const [search, setSearch] = useState('')
+  const [show, setShow] = useState('all')
+  const q = useDeferredValue(search.trim())
   const shelf = useResource(`/learning/children/${learner.id}/lessons`, {
     page,
-    page_size: PAGE_SIZE
+    page_size: PAGE_SIZE,
+    q,
+    show
   })
+  const filtered = Boolean(q) || show !== 'all'
   const games = shelf.data?.items ?? []
   const next = games.find((lesson) => !lesson.times_completed && !lesson.locked_after) ?? null
   const toTry = learner.games_total - learner.games_played
@@ -270,8 +284,43 @@ export function LearnHomeView() {
                     {shelf.error.message}
                   </p>
                 ) : null}
+                <div className={styles.filters}>
+                  <label className={styles.search}>
+                    <SearchIcon size={24} />
+                    <input
+                      type="search"
+                      value={search}
+                      onChange={(event) => {
+                        setSearch(event.target.value)
+                        setPage(1)
+                      }}
+                      placeholder="Find a game"
+                      aria-label="Find a game"
+                    />
+                  </label>
+                  <div className={styles.chips} role="group" aria-label="Show">
+                    {SHOWS.map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        className={styles.chip}
+                        aria-pressed={show === value}
+                        onClick={() => {
+                          setShow(value)
+                          setPage(1)
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 {shelf.data && !games.length ? (
-                  <p className={styles.note}>No games yet. New games are coming soon.</p>
+                  <p className={styles.note}>
+                    {filtered
+                      ? 'No games here. Try another word or tap All.'
+                      : 'No games yet. New games are coming soon.'}
+                  </p>
                 ) : null}
                 {games.length ? (
                   <ul className={styles.grid} aria-label="My games">

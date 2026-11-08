@@ -26,3 +26,5 @@ export const BreakIcon = openmoji('pause')
 export const NextIcon = openmoji('arrow-right')
 
 export const BackIcon = openmoji('arrow-left')
+
+export const SearchIcon = openmoji('magnifier')
