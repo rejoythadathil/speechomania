@@ -30,7 +30,8 @@ import { formatDate } from '@/utils/format'
 
 const STATUS_OPTIONS = ['all', 'published', 'draft', 'superseded', 'archived'].map((id) => ({
   id,
-  label: id === 'all' ? 'Current lessons' : id[0].toUpperCase() + id.slice(1)
+  label:
+    { all: 'Current lessons', superseded: 'Old versions' }[id] ?? id[0].toUpperCase() + id.slice(1)
 }))
 
 const slugify = (text) =>

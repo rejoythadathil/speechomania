@@ -23,10 +23,12 @@ const COLORS = {
   completed: 'lime'
 }
 
+const LABELS = { superseded: 'Old version', not_started: 'Not started' }
+
 export function StatusChip({ value }) {
   return (
     <Chip variant="caption" color={COLORS[value] ?? 'neutral'}>
-      {titleCase(value)}
+      {LABELS[value] ?? titleCase(value)}
     </Chip>
   )
 }

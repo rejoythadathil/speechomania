@@ -25,10 +25,12 @@ const ENTITY_OPTIONS = [
   { id: 'user', label: 'People' },
   { id: 'lesson', label: 'Lessons' },
   { id: 'remark', label: 'Remarks' },
-  { id: 'change_request', label: 'Change requests' }
+  { id: 'change_request', label: 'Lesson suggestions' }
 ]
 
 const describe = (action) => titleCase(action.split('.')[1] ?? action)
+
+const RECORD = { attempt: 'Play', change_request: 'Suggestion', user: 'Person' }
 
 export function AuditView() {
   const [entity, setEntity] = useState('all')
@@ -42,8 +44,8 @@ export function AuditView() {
   return (
     <>
       <PageHeader
-        title="Audit log"
-        description="Every change, and every time someone opened a child’s record. Entries cannot be edited or deleted."
+        title="Activity history"
+        description="Who did what, and when. This includes every time someone opened a child’s page. Nothing here can be edited or deleted."
       />
       <Panel
         bodyClassName="p-0"
@@ -78,7 +80,7 @@ export function AuditView() {
           onRetry={audit.reload}
         >
           {audit.data?.items.length ? (
-            <Table aria-label="Audit log" size="sm">
+            <Table aria-label="Activity history" size="sm">
               <TableHeader>
                 <TableColumn isRowHeader>When</TableColumn>
                 <TableColumn>Who</TableColumn>
@@ -100,10 +102,16 @@ export function AuditView() {
                     </TableCell>
                     <TableCell>{describe(entry.action)}</TableCell>
                     <TableCell>
-                      <span className="text-text-secondary">{titleCase(entry.entity_type)}</span>{' '}
-                      <code className="text-caption-1-medium text-text-tertiary">
-                        {entry.entity_id.slice(-8)}
-                      </code>
+                      <span className="text-text-secondary">
+                        {RECORD[entry.entity_type] ?? titleCase(entry.entity_type)}
+                      </span>{' '}
+                      {entry.entity_label ? (
+                        <span className="text-text-primary">{entry.entity_label}</span>
+                      ) : (
+                        <code className="text-caption-1-medium text-text-tertiary">
+                          {entry.entity_id.slice(-8)}
+                        </code>
+                      )}
                     </TableCell>
                     <TableCell className="text-text-tertiary">{entry.ip ?? '—'}</TableCell>
                   </TableRow>

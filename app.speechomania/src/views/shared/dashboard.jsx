@@ -75,17 +75,17 @@ function Kpis({ data, role }) {
         />
       )}
       <KpiTile
-        label="Need a remark"
+        label="Need a note"
         icon={RiChat3Line}
         value={k.needs_remark}
-        note={`No remark in ${data.stale_days}+ days`}
+        note={`No remark in the last ${data.stale_days} days`}
         attention
       />
       <KpiTile
-        label={role === 'admin' ? 'Change requests' : 'My change requests'}
+        label={role === 'admin' ? 'Lesson suggestions' : 'My suggestions'}
         icon={RiEditBoxLine}
         value={k.pending_requests}
-        note={role === 'admin' ? 'Waiting for your review' : 'Waiting for admin review'}
+        note={role === 'admin' ? 'Waiting for your answer' : 'Waiting for an admin'}
         to="/change-requests"
       />
     </StatStrip>
@@ -170,7 +170,7 @@ function CaseloadPanel({ caseload, staleDays }) {
   ]
   return (
     <Panel
-      title="Mentor caseload"
+      title="Children per mentor"
       description="Children per mentor, split by remark status"
       actions={
         <RouterButton to="/people/mentor" variant="secondary" size="xs">
@@ -256,7 +256,7 @@ function EnrolmentsPanel({ series }) {
   })
   return (
     <ChartPanel
-      title="Enrolments"
+      title="New children"
       description="New children per month"
       headline={
         <>
@@ -377,7 +377,7 @@ function PendingRequests() {
           <EmptyState
             icon={RiEditBoxLine}
             title="Nothing waiting"
-            description="Lesson change requests appear here."
+            description="Lesson suggestions from mentors appear here."
           />
         )}
       </DataState>

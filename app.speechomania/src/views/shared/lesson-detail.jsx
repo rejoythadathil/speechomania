@@ -168,7 +168,7 @@ function RequestChangeModal({ lesson, isOpen, onOpenChange }) {
         method: 'POST',
         body: { lesson_id: lesson.id, reason, proposed_change: { summary } }
       })
-      notify('Change request sent to Speechomania admins')
+      notify('Suggestion sent to the admins')
       navigate('/change-requests')
     } catch (caught) {
       setError(caught)
@@ -180,7 +180,7 @@ function RequestChangeModal({ lesson, isOpen, onOpenChange }) {
     <Modal
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      title="Request a change"
+      title="Suggest a change"
       description={`${lesson.title} · v${lesson.version}. An admin will approve or reject it.`}
       footer={
         <>
@@ -240,7 +240,7 @@ function FlowPanel({ lesson, editable, onChanged }) {
     try {
       await api(`/lessons/${lesson.id}/check`, { method: 'PATCH', body: check })
       onChanged()
-      notify(check.enabled ? 'Quick check is on' : 'Quick check is off')
+      notify(check.enabled ? 'Questions at the end are on' : 'Questions at the end are off')
     } catch (error) {
       notify(error.message, { status: 'error' })
     } finally {
@@ -253,8 +253,8 @@ function FlowPanel({ lesson, editable, onChanged }) {
       <ol className="flex flex-col gap-3 text-body-2-regular text-text-secondary">
         {after ? (
           <li>
-            <span className="text-body-2-medium text-text-primary">Opens after</span> · {after},
-            once the child has finished it
+            <span className="text-body-2-medium text-text-primary">Unlocks after</span> ·{' '}
+            {lesson.after_title ?? after}, once the child has finished it
           </li>
         ) : null}
         {player === 'cards' ? (
@@ -271,7 +271,7 @@ function FlowPanel({ lesson, editable, onChanged }) {
         )}
         <li className={player === 'cards' ? 'hidden' : 'flex flex-col gap-2'}>
           <span>
-            <span className="text-body-2-medium text-text-primary">Quick check</span> ·{' '}
+            <span className="text-body-2-medium text-text-primary">Questions at the end</span> ·{' '}
             {story
               ? 'not for story lessons'
               : lesson.check
@@ -348,7 +348,7 @@ export function LessonDetailView() {
             <header className="flex flex-wrap items-end justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <span className="text-caption-1-semibold tracking-wide text-accent-700 uppercase">
-                  {data.slug} · version {data.version}
+                  Version {data.version}
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="font-display text-title-1-semibold text-text-primary">
@@ -389,17 +389,17 @@ export function LessonDetailView() {
                     <Button
                       leadingIcon={RiGitBranchLine}
                       onClick={() =>
-                        action('/draft', 'New draft created').catch((error) =>
+                        action('/draft', 'Editable copy created').catch((error) =>
                           notify(error.message, { status: 'error' })
                         )
                       }
                     >
-                      New version
+                      Edit lesson
                     </Button>
                   </>
                 ) : null}
                 {user.role === 'mentor' ? (
-                  <Button onClick={() => setModal('request')}>Request a change</Button>
+                  <Button onClick={() => setModal('request')}>Suggest a change</Button>
                 ) : null}
               </div>
             </header>

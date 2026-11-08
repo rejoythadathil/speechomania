@@ -259,7 +259,7 @@ export function GamePanel({ lesson }) {
 export function LinesPanel({ lesson }) {
   const lines = Object.entries(LINE_LABELS).filter(([name]) => lesson.content.lines?.[name]?.text)
   return (
-    <Panel title="Spoken lines" description="What the voice says around the rounds">
+    <Panel title="Voice lines" description="What the voice says between the rounds">
       {lines.length ? (
         <ul className="hairlines flex flex-col">
           {lines.map(([name, label]) => (
