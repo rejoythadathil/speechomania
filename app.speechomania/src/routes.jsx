@@ -17,28 +17,34 @@ import { ChildrenView } from '@/views/shared/children.jsx'
 import { DashboardView } from '@/views/shared/dashboard.jsx'
 import { LessonDetailView } from '@/views/shared/lesson-detail.jsx'
 import { LessonsView } from '@/views/shared/lessons.jsx'
+import { LandingView } from '@/views/public/landing.jsx'
 import { NotFoundView } from '@/views/shared/not-found.jsx'
 import { SettingsView } from '@/views/shared/settings.jsx'
 
+function Loading() {
+  return (
+    <div
+      className="flex min-h-dvh items-center justify-center text-body-regular text-text-secondary"
+      aria-busy="true"
+    >
+      Loading…
+    </div>
+  )
+}
+
 function RequireAuth() {
   const { status } = useAuth()
-  if (status === 'loading') {
-    return (
-      <div
-        className="flex min-h-dvh items-center justify-center text-body-regular text-text-secondary"
-        aria-busy="true"
-      >
-        Loading…
-      </div>
-    )
-  }
+  if (status === 'loading') return <Loading />
   if (status !== 'signed-in') return <Navigate to="/login" replace />
   return <Outlet />
 }
 
-function Home() {
-  const { user } = useAuth()
-  return <Navigate to={user.role === 'parent' ? '/learn' : '/dashboard'} replace />
+function Front() {
+  const { status, user } = useAuth()
+  if (status === 'loading') return <Loading />
+  if (status === 'signed-in')
+    return <Navigate to={user.role === 'parent' ? '/learn' : '/dashboard'} replace />
+  return <LandingView />
 }
 
 function RequireRole({ roles }) {
@@ -48,6 +54,7 @@ function RequireRole({ roles }) {
 }
 
 export const router = createBrowserRouter([
+  { path: '/', element: <Front /> },
   { path: '/login', element: <LoginView /> },
   {
     element: <RequireAuth />,
@@ -70,7 +77,6 @@ export const router = createBrowserRouter([
       {
         element: <WorkLayout />,
         children: [
-          { index: true, element: <Home /> },
           { path: 'dashboard', element: <DashboardView /> },
           { path: 'children', element: <ChildrenView /> },
           { path: 'children/:id', element: <ChildDetailView /> },
