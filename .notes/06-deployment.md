@@ -57,9 +57,10 @@ No pgweb or redis-commander on a public subdomain: the database holds children's
 - Valkey runs with `maxmemory-policy noeviction`, because it is also the BullMQ broker and evicting queue keys would silently drop jobs.
 
 ## Single-host mode (current prod)
-Prod runs on one DigitalOcean Droplet (`speechomania-prod`, BLR1, 2 vCPU, 2 GB, 60 GB, $18 a month) at `speechomania.deadendengineers.co.in`. The parent domain's DNS is on Vercel, so there is no Cloudflare in front.
-- `SINGLE_HOST=1` in the deploy `.env`: one nginx site (`single.conf.tmpl`) serves the SPA at `/` and proxies `/v1/` and `/health` to the API upstream. The app's `VITE_API_URL` is the same host.
-- Certificate: Let's Encrypt HTTP-01 (`certbot --standalone`, nginx stopped for a few seconds by certbot's hooks). No wildcard and no Cloudflare token.
+Prod runs on one DigitalOcean Droplet (`speechomania-prod`, BLR1, 2 vCPU, 2 GB, 60 GB, $18 a month) at `speechomania.com` (DNS on GoDaddy: `@` A record to the Droplet, `www` CNAME to `@`, no Cloudflare in front). `www.speechomania.com` and the old `speechomania.deadendengineers.co.in` are served by the same site through `SITE_ALIASES`.
+- `SINGLE_HOST=1` in the deploy `.env`: one nginx site (`single.conf.tmpl`) serves the SPA at `/` and proxies `/v1/` and `/health` to the API upstream. The app's `VITE_API_URL` is empty, so it calls the API on whichever name it was opened from.
+- `SITE_ALIASES` (space-separated) adds names to that site and to its certificate.
+- Certificate: Let's Encrypt HTTP-01 (`certbot --standalone`, nginx stopped for a few seconds by certbot's hooks), one certificate named after `BASE_DOMAIN` covering it and every alias. No wildcard and no Cloudflare token.
 - `SERVER_PROFILE=tiny` (Postgres 256 MB shared buffers), PgBouncer pool 15, Valkey 128 MB, 2 GB swap.
 - `scripts/harden.sh <admin> <admin.pub>` runs first: a named admin with sudo, SSH keys only, no root login, fail2ban on SSH, automatic security updates.
 - Every merge to `main` deploys: CI pushes `speechomania-api:prod` and `speechomania-app:prod` to GHCR and the VM's `auto-deploy.sh` cron (every 2 minutes) pulls and deploys whichever changed. No production environment and no SSH secrets in GitHub.

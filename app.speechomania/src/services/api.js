@@ -9,7 +9,7 @@ export class ApiError extends Error {
 }
 
 export async function api(path, { method = 'GET', body, query } = {}) {
-  const url = new URL(`${import.meta.env.VITE_API_URL}/v1${path}`)
+  const url = new URL(`${import.meta.env.VITE_API_URL}/v1${path}`, window.location.origin)
   for (const [key, value] of Object.entries(query ?? {})) {
     if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, value)
   }

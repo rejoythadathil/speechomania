@@ -7,7 +7,7 @@ if [ "${SINGLE_HOST:-0}" = 1 ]; then
   if [ -n "${LETSENCRYPT_EMAIL:-}" ]; then contact="--email $LETSENCRYPT_EMAIL"; else contact="--register-unsafely-without-email"; fi
   certbot certonly --non-interactive --agree-tos $contact --standalone \
     --pre-hook "systemctl stop nginx" --post-hook "systemctl start nginx" \
-    --cert-name "$BASE_DOMAIN" -d "$BASE_DOMAIN"
+    --cert-name "$BASE_DOMAIN" -d "$BASE_DOMAIN" $(for alias in ${SITE_ALIASES:-}; do printf -- "-d %s " "$alias"; done)
   ok "Certificate issued for $BASE_DOMAIN. Renewal runs from certbot's timer."
   exit 0
 fi
