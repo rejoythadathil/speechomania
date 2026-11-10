@@ -18,7 +18,7 @@ for entry in $SERVICES; do
   port_var=$(echo "$entry" | cut -d: -f3)
   case "$name" in
     www) fqdn="$BASE_DOMAIN www.$BASE_DOMAIN"; root="www.$BASE_DOMAIN" ;;
-    site) fqdn="$BASE_DOMAIN"; root="$fqdn" ;;
+    site) fqdn="$BASE_DOMAIN${SITE_ALIASES:+ $SITE_ALIASES}"; root="$BASE_DOMAIN" ;;
     *) fqdn="$name.$BASE_DOMAIN"; root="$fqdn" ;;
   esac
   port=""
@@ -26,7 +26,7 @@ for entry in $SERVICES; do
   target="/etc/nginx/sites-available/speechomania-$name.conf"
   SERVICE_FQDN="$fqdn" envsubst '${SERVICE_FQDN}' < "$NGINX/templates/http-redirect.conf.tmpl" > "$target"
   SERVICE_FQDN="$fqdn" UPSTREAM_PORT="$port" BASE_DOMAIN="$BASE_DOMAIN" MEDIA_BUCKET="${MEDIA_BUCKET:-}" STORAGE_HOST_PORT="${STORAGE_HOST_PORT:-}" envsubst '${SERVICE_FQDN} ${UPSTREAM_PORT} ${BASE_DOMAIN} ${MEDIA_BUCKET} ${STORAGE_HOST_PORT}' < "$NGINX/templates/$kind.conf.tmpl" >> "$target"
-  [ "$kind" = "static" ] && sed -i "s#root /var/www/$fqdn/current;#root /var/www/$root/current;#" "$target"
+  case "$kind" in static | single) sed -i "s#root /var/www/$fqdn/current;#root /var/www/$root/current;#" "$target" ;; esac
   case "$kind" in static | single) install -d -m 755 "/var/www/$root/releases" ;; esac
   ln -sf "$target" "/etc/nginx/sites-enabled/speechomania-$name.conf"
 done
