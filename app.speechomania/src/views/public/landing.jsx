@@ -2,10 +2,10 @@ import { Link } from 'react-router'
 import { ART, GAME_ART, GAME_SCENES } from '@/components/child/art.jsx'
 import { SCENES } from '@/components/child/scenes.js'
 import { NUDGE_EVERY, PLAY_LIMIT, REST } from '@/components/child/use-screen-time.js'
-import { BrandMark } from '@/components/shared/brand-mark.jsx'
 import { useResource } from '@/hooks/use-resource.js'
 import { cx } from '@/utils/cx'
 import styles from './landing.module.css'
+import { PublicHeader } from './public-header.jsx'
 
 const PLAYERS = [
   'shark',
@@ -97,22 +97,7 @@ export function LandingView() {
 
   return (
     <div className={styles.page}>
-      <header className={styles.top}>
-        <div className={styles.wrap}>
-          <Link className={styles.brand} to="/">
-            <BrandMark size={32} />
-            Speechomania
-          </Link>
-          <nav className={styles.nav} aria-label="Main">
-            <a href="#games">Games</a>
-            <a href="#how">How it works</a>
-            <a href="#who">Who it is for</a>
-          </nav>
-          <Link className={cx(styles.btn, styles.primary, styles.small)} to="/login">
-            Sign in
-          </Link>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main>
         <section className={styles.hero}>
@@ -125,7 +110,7 @@ export function LandingView() {
             </p>
             <div className={styles.ctas}>
               <a className={cx(styles.btn, styles.primary)} href="#games">
-                See the games
+                Explore our Games
               </a>
               <a className={cx(styles.btn, styles.ghost)} href="#how">
                 How it works
@@ -273,10 +258,17 @@ export function LandingView() {
         <section className={styles.section}>
           <div className={cx(styles.wrap, styles.cta)}>
             <h2>Bring Speechomania to your child or centre.</h2>
-            <p>Families get an account from their centre. Already have one? Sign in to play.</p>
-            <Link className={cx(styles.btn, styles.primary)} to="/login">
-              Sign in
-            </Link>
+            <p>
+              Play our free games, no account needed. Families get a full account from their centre.
+            </p>
+            <div className={styles.ctas}>
+              <Link className={cx(styles.btn, styles.primary)} to="/try">
+                Try for free
+              </Link>
+              <Link className={cx(styles.btn, styles.ghost)} to="/login">
+                Sign in
+              </Link>
+            </div>
           </div>
         </section>
       </main>

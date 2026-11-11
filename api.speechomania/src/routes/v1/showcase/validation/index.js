@@ -16,3 +16,12 @@ export const gamesQuery = Joi.object({
       return error ? helpers.error('any.invalid') : list
     })
 })
+
+export const freeQuery = Joi.object(pageQuery)
+
+export const freeParams = Joi.object({
+  slug: Joi.string()
+    .pattern(/^[a-z0-9-]+$/)
+    .max(80)
+    .required()
+})

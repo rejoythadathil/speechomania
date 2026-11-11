@@ -5,6 +5,8 @@ Public data for the landing page. No sign-in; only published lessons; no child, 
 | Method | Path | Roles | Input | Returns |
 |---|---|---|---|---|
 | GET | `/showcase` | public | | `{ games, flashcards, stars_per_friend, medal_share, trophy_share, friends }`: counts of published game lessons and flashcards, and the reward rules from `learning/constants` |
+| GET | `/showcase/free` | public | `page`, `page_size` | page of `{ slug, skill, player }` for the free games (`FREE_GAMES` in `constants/index.js`) that are published |
+| GET | `/showcase/free/:slug` | public | | one free game ready to play: `{ slug, title, content, cards, check }` with signed audio; 404 for any lesson not in `FREE_GAMES` or not published |
 | GET | `/showcase/games` | public | `page`, `page_size`, `players` (comma list of lesson players) | page of `{ slug, skill, player, example: { text, art, keys, layout } }`, one published game per player, in the order of `players` |
 
 ## Rules (`utils/index.js`)
@@ -13,4 +15,6 @@ Public data for the landing page. No sign-in; only published lessons; no child, 
 - `example` is the first flashcard of the paired `<slug>-cards` lesson (its text, art, key words and layout), else the first step with a sentence, else the first step.
 - Flashcard lessons (`player: 'cards'`) are never listed as games.
 
-Files: `route/index.js`, `controller/index.js`, `service/index.js`, `validation/index.js`, `utils/index.js`, `tests/index.test.js`.
+- Free games are the published lessons named in `FREE_GAMES`; nothing a visitor plays is saved.
+
+Files: `route/index.js`, `controller/index.js`, `service/index.js`, `validation/index.js`, `constants/index.js`, `exception/index.js`, `utils/index.js`, `tests/index.test.js`.

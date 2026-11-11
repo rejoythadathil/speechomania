@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, test } from 'bun:test'
 import { db } from '../../../../../common-service/db/service/index.js'
 import { call, makeChild, makeUser } from '../../../../../test/helpers.js'
 import { FRIENDS, STARS_PER_FRIEND } from '../../learning/constants/index.js'
+import { FREE_GAMES } from '../constants/index.js'
 import { exampleOf, pickGames, skillOf, totals } from '../utils/index.js'
 
 const tag = crypto.randomUUID().slice(0, 6)
@@ -91,6 +92,42 @@ describe('showcase', () => {
     expect(page.body.page_size).toBe(1)
     const bad = await call(null, 'GET', '/showcase/games', undefined, { players: 'shark,nope' })
     expect(bad.status).toBe(400)
+  })
+})
+
+describe('free games', () => {
+  const [free] = FREE_GAMES
+
+  beforeAll(async () => {
+    const existing = await db.lessons.findFirst({ where: { slug: free, status: 'published' } })
+    if (!existing) {
+      await lesson(free, 'Free words, part 2: Feed the shark', {
+        player: 'shark',
+        lines: { intro: { text: 'Hello', audio: { key: 'audio/test.mp3' } } },
+        steps: steps(15)
+      })
+    }
+  })
+
+  test('the list needs no sign-in and holds only free games', async () => {
+    const { status, body } = await call(null, 'GET', '/showcase/free')
+    expect(status).toBe(200)
+    expect(body.items.length).toBeGreaterThanOrEqual(1)
+    expect(body.items.every((item) => FREE_GAMES.includes(item.slug))).toBe(true)
+    expect(Object.keys(body.items[0]).sort()).toEqual(['player', 'skill', 'slug'])
+  })
+
+  test('a free game is playable without sign-in and carries no internal fields', async () => {
+    const { status, body } = await call(null, 'GET', `/showcase/free/${free}`)
+    expect(status).toBe(200)
+    expect(Object.keys(body).sort()).toEqual(['cards', 'check', 'content', 'slug', 'title'])
+    expect(body.content.steps.length).toBeGreaterThanOrEqual(15)
+  })
+
+  test('other lessons, drafts and bad slugs are not reachable', async () => {
+    expect((await call(null, 'GET', `/showcase/free/${tag}-a`)).status).toBe(404)
+    expect((await call(null, 'GET', `/showcase/free/${tag}-d`)).status).toBe(404)
+    expect((await call(null, 'GET', '/showcase/free/Not_A_Slug!')).status).toBe(400)
   })
 })
 
