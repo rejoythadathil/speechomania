@@ -5,6 +5,7 @@ import soft from '@/assets/sounds/soft.m4a'
 import win from '@/assets/sounds/win.m4a'
 
 const SOUNDS = { ding, soft, win }
+const fire = confetti.create(null, { resize: true, useWorker: false })
 const VOLUME = { normal: 1, quiet: 0.5 }
 
 function originOf(element) {
@@ -26,7 +27,7 @@ export function useCelebrate({ motion, sound, muted }) {
     }
     const burst = (options) => {
       if (motion === 'off') return
-      confetti({
+      fire({
         disableForReducedMotion: true,
         particleCount: motion === 'gentle' ? 40 : 90,
         ...options
@@ -68,7 +69,7 @@ export function useCelebrate({ motion, sound, muted }) {
         setTimeout(() => burst({ angle: 60, spread: 60, origin: { x: 0, y: 0.7 } }), 300)
         setTimeout(() => burst({ angle: 120, spread: 60, origin: { x: 1, y: 0.7 } }), 500)
       },
-      reset: () => confetti.reset()
+      reset: () => fire.reset()
     }
   }, [motion, sound, muted])
 }
