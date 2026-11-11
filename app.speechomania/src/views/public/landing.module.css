@@ -11,6 +11,7 @@
   --radius: 20px;
   --pad: 20px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  display: flow-root;
   min-height: 100dvh;
   background: #fff;
   color: var(--ink);
@@ -130,6 +131,15 @@
 .nav {
   display: none;
   gap: 26px;
+}
+
+.acts {
+  display: flex;
+  gap: 8px;
+}
+
+.signIn {
+  display: none;
 }
 
 .nav a {
@@ -566,6 +576,12 @@
   }
 }
 
+@media (min-width: 480px) {
+  .signIn {
+    display: inline-flex;
+  }
+}
+
 @media (min-width: 720px) {
   .page {
     --pad: 32px;
@@ -611,5 +627,90 @@
   .media img,
   .game {
     transition: none;
+  }
+}
+
+.tryHero {
+  padding: 64px 0 40px;
+  text-align: center;
+}
+
+.tryHero h1 {
+  max-width: 720px;
+  margin: 16px auto 0;
+  font-size: clamp(34px, 5vw, 56px);
+}
+
+.tryHero .sub {
+  margin: 16px auto 0;
+}
+
+.tryGrid {
+  display: grid;
+  gap: 16px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.game:disabled {
+  cursor: progress;
+}
+
+.gameButton {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.badge {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 880px;
+  margin: 24px auto 80px;
+  padding: 32px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.gate h2 {
+  font-size: clamp(24px, 3vw, 32px);
+}
+
+.gate p {
+  max-width: 520px;
+}
+
+.gate .ctas {
+  margin-top: 8px;
+}
+
+.notice {
+  max-width: 880px;
+  margin: 0 auto 24px;
+  color: var(--key);
+  text-align: center;
+}
+
+@media (min-width: 720px) {
+  .tryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
   }
 }

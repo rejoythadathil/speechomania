@@ -15,7 +15,12 @@ function tally(saved, answers) {
   }
 }
 
-export function LessonPreview({ lesson, onClose }) {
+export function LessonPreview({
+  lesson,
+  onClose,
+  kicker = 'Preview',
+  leaveLabel = 'Close preview'
+}) {
   const lines = useMemo(() => ({ ...LINES, ...lesson.content.lines }), [lesson.content.lines])
   const plan = useCallback(
     () => lessonPages(lesson.content, lines, { cards: lesson.cards, check: lesson.check }),
@@ -27,7 +32,7 @@ export function LessonPreview({ lesson, onClose }) {
         <PlaySession
           {...stage}
           title={lesson.title}
-          kicker="Preview"
+          kicker={kicker}
           cover={lessonCover(lesson, lines)}
           lines={lines}
           plan={plan}
@@ -35,7 +40,7 @@ export function LessonPreview({ lesson, onClose }) {
           send={nothing}
           summarise={tally}
           onLeave={onClose}
-          leaveLabel="Close preview"
+          leaveLabel={leaveLabel}
         />
       )}
     </PreviewStage>

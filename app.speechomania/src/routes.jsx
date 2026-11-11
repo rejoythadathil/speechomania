@@ -18,6 +18,7 @@ import { DashboardView } from '@/views/shared/dashboard.jsx'
 import { LessonDetailView } from '@/views/shared/lesson-detail.jsx'
 import { LessonsView } from '@/views/shared/lessons.jsx'
 import { LandingView } from '@/views/public/landing.jsx'
+import { TryView } from '@/views/public/try.jsx'
 import { NotFoundView } from '@/views/shared/not-found.jsx'
 import { SettingsView } from '@/views/shared/settings.jsx'
 
@@ -55,6 +56,7 @@ function RequireRole({ roles }) {
 
 export const router = createBrowserRouter([
   { path: '/', element: <Front /> },
+  { path: '/try', element: <TryView /> },
   { path: '/login', element: <LoginView /> },
   {
     element: <RequireAuth />,
