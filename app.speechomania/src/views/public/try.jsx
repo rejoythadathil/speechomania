@@ -101,7 +101,7 @@ export function TryView() {
                           {opening === item.slug
                             ? 'Opening…'
                             : done
-                              ? 'Sign in to play again.'
+                              ? 'Sign up to play again.'
                               : wasPlayed
                                 ? 'Play again'
                                 : 'Tap to play'}
@@ -116,21 +116,20 @@ export function TryView() {
             <h2>{done ? 'You’ve played the free games.' : 'Want every game?'}</h2>
             <p>
               {done
-                ? 'Sign in to keep playing.'
+                ? 'Sign up to keep playing.'
                 : `${left} free ${left === 1 ? 'game' : 'games'} left to try.`}{' '}
               {summary.data
-                ? `An account opens all ${summary.data.games} games and ${summary.data.flashcards} flashcards, with rewards and a mentor who follows every play.`
+                ? `An account opens all ${summary.data.games} games and ${summary.data.flashcards} flashcards, with stars, medals and animal friends to collect.`
                 : null}
             </p>
             <div className={styles.ctas}>
-              <Link className={cx(styles.btn, styles.primary)} to="/login">
-                Sign in
+              <Link className={cx(styles.btn, styles.primary)} to="/start">
+                Sign up
               </Link>
-              <Link className={cx(styles.btn, styles.ghost)} to="/">
-                Back to Speechomania
+              <Link className={cx(styles.btn, styles.ghost)} to="/login">
+                I have an account
               </Link>
             </div>
-            <p>Families get an account from their centre.</p>
           </section>
         </div>
       </main>
