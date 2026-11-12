@@ -2,6 +2,7 @@ import { db } from '../../common-service/db/service/index.js'
 import { verifyToken } from '../../common-service/firebase/service/index.js'
 import {
   accountInactive,
+  accountUnknown,
   sessionExpired,
   signInRequired
 } from '../../common-service/http/exception/index.js'
@@ -19,7 +20,8 @@ export async function requireAuth(c, next) {
     where: { firebase_uid: decoded.uid, deleted_at: null },
     select: { id: true, email: true, full_name: true, role: true, status: true }
   })
-  if (!user || user.status === 'disabled') throw accountInactive()
+  if (!user) throw accountUnknown()
+  if (user.status === 'disabled') throw accountInactive()
   if (user.status === 'invited') {
     await db.users.update({
       where: { id: user.id },

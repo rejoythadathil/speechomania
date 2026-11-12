@@ -35,3 +35,19 @@
   font-size: 13px;
   text-align: center;
 }
+
+.or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+}
+
+.or::before,
+.or::after {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+  content: '';
+}
