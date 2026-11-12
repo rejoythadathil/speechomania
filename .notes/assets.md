@@ -12,3 +12,4 @@ Every downloaded asset with its source, licence and URL. No licence, no use.
 | canvas-confetti 1.9.3 | celebration on correct answers | npm | ISC | https://www.npmjs.com/package/canvas-confetti |
 | Win sound (`win.m4a`) | end-of-game fanfare | OpenGameArt, "Win sound effect" | CC0 | https://opengameart.org/content/win-sound-effect |
 | Bell ding 1 and 3 (`ding.m4a`, `soft.m4a`) | correct and try-again sounds | OpenGameArt, "Bell dings/chimes" | CC0 | https://opengameart.org/node/53288 |
+| Google "G" logo | "Continue with Google" on the login page | Google (FirebaseUI) | Google brand asset, used as the Sign in with Google branding guidelines allow | https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg |

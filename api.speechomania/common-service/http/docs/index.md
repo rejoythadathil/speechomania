@@ -4,7 +4,7 @@ Shared HTTP building blocks for every feature: the error type, paging, and small
 
 | File | Exports |
 |---|---|
-| `exception/index.js` | `HttpError(status, message, details)`, `notFound(what)`, `forbidden()`, and the middleware errors `invalidJson`, `invalidFields(details)`, `signInRequired`, `sessionExpired`, `accountInactive`, `tooManyRequests` |
+| `exception/index.js` | `HttpError(status, message, details)`, `notFound(what)`, `forbidden()`, and the middleware errors `invalidJson`, `invalidFields(details)`, `signInRequired`, `sessionExpired`, `accountInactive`, `accountUnknown`, `tooManyRequests` |
 | `utils/index.js` | `requestCtx(c)` (ip and request id for the audit log), `containsText(text)` (case-insensitive Prisma `contains` with `%` and `_` escaped), `isoDate(date)`, `pageMeta`, `pageOf(model, args, window)` (`findMany` with skip/take plus `count` on the same `where`), `pageArray(all, window)` |
 | `validation/index.js` | `pageQuery`: `page` 1–10000 (default 1), `page_size` 1–100 (default 25) |
 | `constants/index.js` | `PAGE` limits used by `pageQuery` |

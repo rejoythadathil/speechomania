@@ -21,5 +21,11 @@ export const sessionExpired = () => new HttpError(401, 'Your session has expired
 export const accountInactive = () =>
   new HttpError(403, 'This account is not active. Contact Speechomania.')
 
+export const accountUnknown = () =>
+  new HttpError(
+    403,
+    'This account is not on Speechomania. Sign in with the email Speechomania invited you with.'
+  )
+
 export const tooManyRequests = () =>
   new HttpError(429, 'Too many requests. Wait a minute and try again.')

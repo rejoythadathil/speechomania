@@ -6,14 +6,19 @@ import { Input } from '@/components/base/input/input'
 import { BrandMark } from '@/components/shared/brand-mark.jsx'
 import { FormAlert } from '@/components/shared/form-alert.jsx'
 import { useAuth } from '@/hooks/use-auth.jsx'
+import googleLogo from '@/assets/brands/google.svg'
 import styles from './login.module.css'
 
 const SIGN_IN_ERRORS = {
   'auth/invalid-credential':
     'That email and password do not match. Try again or reset your password.',
   'auth/too-many-requests': 'Too many attempts. Wait a few minutes and try again.',
-  'auth/user-disabled': 'This account is not active. Contact Speechomania.'
+  'auth/user-disabled': 'This account is not active. Contact Speechomania.',
+  'auth/account-exists-with-different-credential':
+    'This email already has a password. Sign in with it once below and Google will work from then on.',
+  'auth/popup-blocked': 'Your browser blocked the Google window. Allow pop-ups and try again.'
 }
+const QUIET = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request']
 
 export function LoginView() {
   const auth = useAuth()
@@ -35,6 +40,21 @@ export function LoginView() {
       await auth.signIn(email.trim(), password)
     } catch (caught) {
       setError({ message: SIGN_IN_ERRORS[caught.code] ?? 'We could not sign you in. Try again.' })
+    } finally {
+      setPending(false)
+    }
+  }
+
+  async function google() {
+    setPending(true)
+    setError(null)
+    setNotice(null)
+    try {
+      await auth.signInWithGoogle()
+    } catch (caught) {
+      if (!QUIET.includes(caught.code)) {
+        setError({ message: SIGN_IN_ERRORS[caught.code] ?? 'We could not sign you in. Try again.' })
+      }
     } finally {
       setPending(false)
     }
@@ -75,6 +95,13 @@ export function LoginView() {
               {notice}
             </p>
           ) : null}
+          <Button variant="secondary" onClick={google} disabled={pending}>
+            <img src={googleLogo} alt="" width={18} height={18} className="mr-2" />
+            Continue with Google
+          </Button>
+          <div className={styles.or}>
+            <span>or</span>
+          </div>
           <Input
             label="Email"
             type="email"
