@@ -17,6 +17,12 @@ export function estimateWords(text) {
 }
 
 const SAFETY_SECONDS = 2
+const FEMALE = /samantha|ava|allison|susan|zira|aria|jenny|female|google us english/i
+
+export function deviceVoice(voices) {
+  const american = voices.filter((voice) => voice.lang.replace('_', '-') === 'en-US')
+  return american.find((voice) => FEMALE.test(voice.name)) ?? american[0] ?? null
+}
 
 export function useVoice({ sound = 'normal', muted = false }) {
   const [line, setLine] = useState({ text: '', index: -1 })
@@ -97,7 +103,10 @@ export function useVoice({ sound = 'normal', muted = false }) {
         current.audio.play().catch(runSilently)
       } else if (!silent && 'speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(text)
-        utterance.rate = 0.85
+        utterance.lang = 'en-US'
+        utterance.voice = deviceVoice(window.speechSynthesis.getVoices())
+        utterance.rate = 0.95
+        utterance.pitch = 1.2
         utterance.volume = VOLUME[level] ?? 1
         window.speechSynthesis.speak(utterance)
       }
