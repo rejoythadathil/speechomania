@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbf8f3">
+<title>Speechomania · Speech practice that feels like play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fbf8f3;
+  --card: #ffffff;
+  --ink: #15163a;
+  --muted: #4a4d6b;
+  --faint: #6b6e8a;
+  --line: #ebe6dc;
+  --blue: #1479bb;
+  --sky: #38b6ff;
+  --sky-soft: #e3f3ff;
+  --coral: #ff6b5e;
+  --coral-ink: #c63d2f;
+  --coral-soft: #ffeae6;
+  --sun: #ffc94a;
+  --sun-soft: #fff4d6;
+  --mint: #2bb59a;
+  --mint-ink: #0f7564;
+  --mint-soft: #e0f6f0;
+  --violet: #7c5cf0;
+  --violet-soft: #efeaff;
+  --r: 28px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --pad: clamp(18px, 5vw, 40px);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 16px; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+h1, h2, h3 { font-family: 'Bricolage Grotesque', sans-serif; letter-spacing: -.025em; margin: 0; }
+p { margin: 0; line-height: 1.6; color: var(--muted); }
+img { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; }
+a { color: inherit; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: var(--pad); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; border-radius: 8px; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 24px; border-radius: 999px; font-weight: 800; font-size: 16px; text-decoration: none; border: 0; cursor: pointer; transition: transform .2s var(--ease), background .2s, box-shadow .2s; white-space: nowrap; }
+.btn:active { transform: scale(.96); }
+.btn.dark { background: var(--ink); color: #fff; }
+.btn.dark:hover { background: #2a2c63; }
+.btn.soft { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.btn.soft:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.btn.small { min-height: 44px; padding: 0 18px; font-size: 15px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--mint-ink); }
+.eyebrow::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--mint); }
+.h2 { font-size: clamp(32px, 7vw, 56px); line-height: 1.02; font-weight: 800; }
+.lead { font-size: clamp(17px, 2.4vw, 19px); }
+section { scroll-margin-top: 80px; }
+
+.top { position: sticky; top: 0; z-index: 30; transition: background .3s, box-shadow .3s; }
+.top.scrolled { background: rgba(251, 248, 243, .82); backdrop-filter: blur(14px) saturate(1.5); box-shadow: 0 1px 0 var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 16px; height: 68px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 21px; margin-right: auto; }
+.brand img { width: 36px; height: 36px; }
+.nav { display: none; gap: 4px; }
+.nav a { text-decoration: none; font-weight: 700; font-size: 15px; padding: 10px 14px; border-radius: 999px; color: var(--muted); }
+.nav a:hover { color: var(--ink); background: rgba(21, 22, 58, .05); }
+.top .access { display: none; }
+
+.hero { position: relative; padding: 16px 0 40px; }
+.blobs { position: absolute; inset: -80px 0 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.blobs i { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .55; animation: drift 18s ease-in-out infinite alternate; }
+.blobs i:nth-child(1) { width: 420px; height: 420px; background: #bfe6ff; left: -120px; top: 40px; }
+.blobs i:nth-child(2) { width: 360px; height: 360px; background: #ffd9cf; right: -100px; top: 160px; animation-delay: -6s; }
+.blobs i:nth-child(3) { width: 300px; height: 300px; background: #fff0b8; left: 40%; top: 420px; animation-delay: -12s; }
+@keyframes drift { to { transform: translate(40px, -30px) scale(1.1); } }
+.hero-grid { display: grid; gap: 36px; align-items: center; }
+.hero h1 { font-size: clamp(44px, 11vw, 88px); line-height: .95; font-weight: 800; margin: 14px 0 18px; }
+.hero h1 em { font-style: normal; background: linear-gradient(100deg, var(--blue), var(--sky) 45%, var(--coral)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .lead { max-width: 520px; }
+.hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.trust { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 22px; font-size: 14px; font-weight: 700; color: var(--faint); }
+.trust span { display: inline-flex; align-items: center; gap: 6px; }
+.trust svg { color: var(--mint); }
+
+.tryzone { position: relative; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.tryhint { font-size: 14px; font-weight: 800; color: var(--coral-ink); display: flex; align-items: center; gap: 6px; }
+.stack { position: relative; width: min(330px, 84vw); aspect-ratio: 4 / 5; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.fc { position: absolute; inset: 0; background: var(--card); border-radius: 32px; box-shadow: 0 1px 0 var(--line), 0 30px 60px -28px rgba(21, 22, 58, .35); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding: 28px 22px; transition: transform .6s var(--ease), opacity .6s var(--ease); will-change: transform; cursor: pointer; border: 0; text-align: center; }
+.fc .from { position: absolute; top: 18px; left: 20px; font-size: 12px; font-weight: 800; color: var(--faint); letter-spacing: .04em; text-transform: uppercase; }
+.fc .hear { position: absolute; top: 12px; right: 12px; width: 48px; height: 48px; border-radius: 50%; background: var(--sky-soft); color: var(--blue); display: grid; place-items: center; }
+.fc.speaking .hear { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 10px rgba(56, 182, 255, .18); } }
+.fc .text { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(24px, 6.4vw, 30px); line-height: 1.2; }
+.fc .w { border-radius: 8px; padding: 0 2px; transition: background .15s, color .15s; }
+.fc .w.k { color: var(--coral-ink); text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+.fc .w.now { background: var(--sun); color: var(--ink); }
+.pics { display: flex; justify-content: center; align-items: flex-end; gap: 10px; height: 46%; width: 100%; }
+.pics img { height: 100%; max-width: 46%; object-fit: contain; }
+.pics.one img { max-width: 72%; }
+.pics.place { position: relative; aspect-ratio: 1; height: 42%; width: auto; display: block; margin-top: 4%; }
+.pics.place img { position: absolute; max-width: none; height: auto; }
+.pics.place .spot { inset: 0; width: 100%; z-index: 1; }
+.pics.place .thing { width: 46%; z-index: 4; transform: translate(-50%, -50%); top: 50%; left: 50%; }
+.pics.place .at-in { top: 56%; width: 38%; }
+.pics.place .at-on { top: 6%; }
+.pics.place .at-under { top: 94%; }
+.pics.place .at-beside { top: 60%; left: 118%; }
+.pics.place .at-behind { top: 24%; left: 74%; z-index: 0; }
+.pics.place .at-in-front-of { top: 86%; left: 36%; }
+.pics.place[data-spot='chair'] .at-under { top: 80%; width: 34%; }
+.pics.place[data-spot='chair'] .at-on { top: 30%; }
+.pics.place[data-spot='house'] .at-behind { top: 34%; left: 70%; }
+.stack-nav { display: flex; align-items: center; gap: 14px; }
+.round { width: 52px; height: 52px; border-radius: 50%; border: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--line); display: grid; place-items: center; cursor: pointer; }
+.round:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 8px; height: 8px; border-radius: 99px; background: #d9d3c6; transition: width .3s var(--ease), background .3s; }
+.dots i.on { width: 24px; background: var(--ink); }
+.sticker { position: absolute; z-index: 20; pointer-events: none; display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px; padding: 8px 14px 8px 8px; font-size: 13px; font-weight: 800; box-shadow: 0 12px 30px -14px rgba(21, 22, 58, .4); white-space: nowrap; }
+.sticker img { width: 28px; height: 28px; }
+.sticker { display: none; }
+.sticker.a { right: calc(100% - 26px); top: 30%; rotate: -6deg; }
+.sticker.b { left: calc(100% - 26px); bottom: 12%; rotate: 5deg; }
+@media (min-width: 1000px) { .sticker { display: flex; } }
+
+.facts { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 4px var(--pad) 8px; margin-inline: calc(var(--pad) * -1); }
+.facts::-webkit-scrollbar { display: none; }
+.fact { scroll-snap-align: start; background: #fff; border-radius: 22px; padding: 18px 20px; box-shadow: inset 0 0 0 1px var(--line); }
+.fact b { display: block; font-family: 'Bricolage Grotesque', sans-serif; font-size: 40px; line-height: 1; font-weight: 800; }
+.fact span { display: block; margin-top: 6px; font-size: 14px; font-weight: 700; color: var(--muted); }
+
+.block { padding: 72px 0; }
+.head { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; max-width: 720px; }
+
+.flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: s; }
+.flow li { position: relative; display: grid; grid-template-columns: 1fr; gap: 16px; padding: 22px; border-radius: var(--r); background: #fff; box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.flow .num { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 18px; }
+.flow h3 { font-size: 24px; margin: 10px 0 6px; }
+.flow .vis { height: 200px; border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+.flow .vis img.scene { width: 100%; height: 100%; object-fit: cover; }
+.mini-card { width: 104px; height: 132px; flex: none; background: #fff; border-radius: 18px; box-shadow: 0 14px 28px -16px rgba(21, 22, 58, .4); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 10px 8px; font-size: 12px; font-weight: 700; text-align: center; line-height: 1.25; }
+.mini-card img { height: 60px; }
+.mini-card:nth-child(1) { rotate: -8deg; translate: 20px 6px; }
+.mini-card:nth-child(2) { rotate: 3deg; z-index: 1; }
+.mini-card:nth-child(3) { rotate: 10deg; translate: -20px 8px; }
+.mini-card .k { color: var(--coral-ink); }
+.rewards { display: flex; align-items: flex-end; gap: 14px; }
+.rewards img { width: 64px; animation: bob 3s ease-in-out infinite; }
+.rewards img:nth-child(2) { width: 84px; animation-delay: -1s; }
+.rewards img:nth-child(3) { width: 72px; animation-delay: -2s; }
+@keyframes bob { 50% { translate: 0 -8px; } }
+.note { background: #fff; border-radius: 18px 18px 18px 6px; padding: 14px 16px; max-width: 240px; box-shadow: 0 14px 28px -16px rgba(21, 22, 58, .4); font-size: 14px; line-height: 1.45; color: var(--ink); font-weight: 600; }
+.note small { display: block; color: var(--faint); font-weight: 700; margin-bottom: 4px; }
+
+.games-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 4px var(--pad); margin: 18px calc(var(--pad) * -1) 6px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 0; background: #fff; box-shadow: inset 0 0 0 1.5px var(--line); font-weight: 800; font-size: 14px; cursor: pointer; color: var(--muted); }
+.chip[aria-pressed='true'] { background: var(--ink); color: #fff; box-shadow: none; }
+.shelf { display: grid; grid-auto-flow: column; grid-auto-columns: 72%; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 12px var(--pad) 24px; margin-inline: calc(var(--pad) * -1); scroll-padding-inline: var(--pad); }
+.shelf::-webkit-scrollbar { display: none; }
+.game { scroll-snap-align: start; position: relative; aspect-ratio: 3 / 4; border-radius: 26px; overflow: hidden; border: 0; padding: 0; cursor: pointer; text-align: left; color: #fff; transition: transform .45s var(--ease), box-shadow .45s var(--ease); box-shadow: 0 18px 36px -24px rgba(21, 22, 58, .6); }
+.game:hover { transform: translateY(-6px) rotate(-.6deg); box-shadow: 0 26px 46px -22px rgba(21, 22, 58, .6); }
+.game .art { position: absolute; inset: 0; }
+.game .art img.scene { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease); }
+.game:hover .art img.scene { transform: scale(1.06); }
+.game .icons { position: absolute; inset: 0 0 30%; display: flex; align-items: center; justify-content: center; gap: 6%; }
+.game .icons img { width: 34%; }
+.game::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(15, 16, 44, .88) 0%, rgba(15, 16, 44, .25) 38%, transparent 56%); }
+.game .tag { position: absolute; z-index: 2; top: 14px; left: 14px; font-size: 12px; font-weight: 800; background: rgba(255, 255, 255, .92); color: var(--ink); padding: 6px 10px; border-radius: 999px; }
+.game .lock { position: absolute; z-index: 2; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 50%; background: rgba(15, 16, 44, .55); backdrop-filter: blur(6px); display: grid; place-items: center; }
+.game .txt { position: absolute; z-index: 2; left: 18px; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 4px; }
+.game .txt b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; line-height: 1.05; }
+.game .txt span { font-size: 14px; font-weight: 600; opacity: .85; }
+.shelf-nav { display: none; gap: 8px; }
+.none { padding: 30px 0; font-weight: 700; color: var(--faint); }
+
+.seg { display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: #fff; border-radius: 999px; padding: 5px; box-shadow: inset 0 0 0 1px var(--line); width: 100%; max-width: 480px; position: relative; }
+.seg button { position: relative; z-index: 1; min-height: 46px; border: 0; background: none; border-radius: 999px; font-weight: 800; font-size: 15px; cursor: pointer; color: var(--muted); transition: color .3s; }
+.seg button[aria-selected='true'] { color: #fff; }
+.seg .pill { position: absolute; top: 5px; bottom: 5px; left: 5px; border-radius: 999px; background: var(--ink); transition: transform .45s var(--ease); width: calc((100% - 10px) / 3); }
+.panel { display: grid; gap: 14px; margin-top: 22px; }
+.panel[hidden] { display: none; }
+.panel .lede { padding: 26px; border-radius: var(--r); color: var(--ink); display: flex; flex-direction: column; gap: 10px; justify-content: flex-end; min-height: 200px; position: relative; overflow: hidden; }
+.panel .lede h3 { font-size: clamp(26px, 5vw, 36px); line-height: 1.05; }
+.panel .lede p { color: var(--ink); opacity: .8; }
+.panel .lede img { position: absolute; right: 16px; top: 16px; width: 72px; }
+.points { display: grid; gap: 12px; }
+.point { display: flex; gap: 14px; align-items: flex-start; background: #fff; border-radius: 22px; padding: 18px; box-shadow: inset 0 0 0 1px var(--line); }
+.point .ic { flex: none; width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; }
+.point h4 { margin: 0 0 4px; font-size: 16px; }
+.point p { font-size: 15px; line-height: 1.5; }
+.panel.in .lede, .panel.in .point { animation: up .55s var(--ease) both; }
+.panel.in .point:nth-child(2) { animation-delay: .05s; }
+.panel.in .point:nth-child(3) { animation-delay: .1s; }
+.panel.in .point:nth-child(4) { animation-delay: .15s; }
+@keyframes up { from { opacity: 0; transform: translateY(14px); } }
+
+.bento { display: grid; gap: 14px; }
+.tile { border-radius: var(--r); padding: 24px; position: relative; overflow: hidden; min-height: 190px; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; }
+.tile h3 { font-size: 24px; line-height: 1.1; }
+.tile p { color: var(--ink); opacity: .78; font-size: 15px; }
+.words { display: flex; flex-wrap: wrap; gap: 8px; }
+.words span { background: rgba(255, 255, 255, .8); padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 15px; }
+.words s { opacity: .45; font-weight: 600; }
+.karaoke { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: clamp(24px, 5vw, 32px); line-height: 1.25; }
+.karaoke span { padding: 0 3px; border-radius: 8px; transition: background .2s; }
+.karaoke span.now { background: #fff; }
+.timer { display: flex; align-items: center; gap: 16px; }
+.ring { width: 86px; height: 86px; flex: none; }
+.ring circle { fill: none; stroke-width: 10; }
+.ring .bgc { stroke: rgba(255, 255, 255, .6); }
+.ring .fg { stroke: var(--violet); stroke-linecap: round; stroke-dasharray: 226; stroke-dashoffset: 170; transform: rotate(-90deg); transform-origin: center; animation: tick 6s ease-in-out infinite alternate; }
+@keyframes tick { to { stroke-dashoffset: 30; } }
+.timer ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-weight: 700; font-size: 14px; }
+.devices { display: flex; align-items: flex-end; gap: 10px; }
+.devices i { display: block; border: 3px solid var(--ink); border-radius: 10px; background: #fff; }
+
+.faq { display: grid; gap: 10px; max-width: 820px; }
+.faq details { background: #fff; border-radius: 22px; box-shadow: inset 0 0 0 1px var(--line); }
+.faq summary { list-style: none; cursor: pointer; padding: 20px 22px; min-height: 60px; font-weight: 800; font-size: 17px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: '+'; flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-size: 22px; font-weight: 600; transition: rotate .3s var(--ease); }
+.faq details[open] summary::after { rotate: 45deg; }
+.faq details p { padding: 0 22px 22px; }
+
+.final { margin: 30px 0 120px; border-radius: 36px; background: var(--ink); color: #fff; padding: clamp(30px, 7vw, 72px); position: relative; overflow: hidden; display: grid; gap: 26px; }
+.final h2 { font-size: clamp(34px, 7vw, 60px); line-height: 1; font-weight: 800; max-width: 680px; }
+.final p { color: #c8cbe8; max-width: 560px; }
+.final .row { display: flex; flex-wrap: wrap; gap: 12px; }
+.final .btn.soft { background: transparent; color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .35); }
+.final .btn.light { background: #fff; color: var(--ink); }
+.final .glow { position: absolute; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(circle, rgba(56, 182, 255, .45), transparent 65%); right: -120px; top: -140px; }
+.final .peek { position: absolute; right: 24px; bottom: -18px; width: 140px; rotate: -10deg; opacity: .9; }
+footer { padding: 0 0 120px; color: var(--faint); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 22px; }
+
+.dock { position: fixed; z-index: 40; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 8px; padding: 8px; background: rgba(21, 22, 58, .92); backdrop-filter: blur(14px); border-radius: 999px; box-shadow: 0 20px 40px -16px rgba(21, 22, 58, .6); transform: translateY(140%); transition: transform .5s var(--ease); }
+.dock.show { transform: none; }
+.dock .btn { flex: 1; min-height: 48px; padding: 0 14px; }
+.dock .btn.ghost { background: rgba(255, 255, 255, .1); color: #fff; }
+.dock .btn.light { background: #fff; color: var(--ink); }
+
+dialog { border: 0; padding: 0; color: var(--ink); background: var(--bg); width: 100%; max-width: 100%; max-height: 92dvh; margin: auto auto 0; border-radius: 30px 30px 0 0; overflow: hidden; }
+dialog[open] { display: flex; flex-direction: column; animation: sheet .5s var(--ease); }
+dialog::backdrop { background: rgba(21, 22, 58, .5); backdrop-filter: blur(4px); }
+@keyframes sheet { from { transform: translateY(100%); } }
+.grab { width: 44px; height: 5px; border-radius: 9px; background: rgba(255, 255, 255, .85); position: absolute; z-index: 3; top: 10px; left: 50%; translate: -50% 0; }
+.sh-art { position: relative; height: 230px; flex: none; }
+.sh-art img.scene { width: 100%; height: 100%; object-fit: cover; }
+.sh-art .icons { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8%; }
+.sh-art .icons img { width: 26%; }
+.sh-close { position: absolute; z-index: 3; top: 14px; right: 14px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .92); cursor: pointer; display: grid; place-items: center; }
+.sh-body { overflow-y: auto; padding: 22px var(--pad) 26px; display: flex; flex-direction: column; gap: 22px; overscroll-behavior: contain; }
+.sh-body h2 { font-size: 34px; line-height: 1; font-weight: 800; margin-top: 6px; }
+.sh-label { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin-bottom: 10px; }
+.steps3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.steps3 div { background: #fff; border-radius: 18px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; font-weight: 800; font-size: 13px; box-shadow: inset 0 0 0 1px var(--line); }
+.steps3 img { width: 36px; height: 36px; }
+.cardrow { display: grid; grid-auto-flow: column; grid-auto-columns: 140px; gap: 10px; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--pad) * -1); padding: 4px var(--pad) 8px; }
+.cardrow::-webkit-scrollbar { display: none; }
+.cm { background: #fff; border-radius: 18px; padding: 14px 10px; height: 170px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; box-shadow: inset 0 0 0 1px var(--line); }
+.cm .pics { height: 70px; }
+.cm .pics.place { height: 56px; }
+.cm p { color: var(--ink); font-size: 13px; font-weight: 700; text-align: center; line-height: 1.3; }
+.cm .k { color: var(--coral-ink); }
+.kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.kv div { background: #fff; border-radius: 18px; padding: 14px 16px; box-shadow: inset 0 0 0 1px var(--line); }
+.kv b { display: block; font-family: 'Bricolage Grotesque', sans-serif; font-size: 26px; }
+.kv span { font-size: 13px; font-weight: 700; color: var(--faint); }
+.gate { background: var(--ink); color: #fff; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.gate p { color: #c8cbe8; font-size: 15px; }
+.gate .btn.light { background: #fff; color: var(--ink); }
+.gate form { display: none; flex-direction: column; gap: 10px; }
+.gate.signing form { display: flex; }
+.gate.signing .gate-cta { display: none; }
+.gate label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: #c8cbe8; }
+.gate input { font: inherit; font-size: 16px; min-height: 50px; padding: 0 14px; border-radius: 14px; border: 0; background: rgba(255, 255, 255, .1); color: #fff; }
+
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+.reveal.seen { opacity: 1; transform: none; }
+
+@media (min-width: 720px) {
+  .shelf { grid-auto-columns: calc((100% - var(--pad) * 2 - 42px) / 3.4); }
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bento { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .tile:nth-child(1) { grid-column: span 4; }
+  .tile:nth-child(2) { grid-column: span 2; }
+  .tile:nth-child(3) { grid-column: span 2; }
+  .tile:nth-child(4) { grid-column: span 4; }
+  .tile:nth-child(5) { grid-column: span 3; }
+  .tile:nth-child(6) { grid-column: span 3; }
+  .points { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .facts { grid-auto-flow: row; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; margin-inline: 0; padding-inline: 0; }
+  dialog { max-width: 760px; margin: auto; border-radius: 30px; max-height: 88dvh; }
+  dialog[open] { animation: pop .45s var(--ease); }
+  @keyframes pop { from { opacity: 0; transform: translateY(30px) scale(.98); } }
+  .sh-art { height: 300px; }
+  .grab { display: none; }
+}
+@media (min-width: 1000px) {
+  .nav, .top .access { display: inline-flex; }
+  .hero { padding: 40px 0 70px; }
+  .hero-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 56px; }
+  .flow { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .flow li { grid-template-rows: auto 1fr; }
+  .flow .vis { order: -1; }
+  .panel { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+  .panel .lede { min-height: 100%; }
+  .shelf { grid-auto-columns: calc((100% - var(--pad) * 2 - 56px) / 4.3); }
+  .shelf-nav { display: flex; }
+  .dock { display: none; }
+  footer { padding-bottom: 40px; }
+  .final { margin-bottom: 60px; grid-template-columns: 1fr auto; align-items: end; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="top" id="top"><div class="wrap">
+  <a class="brand" href="#"><img src="img/mark.svg" alt="">Speechomania</a>
+  <nav class="nav" aria-label="Main"><a href="#how">How it works</a><a href="#games">Games</a><a href="#who">Who it is for</a><a href="#faq">Questions</a></nav>
+  <button class="btn soft small" type="button" data-signin>Sign in</button>
+  <a class="btn dark small access" href="#access">Get access</a>
+</div></header>
+
+<main>
+<section class="hero">
+  <div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Speech and language games for autistic children</span>
+      <h1>Speech practice that feels like <em>play.</em></h1>
+      <p class="lead">Short picture lessons in simple Indian English. A calm voice reads every word, the child plays a game with the same words, and a mentor follows every step.</p>
+      <div class="ctas">
+        <a class="btn dark" href="#try">Try a flashcard</a>
+        <a class="btn soft" href="#games">See the games</a>
+      </div>
+      <div class="trust">
+        <span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Phone, tablet or laptop</span>
+        <span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>Built-in screen time breaks</span>
+        <span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>A mentor for every child</span>
+      </div>
+    </div>
+    <div class="tryzone" id="try">
+      <span class="tryhint"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5a2 2 0 0 1 4 0v6"/><path d="M13 9a2 2 0 0 1 4 0v3a7 7 0 0 1-7 7H9a5 5 0 0 1-4.3-2.4L3 14a2 2 0 0 1 3.4-2L8 14"/></svg>Tap the card to hear it</span>
+      <div class="stack" id="stack" aria-roledescription="flashcards" aria-live="polite">
+        <span class="sticker a"><img src="art/sound-on.svg" alt="">Read word by word</span>
+        <span class="sticker b"><img src="art/star.svg" alt="">15+ activities a lesson</span>
+      </div>
+      <div class="stack-nav">
+        <button class="round" type="button" id="prev" aria-label="Previous card"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <div class="dots" id="dots"></div>
+        <button class="round" type="button" id="next" aria-label="Next card"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:44px"><div class="facts" id="facts"></div></div>
+</section>
+
+<section class="block" id="how"><div class="wrap">
+  <div class="head reveal"><span class="eyebrow">How it works</span><h2 class="h2">One lesson, four simple steps.</h2><p class="lead">Every lesson follows the same calm pattern, so children always know what comes next.</p></div>
+  <ol class="flow">
+    <li class="reveal">
+      <div class="vis" style="background:var(--sky-soft)" id="flow-cards"></div>
+      <div><span class="num" style="background:var(--sky);color:#fff">1</span><h3>Look and listen</h3><p>Picture flashcards, one short sentence each. The voice reads it and lights up each word.</p></div>
+    </li>
+    <li class="reveal">
+      <div class="vis"><img class="scene" src="img/shark.webp" alt="Feed the shark game"></div>
+      <div><span class="num" style="background:var(--coral);color:#fff">2</span><h3>Play a game</h3><p>The game uses the same words. A wrong tap gets gentle help, never a buzzer.</p></div>
+    </li>
+    <li class="reveal">
+      <div class="vis" style="background:var(--sun-soft)"><div class="rewards"><img src="art/star.svg" alt=""><img src="art/trophy.svg" alt=""><img src="art/medal.svg" alt=""></div></div>
+      <div><span class="num" style="background:var(--sun);color:var(--ink)">3</span><h3>Earn a reward</h3><p>Stars for right answers on the first try, then a medal or a trophy at the end.</p></div>
+    </li>
+    <li class="reveal">
+      <div class="vis" style="background:var(--mint-soft)"><div class="note"><small>From your child’s mentor</small>A note about today’s play, written for you.</div></div>
+      <div><span class="num" style="background:var(--mint);color:#fff">4</span><h3>A mentor follows</h3><p>The mentor sees every play and writes notes the family can read.</p></div>
+    </li>
+  </ol>
+</div></section>
+
+<section class="block" id="games" style="padding-top:20px"><div class="wrap">
+  <div class="games-head reveal">
+    <div class="head" style="margin:0"><span class="eyebrow">The games</span><h2 class="h2">Pick a game. Peek inside.</h2><p class="lead">Open any game to see its flashcards and how it plays. Playing needs a family account.</p></div>
+    <div class="shelf-nav"><button class="round" type="button" data-shelf="-1" aria-label="Scroll games left"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><button class="round" type="button" data-shelf="1" aria-label="Scroll games right"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
+  </div>
+  <div class="chips" id="chips" role="toolbar" aria-label="Filter games by skill"></div>
+  <div class="shelf" id="shelf"></div>
+</div></section>
+
+<section class="block" id="who"><div class="wrap">
+  <div class="head reveal"><span class="eyebrow">Who it is for</span><h2 class="h2">Everyone around the child, in one place.</h2></div>
+  <div class="seg reveal" role="tablist" aria-label="Choose who you are" id="seg">
+    <span class="pill" id="seg-pill"></span>
+    <button role="tab" aria-selected="true" aria-controls="p-family" id="t-family">Families</button>
+    <button role="tab" aria-selected="false" aria-controls="p-mentor" id="t-mentor">Mentors</button>
+    <button role="tab" aria-selected="false" aria-controls="p-centre" id="t-centre">Centres</button>
+  </div>
+  <div class="panel in" role="tabpanel" id="p-family" aria-labelledby="t-family">
+    <div class="lede" style="background:var(--sky-soft)"><img src="art/teddy.svg" alt=""><h3>Learning at home, made simple.</h3><p>Sign in and your child’s learning path opens straight away.</p></div>
+    <div class="points">
+      <div class="point"><span class="ic" style="background:var(--sky-soft)"><img src="art/books.svg" alt="" width="26"></span><div><h4>A path made for your child</h4><p>Lessons chosen by your centre, unlocked one after another.</p></div></div>
+      <div class="point"><span class="ic" style="background:var(--violet-soft)"><img src="art/hourglass.svg" alt="" width="26"></span><div><h4>Healthy screen time</h4><p>A check-in every 15 minutes, and a 15 minute rest after an hour of play.</p></div></div>
+      <div class="point"><span class="ic" style="background:var(--mint-soft)"><img src="art/sound-on.svg" alt="" width="26"></span><div><h4>Notes from the mentor</h4><p>Read what the mentor shares about your child’s progress.</p></div></div>
+      <div class="point"><span class="ic" style="background:var(--sun-soft)"><img src="art/star.svg" alt="" width="26"></span><div><h4>A grown-up area, one tap away</h4><p>Switch from the child’s games to your own view any time.</p></div></div>
+    </div>
+  </div>
+  <div class="panel" role="tabpanel" id="p-mentor" aria-labelledby="t-mentor" hidden>
+    <div class="lede" style="background:var(--mint-soft)"><img src="art/books.svg" alt=""><h3>See every play. Guide every child.</h3><p>All your children and their progress on one screen.</p></div>
+    <div class="points">
+      <div class="point"><span class="ic" style="background:var(--mint-soft)"><img src="art/star.svg" alt="" width="26"></span><div><h4>Every play, recorded</h4><p>Right answers, tries and time for each game a child plays.</p></div></div>
+      <div class="point"><span class="ic" style="background:var(--sky-soft)"><img src="art/sound-on.svg" alt="" width="26"></span><div><h4>Notes for the family</h4><p>Share a note with parents, or keep it private for the team.</p></div></div>
+      <div class="point"><span class="ic" style="background:var(--sun-soft)"><img src="art/cards.svg" alt="" width="26"></span><div><h4>Suggest lesson changes</h4><p>Spot a word that does not work? Send a suggestion to the centre.</p></div></div>
+      <div class="point"><span class="ic" style="background:var(--coral-soft)"><img src="art/trophy.svg" alt="" width="26"></span><div><h4>Assessments</h4><p>Give a child an assessment and follow the results.</p></div></div>
+    </div>
+  </div>
+  <div class="panel" role="tabpanel" id="p-centre" aria-labelledby="t-centre" hidden>
+    <div class="lede" style="background:var(--sun-soft)"><img src="art/school.svg" alt=""><h3>Run your whole programme.</h3><p>Children, mentors, lessons and assessments in one place.</p></div>
+    <div class="points">
+      <div class="point"><span class="ic" style="background:var(--sun-soft)"><img src="art/school.svg" alt="" width="26"></span><div><h4>Enrol and match</h4><p>Add children and give each one a mentor.</p></div></div>
+      <div class="point"><span class="ic" style="background:var(--sky-soft)"><img src="art/books.svg" alt="" width="26"></span><div><h4>Choose the lessons</h4><p>Decide which lessons each child gets, and in what order.</p></div></div>
+      <div class="point"><span class="ic" style="background:var(--violet-soft)"><img src="art/medal.svg" alt="" width="26"></span><div><h4>Build assessments</h4><p>Set the questions, the scoring and what parents can see.</p></div></div>
+      <div class="point"><span class="ic" style="background:var(--mint-soft)"><img src="art/cards.svg" alt="" width="26"></span><div><h4>Preview any game</h4><p>Play a lesson exactly as a child would, without saving anything.</p></div></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="block"><div class="wrap">
+  <div class="head reveal"><span class="eyebrow">Made calm, on purpose</span><h2 class="h2">Designed for how autistic children learn.</h2></div>
+  <div class="bento">
+    <div class="tile reveal" style="background:var(--sun-soft)">
+      <div class="karaoke" id="karaoke" aria-label="The boy can ride a cycle."></div>
+      <div><h3>Every word, lit up as it is read</h3><p>The voice reads slowly and highlights each word, so listening and reading happen together.</p></div>
+    </div>
+    <div class="tile reveal" style="background:var(--coral-soft)">
+      <div class="words"><span>cycle</span><span>toffee</span></div>
+      <div><h3>Simple Indian English</h3><p>Words children hear at home and in school.</p></div>
+    </div>
+    <div class="tile reveal" style="background:var(--mint-soft)">
+      <img src="art/sound-on.svg" alt="" width="64">
+      <div><h3>Gentle help, no buzzer</h3><p>A wrong tap shows the answer again, kindly.</p></div>
+    </div>
+    <div class="tile reveal" style="background:var(--violet-soft)">
+      <div class="timer">
+        <svg class="ring" viewBox="0 0 90 90" aria-hidden="true"><circle class="bgc" cx="45" cy="45" r="36"/><circle class="fg" cx="45" cy="45" r="36"/></svg>
+        <ul><li>Check-in every 15 minutes</li><li>Rest after 60 minutes</li><li>15 minute break, then play again</li></ul>
+      </div>
+      <div><h3>Screen time with limits built in</h3><p>The app itself pauses for a break, so parents don’t have to be the bad guy.</p></div>
+    </div>
+    <div class="tile reveal" style="background:var(--sky-soft)">
+      <div style="display:flex;gap:10px"><img src="art/cat.svg" alt="" width="54"><img src="art/apple.svg" alt="" width="54"><img src="art/dog.svg" alt="" width="54"></div>
+      <div><h3>One calm picture style</h3><p>The same friendly pictures everywhere, few decorations, nothing flashing.</p></div>
+    </div>
+    <div class="tile reveal" style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)">
+      <div class="devices" aria-hidden="true"><i style="width:34px;height:60px"></i><i style="width:76px;height:56px"></i><i style="width:120px;height:76px"></i></div>
+      <div><h3>Phone, tablet or laptop</h3><p>Big buttons for small hands, on any screen at home.</p></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="block" id="faq" style="padding-top:20px"><div class="wrap">
+  <div class="head reveal"><span class="eyebrow">Questions</span><h2 class="h2">Good to know.</h2></div>
+  <div class="faq">
+    <details class="reveal"><summary>Who is Speechomania for?</summary><p>Autistic children working on speech and language, with their families, their mentors and the centre that supports them.</p></details>
+    <details class="reveal"><summary>How do we get an account?</summary><p>Accounts come from your centre. The centre enrols your child, gives them a mentor and chooses their lessons. Then you sign in and your child’s path is ready.</p></details>
+    <details class="reveal"><summary>How long is one lesson?</summary><p>Every lesson has at least 15 activities: flashcards first, then a game with the same words. Most children finish one in a short sitting.</p></details>
+    <details class="reveal"><summary>What does the mentor do?</summary><p>The mentor sees each game your child plays, writes notes for you, and can suggest changes to lessons or give an assessment.</p></details>
+    <details class="reveal"><summary>Who can see my child’s progress?</summary><p>Only your family, your child’s mentor and your centre. Mentors only see the children they look after.</p></details>
+    <details class="reveal"><summary>Does it need special equipment?</summary><p>No. It runs in the browser on a phone, tablet or laptop. Sound on helps, because every word is read aloud.</p></details>
+  </div>
+</div></section>
+
+<section class="wrap" id="access">
+  <div class="final reveal">
+    <span class="glow" aria-hidden="true"></span>
+    <div style="position:relative;display:grid;gap:16px"><h2>Bring Speechomania to your child or centre.</h2><p>Meet us at [EVENT BOOTH], or write to [CONTACT EMAIL] and we’ll set you up.</p></div>
+    <div class="row" style="position:relative"><a class="btn light" href="mailto:[CONTACT EMAIL]">Ask for access</a><button class="btn soft" type="button" data-signin>I have an account</button></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><span>Speechomania · Speech and language games for autistic children</span><span>Made in India</span></div></footer>
+
+<nav class="dock" id="dock" aria-label="Quick actions"><button class="btn ghost" type="button" data-signin>Sign in</button><a class="btn light" href="#access">Get access</a></nav>
+
+<dialog id="sheet" aria-labelledby="sh-name">
+  <span class="grab" aria-hidden="true"></span>
+  <div class="sh-art" id="sh-art"></div>
+  <button class="sh-close" type="button" id="sh-close" aria-label="Close"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <div class="sh-body">
+    <div><span class="eyebrow" id="sh-topic"></span><h2 id="sh-name"></h2></div>
+    <div><div class="sh-label">How to play</div><div class="steps3" id="sh-how"></div></div>
+    <div id="sh-cards-wrap"><div class="sh-label">Part 1 · the flashcards</div><div class="cardrow" id="sh-cards"></div></div>
+    <div class="kv" id="sh-kv"></div>
+    <div class="gate" id="gate">
+      <div class="gate-cta" style="display:flex;flex-direction:column;gap:12px">
+        <p>Playing needs a family account from your centre.</p>
+        <button class="btn light" type="button" id="gate-go"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Sign in to play</button>
+      </div>
+      <form method="dialog">
+        <p id="gate-for" style="color:#fff;font-weight:800"></p>
+        <label>Email<input type="email" autocomplete="email" inputmode="email"></label>
+        <label>Password<input type="password" autocomplete="current-password"></label>
+        <button class="btn light" value="signin">Sign in</button>
+      </form>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="signin" aria-labelledby="si-title">
+  <span class="grab" aria-hidden="true" style="background:var(--line)"></span>
+  <button class="sh-close" type="button" data-close aria-label="Close" style="background:#fff;box-shadow:inset 0 0 0 1px var(--line)"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <div class="sh-body" style="padding-top:40px">
+    <img src="img/mark.svg" alt="" width="52">
+    <div><h2 id="si-title">Welcome back</h2><p style="margin-top:8px">Sign in with the account your centre gave you.</p></div>
+    <form method="dialog" style="display:flex;flex-direction:column;gap:12px">
+      <label style="display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px">Email<input type="email" autocomplete="email" inputmode="email" style="font:inherit;font-size:16px;min-height:52px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:#fff"></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px">Password<input type="password" autocomplete="current-password" style="font:inherit;font-size:16px;min-height:52px;padding:0 14px;border-radius:14px;border:1.5px solid var(--line);background:#fff"></label>
+      <button class="btn dark" value="signin">Sign in</button>
+    </form>
+    <p style="font-size:14px">No account yet? <a href="#access" data-close>Ask your centre or get in touch</a>.</p>
+  </div>
+</dialog>
+
+<script src="data.js"></script>
+<script>
+const dup = new Set(GAMES.map((g) => g.name).filter((n, i, all) => all.indexOf(n) !== i))
+GAMES.forEach((g) => { g.subject = g.topic; if (dup.has(g.name)) { [g.name, g.topic] = [g.topic, g.name]; g.subject = g.name } })
+const bySlug = Object.fromEntries(GAMES.map((g) => [g.slug, g]))
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+const bare = (w) => w.toLowerCase().replace(/[^a-z’']/g, '')
+const lock = '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
+const speaker = '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>'
+
+const pics = (card) => {
+  if (card.layout !== 'row' && card.art.length === 2) {
+    const [thing, spot] = card.art
+    return `<div class="pics place" data-spot="${spot.split('/').pop().replace(/\.\w+$/, '')}"><img class="spot" src="${spot}" alt=""><img class="thing at-${card.layout.replace(/\s+/g, '-')}" src="${thing}" alt=""></div>`
+  }
+  return `<div class="pics ${card.art.length === 1 ? 'one' : ''}">${card.art.map((a) => `<img src="${a}" alt="">`).join('')}</div>`
+}
+const words = (card, cls = 'w') => {
+  const keys = card.keys.map((k) => k.toLowerCase())
+  return card.text.split(' ').map((w, i) => {
+    const tail = w.match(/[.,!?]+$/)?.[0] ?? ''
+    return `<span class="${cls}${keys.includes(bare(w)) ? ' k' : ''}" data-i="${i}">${esc(w.slice(0, w.length - tail.length))}</span>${esc(tail)}`
+  }).join(' ')
+}
+const art = (g) => g.scene ? `<img class="scene" src="${g.scene}" alt="">` : `<div class="icons" style="background:${g.background};position:absolute;inset:0">${g.icons.map((i) => `<img src="${i}" alt="">`).join('')}</div>`
+
+let voice = null
+const pickVoice = () => { const v = speechSynthesis.getVoices(); voice = v.find((x) => x.lang === 'en-IN') ?? v.find((x) => x.lang.startsWith('en')) ?? null }
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice }
+const speak = (text, onWord, onEnd) => {
+  const count = text.split(' ').length
+  if (!('speechSynthesis' in window)) { onEnd?.(); return }
+  speechSynthesis.cancel()
+  const u = new SpeechSynthesisUtterance(text)
+  if (voice) u.voice = voice
+  u.lang = 'en-IN'
+  u.rate = .78
+  let fallback
+  let got = false
+  u.onboundary = (e) => {
+    if (e.name && e.name !== 'word') return
+    got = true
+    onWord?.(text.slice(0, e.charIndex).split(' ').length - 1)
+  }
+  u.onstart = () => {
+    let i = 0
+    fallback = setInterval(() => { if (got) return clearInterval(fallback); onWord?.(i++); if (i >= count) clearInterval(fallback) }, 420)
+  }
+  u.onend = () => { clearInterval(fallback); onEnd?.() }
+  speechSynthesis.speak(u)
+}
+
+const CARDS = [['this-these', 0], ['action-words', 0], ['where-is-it', 1], ['feelings', 0], ['bigger-smaller', 0]]
+  .map(([s, i]) => ({ ...bySlug[s].cards[i], from: bySlug[s].subject }))
+const stack = document.getElementById('stack')
+stack.insertAdjacentHTML('beforeend', CARDS.map((c, i) => `<button class="fc" type="button" data-n="${i}" aria-label="${esc(c.text)} Tap to hear it."><span class="from">${esc(c.from)}</span><span class="hear">${speaker}</span>${pics(c)}<span class="text">${words(c)}</span></button>`).join(''))
+const fcs = [...stack.querySelectorAll('.fc')]
+document.getElementById('dots').innerHTML = CARDS.map(() => '<i></i>').join('')
+let at = 0
+const layout = (drag = 0) => fcs.forEach((el, i) => {
+  const d = (i - at + CARDS.length) % CARDS.length
+  el.style.zIndex = 10 - d
+  el.style.pointerEvents = d ? 'none' : ''
+  el.tabIndex = d ? -1 : 0
+  el.style.opacity = d > 2 ? 0 : 1
+  el.style.transform = d ? `translateY(${d * 14}px) scale(${1 - d * .05}) rotate(${d % 2 ? 3 : -3}deg)` : `translateX(${drag}px) rotate(${drag / 18}deg)`
+  ;[...document.getElementById('dots').children].forEach((dot, n) => dot.classList.toggle('on', n === at))
+})
+const go = (dir) => {
+  speechSynthesis?.cancel()
+  const el = fcs[at]
+  el.style.transform = `translateX(${dir * 120}%) rotate(${dir * 14}deg)`
+  el.style.opacity = 0
+  setTimeout(() => { at = (at + dir + CARDS.length) % CARDS.length; layout() }, 240)
+}
+const read = (el) => {
+  const c = CARDS[+el.dataset.n]
+  const spans = [...el.querySelectorAll('.w')]
+  el.classList.add('speaking')
+  speak(c.text, (i) => spans.forEach((s, n) => s.classList.toggle('now', n === i)), () => { el.classList.remove('speaking'); spans.forEach((s) => s.classList.remove('now')) })
+}
+layout()
+let sx = null
+let moved = 0
+stack.addEventListener('pointerdown', (e) => { if (!e.target.closest('.fc')) return; sx = e.clientX; moved = 0 })
+stack.addEventListener('pointermove', (e) => { if (sx === null) return; moved = e.clientX - sx; if (Math.abs(moved) > 6) { fcs[at].style.transition = 'none'; layout(moved) } })
+const release = () => {
+  if (sx === null) return
+  fcs[at].style.transition = ''
+  if (Math.abs(moved) > 70) go(moved < 0 ? 1 : -1)
+  else { layout(); if (Math.abs(moved) < 6) read(fcs[at]) }
+  sx = null
+}
+stack.addEventListener('pointerup', release)
+stack.addEventListener('pointercancel', () => { sx = null; fcs[at].style.transition = ''; layout() })
+stack.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); read(fcs[at]) } })
+document.getElementById('next').onclick = () => go(1)
+document.getElementById('prev').onclick = () => go(-1)
+
+const total = (k) => GAMES.reduce((n, g) => n + g[k], 0)
+document.getElementById('facts').innerHTML = [[GAMES.length, 'games'], [total('cardCount'), 'picture flashcards'], [total('activities'), 'game rounds'], ['1:1', 'a mentor for every child']]
+  .map(([n, l]) => `<div class="fact reveal"><b>${n}</b><span>${l}</span></div>`).join('')
+
+document.getElementById('flow-cards').innerHTML = ['action-words', 'where-is-it', 'feelings'].map((s, i) => {
+  const c = bySlug[s].cards[i === 1 ? 1 : 0]
+  return `<div class="mini-card">${pics(c)}<span>${words(c, 'x')}</span></div>`
+}).join('')
+document.querySelectorAll('#flow-cards .pics').forEach((p) => { p.style.height = '52px'; p.style.flex = 'none' })
+document.querySelectorAll('#flow-cards .x.k').forEach((k) => k.classList.add('k'))
+
+const SKILLS = [
+  { id: 'all', label: 'All' },
+  { id: 'actions', label: 'Actions and feelings', slugs: ['action-words', 'feelings', 'can-and-cant'] },
+  { id: 'describe', label: 'Describing things', slugs: ['describing-words', 'opposites', 'bigger-smaller', 'colours'] },
+  { id: 'little', label: 'Little words', slugs: ['a-or-an', 'a-or-the', 'this-these', 'he-she', 'they', 'short-words', 'where-is-it'] },
+  { id: 'questions', label: 'Questions', slugs: ['ask-me', 'why'] }
+]
+const ORDER = ['action-words', 'feelings', 'where-is-it', 'bigger-smaller', 'describing-words', 'a-or-an', 'ask-me', 'can-and-cant', 'opposites', 'short-words', 'why', 'a-or-the', 'this-these', 'he-she', 'they', 'colours']
+let skill = 'all'
+document.getElementById('chips').innerHTML = SKILLS.map((s) => `<button class="chip" type="button" data-skill="${s.id}" aria-pressed="${s.id === 'all'}">${s.label}</button>`).join('')
+const renderShelf = () => {
+  const list = (skill === 'all' ? ORDER : SKILLS.find((s) => s.id === skill).slugs).map((s) => bySlug[s]).filter(Boolean)
+  const shelf = document.getElementById('shelf')
+  shelf.innerHTML = list.map((g) => `<button class="game" type="button" data-open="${g.slug}" aria-label="${esc(g.name)}, ${esc(g.topic)}. See inside.">
+    <span class="art">${art(g)}</span>
+    <span class="tag">${g.cardCount ? `${g.cardCount} cards · ` : ''}${g.activities} rounds</span>
+    <span class="lock">${lock}</span>
+    <span class="txt"><b>${esc(g.name)}</b><span>${esc(g.topic)}</span></span>
+  </button>`).join('')
+  shelf.scrollLeft = 0
+}
+renderShelf()
+document.getElementById('chips').addEventListener('click', (e) => {
+  const b = e.target.closest('.chip'); if (!b) return
+  skill = b.dataset.skill
+  document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', c === b))
+  renderShelf()
+})
+
+const tabs = [...document.querySelectorAll('#seg [role=tab]')]
+const pill = document.getElementById('seg-pill')
+const pick = (t) => {
+  tabs.forEach((x, i) => {
+    const on = x === t
+    x.setAttribute('aria-selected', on)
+    x.tabIndex = on ? 0 : -1
+    const p = document.getElementById(x.getAttribute('aria-controls'))
+    p.hidden = !on
+    if (on) { p.classList.remove('in'); void p.offsetWidth; p.classList.add('in'); pill.style.transform = `translateX(${i * 100}%)` }
+  })
+}
+tabs.forEach((t, i) => {
+  t.addEventListener('click', () => pick(t))
+  t.addEventListener('keydown', (e) => { const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (d) { const n = tabs[(i + d + tabs.length) % tabs.length]; pick(n); n.focus() } })
+})
+
+const kar = document.getElementById('karaoke')
+const line = 'The boy can ride a cycle.'
+kar.innerHTML = line.split(' ').map((w) => `<span aria-hidden="true">${w}</span>`).join(' ')
+let ki = 0
+setInterval(() => { [...kar.children].forEach((s, n) => s.classList.toggle('now', n === ki)); ki = (ki + 1) % (kar.children.length + 2) }, 520)
+
+const sheet = document.getElementById('sheet')
+const signin = document.getElementById('signin')
+const gate = document.getElementById('gate')
+const openGame = (slug) => {
+  const g = bySlug[slug]
+  document.getElementById('sh-art').innerHTML = art(g)
+  document.getElementById('sh-topic').textContent = g.topic
+  document.getElementById('sh-name').textContent = g.name
+  document.getElementById('sh-how').innerHTML = g.how.map((h) => `<div>${h.icon ? `<img src="${h.icon}" alt="">` : ''}${esc(h.label)}</div>`).join('')
+  document.getElementById('sh-cards-wrap').hidden = !g.cards.length
+  document.getElementById('sh-cards').innerHTML = g.cards.map((c) => `<div class="cm">${pics(c)}<p>${words(c, 'x')}</p></div>`).join('')
+  document.getElementById('sh-kv').innerHTML = [g.cardCount && [g.cardCount, 'flashcards in part 1'], [g.activities, g.cardCount ? 'game rounds in part 2' : 'pages to play']].filter(Boolean).map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('')
+  document.getElementById('gate-for').textContent = `Sign in to play ${g.name}`
+  gate.classList.remove('signing')
+  sheet.querySelector('.sh-body').scrollTop = 0
+  sheet.showModal()
+  history.replaceState(null, '', `#game/${slug}`)
+}
+document.getElementById('gate-go').onclick = () => { gate.classList.add('signing'); setTimeout(() => gate.querySelector('input').focus(), 50); gate.scrollIntoView({ behavior: 'smooth', block: 'end' }) }
+sheet.addEventListener('close', () => history.replaceState(null, '', location.pathname))
+for (const d of [sheet, signin]) d.addEventListener('click', (e) => { if (e.target === d || e.target.closest('[data-close], .sh-close')) d.close() })
+
+let ty = null
+sheet.addEventListener('touchstart', (e) => { if (sheet.querySelector('.sh-body').scrollTop <= 0) ty = e.touches[0].clientY }, { passive: true })
+sheet.addEventListener('touchmove', (e) => { if (ty === null) return; const dy = e.touches[0].clientY - ty; if (dy > 0) sheet.style.transform = `translateY(${dy}px)` }, { passive: true })
+sheet.addEventListener('touchend', (e) => { if (ty === null) return; const dy = e.changedTouches[0].clientY - ty; sheet.style.transform = ''; ty = null; if (dy > 110) sheet.close() })
+
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-open], [data-signin], [data-shelf]')
+  if (!t) return
+  if (t.dataset.open) openGame(t.dataset.open)
+  else if ('signin' in t.dataset) { if (sheet.open) sheet.close(); signin.showModal() }
+  else { const s = document.getElementById('shelf'); s.scrollBy({ left: s.clientWidth * .85 * +t.dataset.shelf, behavior: 'smooth' }) }
+})
+const hash = location.hash.match(/^#game\/(.+)$/)
+if (hash && bySlug[hash[1]]) openGame(hash[1])
+
+const header = document.getElementById('top')
+const dock = document.getElementById('dock')
+const onScroll = () => {
+  header.classList.toggle('scrolled', scrollY > 10)
+  const end = document.getElementById('access').getBoundingClientRect().top < innerHeight
+  dock.classList.toggle('show', scrollY > innerHeight * .7 && !end)
+}
+addEventListener('scroll', onScroll, { passive: true })
+onScroll()
+const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('seen'); io.unobserve(e.target) } }), { threshold: .12, rootMargin: '0px 0px -40px 0px' })
+document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
+</script>
+</body>
+</html>

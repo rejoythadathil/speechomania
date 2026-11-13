@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speechomania · B · Try it first</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.hero { background: var(--navy); color: #fff; }
+.hero .wrap { display: flex; flex-wrap: wrap; gap: 48px; align-items: center; padding: 64px 24px 72px; }
+.hero .copy { flex: 1 1 420px; display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
+.hero h1 { font-size: clamp(40px, 5.5vw, 60px); line-height: 1.04; }
+.hero p { color: #c9cde6; font-size: 18px; max-width: 500px; }
+.hero .pill { background: rgba(56, 182, 255, .16); color: #8dd2fd; }
+.try { flex: 1 1 420px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.flash { width: 360px; max-width: 100%; aspect-ratio: 4 / 5; perspective: 1200px; border: 0; padding: 0; background: none; cursor: pointer; }
+.flash .inner { display: block; position: relative; width: 100%; height: 100%; transition: transform .6s cubic-bezier(.22,1,.36,1); transform-style: preserve-3d; }
+.flash.open .inner { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; }
+.back { background: var(--sky); color: var(--navy); font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 26px; }
+.front { background: #fff; transform: rotateY(180deg); padding: 24px; }
+.front img { width: 62%; }
+.front .text { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; font-size: 30px; color: var(--navy); text-align: center; }
+.front .key { color: var(--coral-ink); font-weight: 800; text-decoration: underline; text-underline-offset: 6px; }
+.dots { display: flex; gap: 8px; }
+.dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.3); }
+.dots span.on { background: var(--sky); }
+.done { text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.done[hidden] { display: none; }
+.picker { padding: 64px 0; display: flex; flex-direction: column; gap: 24px; }
+.picker h2, .roles h2 { font-size: 38px; }
+.picker-row { display: flex; flex-wrap: wrap; gap: 24px; }
+.names { flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px; }
+.names button { font: inherit; text-align: left; padding: 14px 16px; min-height: 52px; border-radius: 12px; border: 1px solid var(--line); background: #fff; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--navy); }
+.names button span { font-size: 13px; font-weight: 700; color: var(--teal-ink); }
+.names button b { font-size: 17px; }
+.names button[aria-pressed="true"] { border-color: var(--blue); background: var(--blue-soft); }
+.feature { flex: 3 1 560px; background: #fff; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; }
+.feature img { width: 100%; height: 380px; object-fit: cover; }
+.feature .body { padding: 22px 24px; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; }
+.feature h3 { font-size: 28px; }
+.roles { background: #fff; border-top: 1px solid var(--line); padding: 64px 0; }
+.role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-top: 24px; }
+.role { border: 1px solid var(--line); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 8px; }
+.role h3 { font-family: inherit; font-weight: 700; font-size: 20px; }
+</style>
+</head>
+<body>
+<header class="top"><nav class="wrap">
+  <a class="brand" href="#"><img src="img/mark.svg" alt="">Speechomania</a>
+  <div class="links"><a href="#try">Try a card</a><a href="#games">Games</a><a href="#who">Who it is for</a></div>
+  <button class="btn outline" type="button" data-signin>Sign in</button>
+</nav></header>
+
+<main>
+<section class="hero" id="try"><div class="wrap">
+  <div class="copy">
+    <span class="pill">Try it, no account needed</span>
+    <h1>Tap the card.<br>Hear the word.</h1>
+    <p>This is how every Speechomania lesson begins: one picture, one short sentence, read aloud slowly. Then the child plays a game with the same words.</p>
+  </div>
+  <div class="try">
+    <button class="flash" id="flash" type="button" aria-label="Flashcard. Tap to turn.">
+      <span class="inner">
+        <span class="face back">Tap me</span>
+        <span class="face front"><img id="card-img" src="img/apple.svg" alt=""><span class="text" id="card-text"></span></span>
+      </span>
+    </button>
+    <div class="dots" id="dots"><span class="on"></span><span></span><span></span></div>
+    <div class="done" id="done" hidden>
+      <p style="color:#fff;font-size:18px;font-weight:600">That was part 1. Part 2 is a game.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center"><a class="btn primary" href="#games">See the games</a><button class="btn ghost" type="button" id="again">Again</button></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="wrap picker" id="games">
+  <div><h2>Then the game</h2><p>Pick one to see it. Playing needs a family account.</p></div>
+  <div class="picker-row">
+    <div class="names" id="names"></div>
+    <div class="feature">
+      <img id="f-img" alt="">
+      <div class="body">
+        <div style="display:flex;flex-direction:column;gap:4px"><span class="pill" id="f-topic"></span><h3 id="f-name"></h3><p id="f-line"></p></div>
+        <button class="btn primary" type="button" id="f-play">Sign in to play</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="roles" id="who"><div class="wrap">
+  <h2>One place for the whole team</h2>
+  <div class="role-grid">
+    <div class="role"><h3>Families</h3><p>Open the child's learning path at home. Every lesson has at least 15 activities, with flashcards first and a game after.</p></div>
+    <div class="role"><h3>Mentors</h3><p>See each child's plays, write notes for the family, and suggest changes to lessons.</p></div>
+    <div class="role"><h3>Centres</h3><p>Enrol children, give each one a mentor, and choose which lessons they get.</p></div>
+  </div>
+  <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap;align-items:center"><a class="btn primary" href="#">Ask for access</a><p>Meet us at [EVENT BOOTH] or write to [CONTACT EMAIL].</p></div>
+</div></section>
+</main>
+
+<footer class="foot"><div class="wrap">Speechomania</div></footer>
+
+<script src="games.js"></script>
+<script>
+const CARDS = [
+  { img: 'img/apple.svg', before: 'This is an ', key: 'apple', after: '.' },
+  { img: 'img/cat.svg', before: 'This is a ', key: 'cat', after: '.' },
+  { img: 'img/dog.svg', before: 'This is a ', key: 'dog', after: '.' }
+]
+let at = 0
+const flash = document.getElementById('flash')
+const show = () => {
+  const c = CARDS[at]
+  document.getElementById('card-img').src = c.img
+  document.getElementById('card-text').innerHTML = `${c.before}<span class="key">${c.key}</span>${c.after}`
+  ;[...document.getElementById('dots').children].forEach((d, i) => d.classList.toggle('on', i <= at))
+}
+const say = (c) => {
+  if (!('speechSynthesis' in window)) return
+  const u = new SpeechSynthesisUtterance(c.before + c.key + c.after)
+  u.lang = 'en-IN'
+  u.rate = 0.8
+  speechSynthesis.speak(u)
+}
+show()
+flash.addEventListener('click', () => {
+  if (!flash.classList.contains('open')) {
+    flash.classList.add('open')
+    say(CARDS[at])
+    return
+  }
+  if (at === CARDS.length - 1) {
+    document.getElementById('done').hidden = false
+    return
+  }
+  flash.classList.remove('open')
+  setTimeout(() => { at += 1; show() }, 300)
+})
+document.getElementById('again').addEventListener('click', () => {
+  at = 0
+  flash.classList.remove('open')
+  document.getElementById('done').hidden = true
+  setTimeout(show, 300)
+})
+
+const names = document.getElementById('names')
+const pick = (g) => {
+  document.getElementById('f-img').src = g.img
+  document.getElementById('f-topic').textContent = g.topic
+  document.getElementById('f-name').textContent = g.name
+  document.getElementById('f-line').textContent = g.line
+  document.getElementById('f-play').dataset.game = g.name
+  ;[...names.children].forEach((b) => b.setAttribute('aria-pressed', b.dataset.name === g.name))
+}
+names.innerHTML = GAMES.map((g) => `<button type="button" data-name="${g.name}" aria-pressed="false"><b>${g.name}</b><span>${g.topic}</span></button>`).join('')
+names.addEventListener('click', (e) => {
+  const b = e.target.closest('button')
+  if (b) pick(GAMES.find((g) => g.name === b.dataset.name))
+})
+pick(GAMES[0])
+</script>
+</body>
+</html>
