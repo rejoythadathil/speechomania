@@ -193,9 +193,15 @@ export function LearnHomeView() {
   return (
     <div className={styles.root}>
       <header className={styles.bar}>
-        <span className={styles.brand}>
-          <BrandMark size={30} />
-          <b>Speechomania</b>
+        <span className={styles.actions}>
+          <button type="button" className={styles.action} onClick={bar.onGrownUp}>
+            <BackIcon size={22} />
+            <span>Back</span>
+          </button>
+          <span className={styles.brand}>
+            <BrandMark size={30} />
+            <b>Speechomania</b>
+          </span>
         </span>
         <span className={styles.actions}>
           <button

@@ -38,7 +38,7 @@ export function useAttempt(start) {
   const attempt = useRef(null)
   const queue = useRef(Promise.resolve())
   const open = useCallback(async () => {
-    attempt.current = (await start())?.id
+    attempt.current = (await start()).id
   }, [start])
   const send = useCallback((body) => {
     const id = attempt.current
@@ -98,7 +98,7 @@ function Player({ lesson, learner, voice, bar, celebrate, reloadLearner }) {
 export function PlayLoading({ bar, error, missing, onBack }) {
   return (
     <div className={styles.root}>
-      <TopBar {...bar} />
+      <TopBar {...bar} onBack={onBack} />
       <section className={cx(child.card, styles.panel)} role={error ? 'alert' : 'status'}>
         <h1>{error ? missing : 'Getting your game ready…'}</h1>
         {error ? (

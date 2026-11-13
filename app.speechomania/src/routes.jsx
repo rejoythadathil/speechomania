@@ -18,6 +18,7 @@ import { DashboardView } from '@/views/shared/dashboard.jsx'
 import { LessonDetailView } from '@/views/shared/lesson-detail.jsx'
 import { LessonsView } from '@/views/shared/lessons.jsx'
 import { LandingView } from '@/views/public/landing.jsx'
+import { WelcomeView } from '@/views/public/welcome.jsx'
 import { StartView } from '@/views/public/start.jsx'
 import { TryView } from '@/views/public/try.jsx'
 import { NotFoundView } from '@/views/shared/not-found.jsx'
@@ -37,14 +38,16 @@ function Loading() {
 function RequireAuth() {
   const { status } = useAuth()
   if (status === 'loading') return <Loading />
+  if (status === 'new') return <Navigate to="/welcome" replace />
   if (status !== 'signed-in') return <Navigate to="/login" replace />
   return <Outlet />
 }
 
 function Front() {
-  const { status, user } = useAuth()
-  if (status === 'loading') return <Loading />
-  if (status === 'signed-in') return <Navigate to={homeFor(user)} replace />
+  const auth = useAuth()
+  if (auth.status === 'loading') return <Loading />
+  if (auth.status === 'signed-in' || auth.status === 'new')
+    return <Navigate to={homeFor(auth)} replace />
   return <LandingView />
 }
 
@@ -59,11 +62,12 @@ export const router = createBrowserRouter([
   { path: '/try', element: <TryView /> },
   { path: '/start', element: <StartView /> },
   { path: '/login', element: <LoginView /> },
+  { path: '/welcome', element: <WelcomeView /> },
   {
     element: <RequireAuth />,
     children: [
       {
-        element: <RequireRole roles={['parent', 'guest']} />,
+        element: <RequireRole roles={['parent']} />,
         children: [
           { path: 'learn', element: <LearnStartView /> },
           {
@@ -78,35 +82,30 @@ export const router = createBrowserRouter([
         ]
       },
       {
-        element: <RequireRole roles={['admin', 'mentor', 'parent']} />,
+        element: <WorkLayout />,
         children: [
+          { path: 'dashboard', element: <DashboardView /> },
+          { path: 'children', element: <ChildrenView /> },
+          { path: 'children/:id', element: <ChildDetailView /> },
+          { path: 'lessons/:id', element: <LessonDetailView /> },
           {
-            element: <WorkLayout />,
+            element: <RequireRole roles={['admin', 'mentor']} />,
             children: [
-              { path: 'dashboard', element: <DashboardView /> },
-              { path: 'children', element: <ChildrenView /> },
-              { path: 'children/:id', element: <ChildDetailView /> },
-              { path: 'lessons/:id', element: <LessonDetailView /> },
-              {
-                element: <RequireRole roles={['admin', 'mentor']} />,
-                children: [
-                  { path: 'lessons', element: <LessonsView /> },
-                  { path: 'assessments', element: <AssessmentsView /> },
-                  { path: 'assessments/:id', element: <AssessmentDetailView /> },
-                  { path: 'change-requests', element: <ChangeRequestsView /> },
-                  { path: 'settings', element: <SettingsView /> }
-                ]
-              },
-              {
-                element: <RequireRole roles={['admin']} />,
-                children: [
-                  { path: 'people/:role', element: <PeopleView /> },
-                  { path: 'audit', element: <AuditView /> }
-                ]
-              },
-              { path: '*', element: <NotFoundView /> }
+              { path: 'lessons', element: <LessonsView /> },
+              { path: 'assessments', element: <AssessmentsView /> },
+              { path: 'assessments/:id', element: <AssessmentDetailView /> },
+              { path: 'change-requests', element: <ChangeRequestsView /> },
+              { path: 'settings', element: <SettingsView /> }
             ]
-          }
+          },
+          {
+            element: <RequireRole roles={['admin']} />,
+            children: [
+              { path: 'people/:role', element: <PeopleView /> },
+              { path: 'audit', element: <AuditView /> }
+            ]
+          },
+          { path: '*', element: <NotFoundView /> }
         ]
       }
     ]

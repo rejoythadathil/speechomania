@@ -168,6 +168,23 @@ function HoldButton({ onUnlock }) {
   )
 }
 
+export function LeaveGameSheet({ onStay, onLeave }) {
+  return (
+    <Sheet title="Leave this game?" onClose={onStay}>
+      <p>You can play it again later.</p>
+      <span className={styles.sheetActions}>
+        <button type="button" className={styles.pill} onClick={onLeave}>
+          Go to my games
+        </button>
+        <button type="button" className={styles.go} onClick={onStay} autoFocus>
+          Keep playing
+          <NextIcon size={26} />
+        </button>
+      </span>
+    </Sheet>
+  )
+}
+
 export function GrownUpSheet({ hasPin, onUnlock, onClose }) {
   return (
     <Sheet title="Leaving the lesson?" onClose={onClose}>
