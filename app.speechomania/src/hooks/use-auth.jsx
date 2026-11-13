@@ -8,7 +8,7 @@ import {
   signOut
 } from 'firebase/auth'
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { api } from '@/services/api.js'
+import { api, setGuest } from '@/services/api.js'
 import { auth } from '@/services/firebase.js'
 
 const AuthContext = createContext(null)
@@ -19,11 +19,25 @@ export function AuthProvider({ children }) {
   const [state, setState] = useState({ status: 'loading', user: null, error: null })
   const pendingGoogle = useRef(null)
 
-  const loadProfile = useCallback(async () => {
+  const loadProfile = useCallback(async (firebaseUser) => {
     try {
       const user = await api('/auth/me')
+      setGuest(false)
       setState({ status: 'signed-in', user, error: null })
     } catch (error) {
+      const google = firebaseUser.providerData.some((p) => p.providerId === 'google.com')
+      if (error.status === 403 && google) {
+        const child = await api('/guest').catch(() => null)
+        if (child) {
+          setGuest(true)
+          setState({
+            status: 'signed-in',
+            user: { role: 'guest', full_name: firebaseUser.displayName, child },
+            error: null
+          })
+          return
+        }
+      }
       await signOut(auth)
       setState({ status: 'signed-out', user: null, error: error.message })
     }
@@ -33,9 +47,10 @@ export function AuthProvider({ children }) {
     () =>
       onAuthStateChanged(auth, (firebaseUser) => {
         if (firebaseUser) {
-          loadProfile()
+          loadProfile(firebaseUser)
           return
         }
+        setGuest(false)
         setState((current) => ({ status: 'signed-out', user: null, error: current.error }))
       }),
     [loadProfile]
@@ -73,3 +88,8 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => use(AuthContext)
+
+export function homeFor(user) {
+  if (user?.role === 'guest') return `/learn/${user.child.id}`
+  return user?.role === 'parent' ? '/learn' : '/dashboard'
+}

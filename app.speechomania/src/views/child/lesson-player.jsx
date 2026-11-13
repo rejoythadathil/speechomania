@@ -38,7 +38,7 @@ export function useAttempt(start) {
   const attempt = useRef(null)
   const queue = useRef(Promise.resolve())
   const open = useCallback(async () => {
-    attempt.current = (await start()).id
+    attempt.current = (await start())?.id
   }, [start])
   const send = useCallback((body) => {
     const id = attempt.current

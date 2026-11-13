@@ -71,3 +71,20 @@ export async function publishFixture(admin, id) {
   })
   return (await call(admin, 'GET', `/lessons/${lesson.id}`)).body
 }
+
+export async function googleGuest(email = `guest.${crypto.randomUUID().slice(0, 8)}@example.com`) {
+  const response = await fetch(
+    `http://${config.FIREBASE_AUTH_EMULATOR_HOST}/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=test`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        requestUri: 'http://localhost',
+        postBody: `id_token=${JSON.stringify({ sub: crypto.randomUUID(), email, email_verified: true })}&providerId=google.com`,
+        returnSecureToken: true,
+        returnIdpCredential: true
+      })
+    }
+  )
+  return { id: null, email, role: 'guest', token: (await response.json()).idToken }
+}
