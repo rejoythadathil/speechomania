@@ -1,6 +1,7 @@
 import { Link, Navigate, useNavigate } from 'react-router'
 import { ART, avatarFor } from '@/components/child/art.jsx'
 import child from '@/components/child/child.module.css'
+import { homeFor, useAuth } from '@/hooks/use-auth.jsx'
 import { useResource } from '@/hooks/use-resource.js'
 import layout from '@/layout/learning-layout/learning-layout.module.css'
 import { cx } from '@/utils/cx'
@@ -8,9 +9,16 @@ import styles from './learn-start.module.css'
 
 export function LearnStartView() {
   const navigate = useNavigate()
-  const children = useResource('/children', { status: 'active', page: 1, page_size: 12 })
+  const { user } = useAuth()
+  const guest = user.role === 'guest'
+  const children = useResource(guest ? null : '/children', {
+    status: 'active',
+    page: 1,
+    page_size: 12
+  })
   const list = children.data?.items ?? []
 
+  if (guest) return <Navigate to={homeFor(user)} replace />
   if (list.length === 1) return <Navigate to={`/learn/${list[0].id}`} replace />
 
   return (

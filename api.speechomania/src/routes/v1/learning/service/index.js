@@ -53,9 +53,22 @@ const attemptFields = {
   completed_at: true
 }
 
+const GUEST = { metadata: { path: ['guest'], equals: true } }
+const ownerOf = (user) => (user.role === 'guest' ? GUEST : { parent_id: user.id })
+
+export async function getGuestChild() {
+  const child = await db.children.findFirst({
+    where: { ...GUEST, deleted_at: null, status: 'active' },
+    select: { id: true, display_name: true },
+    orderBy: { created_at: 'asc' }
+  })
+  if (!child) throw learnerNotFound()
+  return child
+}
+
 async function findLearner(tx, user, id) {
   const child = await tx.children.findFirst({
-    where: { id, parent_id: user.id, deleted_at: null, status: 'active' },
+    where: { id, ...ownerOf(user), deleted_at: null, status: 'active' },
     select: {
       id: true,
       display_name: true,

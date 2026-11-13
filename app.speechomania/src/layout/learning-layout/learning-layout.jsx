@@ -4,6 +4,7 @@ import { BreakSheet, GrownUpSheet, NudgeSheet, RestSheet } from '@/components/ch
 import { useCelebrate } from '@/components/child/use-celebrate.js'
 import { useScreenTime } from '@/components/child/use-screen-time.js'
 import { useVoice } from '@/components/child/use-voice.js'
+import { useAuth } from '@/hooks/use-auth.jsx'
 import { useResource } from '@/hooks/use-resource.js'
 import { api } from '@/services/api.js'
 import styles from './learning-layout.module.css'
@@ -19,6 +20,8 @@ const prefersReduced = () => window.matchMedia(REDUCED).matches
 export function LearningLayout() {
   const { childId } = useParams()
   const navigate = useNavigate()
+  const auth = useAuth()
+  const guest = auth.user.role === 'guest'
   const learner = useResource(`/learning/children/${childId}`)
   const reduced = useSyncExternalStore(subscribe, prefersReduced)
   const [muted, setMuted] = useState(false)
@@ -40,9 +43,14 @@ export function LearningLayout() {
     async (pin) => {
       await api(`/learning/children/${childId}/exit`, { method: 'POST', body: { pin } })
       stop()
+      if (guest) {
+        await auth.signOut()
+        window.location.assign('/')
+        return
+      }
       navigate(`/children/${childId}`)
     },
-    [childId, navigate, stop]
+    [auth, childId, guest, navigate, stop]
   )
 
   const bar = useMemo(

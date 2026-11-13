@@ -3,6 +3,7 @@ import { verifyToken } from '../../common-service/firebase/service/index.js'
 import {
   accountInactive,
   accountUnknown,
+  forbidden,
   sessionExpired,
   signInRequired
 } from '../../common-service/http/exception/index.js'
@@ -30,5 +31,24 @@ export async function requireAuth(c, next) {
     user.status = 'active'
   }
   c.set('user', user)
+  await next()
+}
+
+export async function requireGuest(c, next) {
+  const [scheme, token] = (c.req.header('authorization') ?? '').split(' ')
+  if (scheme !== 'Bearer' || !token) throw signInRequired()
+  let decoded
+  try {
+    decoded = await verifyToken(token)
+  } catch {
+    throw sessionExpired()
+  }
+  if (decoded.firebase?.sign_in_provider !== 'google.com') throw accountUnknown()
+  const member = await db.users.findFirst({
+    where: { firebase_uid: decoded.uid },
+    select: { id: true }
+  })
+  if (member) throw forbidden()
+  c.set('user', { id: null, role: 'guest' })
   await next()
 }

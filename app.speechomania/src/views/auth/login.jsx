@@ -5,7 +5,7 @@ import { LinkButton } from '@/components/base/buttons/link-button'
 import { Input } from '@/components/base/input/input'
 import { BrandMark } from '@/components/shared/brand-mark.jsx'
 import { FormAlert } from '@/components/shared/form-alert.jsx'
-import { useAuth } from '@/hooks/use-auth.jsx'
+import { homeFor, useAuth } from '@/hooks/use-auth.jsx'
 import googleLogo from '@/assets/brands/google.svg'
 import styles from './login.module.css'
 
@@ -28,8 +28,7 @@ export function LoginView() {
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null)
 
-  if (auth.status === 'signed-in')
-    return <Navigate to={auth.user?.role === 'parent' ? '/learn' : '/dashboard'} replace />
+  if (auth.status === 'signed-in') return <Navigate to={homeFor(auth.user)} replace />
 
   async function submit(event) {
     event.preventDefault()
