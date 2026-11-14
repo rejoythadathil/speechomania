@@ -27,6 +27,7 @@ export const ASSESSABLE_PLAYERS = [
   'bubbles',
   'squish',
   'compare',
+  'choose',
   'place',
   'train',
   'yesno',

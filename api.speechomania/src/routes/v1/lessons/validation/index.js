@@ -127,7 +127,7 @@ const stepsFor = (player) => {
   if (player === 'pick') return pickStep
   if (player === 'yesno') return yesNoStep
   if (player === 'match') return matchStep
-  if (player === 'compare') return compareStep
+  if (player === 'compare' || player === 'choose') return compareStep
   if (player === 'place') return placeStep
   if (PICTURE_PLAYERS.includes(player)) return pictureStep
   if (CHOICE_PLAYERS.includes(player)) return choiceStep
