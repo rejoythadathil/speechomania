@@ -669,7 +669,7 @@ const heOrShe = pronoun(
     ['she', ['girl-jumping'], 'jumping'],
     ['he', ['sleeping'], 'sleeping'],
     ['she', ['girl-waving'], 'waving'],
-    ['she', ['dancing'], 'dancing'],
+    ['she', ['girl-dancing'], 'dancing'],
     ['he', ['writing'], 'writing'],
     ['she', ['runner-girl'], 'running'],
     ['he', ['cooking'], 'cooking'],
@@ -692,10 +692,10 @@ const they = pronoun(
     ['they', ['sleeping', 'girl-sleeping'], 'sleeping'],
     ['he', ['waving'], 'waving'],
     ['they', ['waving', 'girl-waving', 'waving'], 'waving'],
-    ['she', ['dancing'], 'dancing'],
+    ['she', ['girl-dancing'], 'dancing'],
     ['they', ['eating', 'girl-eating'], 'eating'],
     ['he', ['writing'], 'writing'],
-    ['they', ['singing', 'dancing'], 'singing'],
+    ['they', ['singing', 'girl-singing'], 'singing'],
     ['she', ['girl-painting'], 'painting'],
     ['they', ['painting', 'girl-painting'], 'painting'],
     ['he', ['riding'], 'cycling']
@@ -809,6 +809,16 @@ const usesCards = cards(
   uses.map(([, answer, art, , , sentence]) => card(sentence, [art], [answer]))
 )
 
+const pronounColour = { he: 'blue', she: 'pink', they: 'orange' }
+const pronounCards = (game) =>
+  cards(
+    game.steps.map((step) =>
+      card(step.sentence.text, step.art, [step.answer], {
+        colours: [pronounColour[step.answer]]
+      })
+    )
+  )
+
 const parts = (slug, title, flash, game, gameName, status = 'published', after = null) => [
   [`${slug}-cards`, `${title}, part 1: flashcards`, after ? { ...flash, after } : flash, status],
   [slug, `${title}, part 2: ${gameName}`, { ...game, after: `${slug}-cards` }, status]
@@ -843,8 +853,8 @@ export const LESSONS = [
   ...parts('why', 'Why?', whyCards, why, 'Find the reason'),
   ...parts('objects-by-use', 'Objects by use', usesCards, objectsByUse, 'Which one?'),
   ...parts('this-these', 'This and these', thisTheseCards, thisOrThese, 'Word bubbles'),
-  ['he-she', 'He and she', heOrShe, 'draft'],
-  ['they', 'He, she and they', they, 'draft'],
+  ...parts('he-she', 'He and she', pronounCards(heOrShe), heOrShe, 'Word bubbles'),
+  ...parts('they', 'He, she and they', pronounCards(they), they, 'Word bubbles'),
   [
     'colours',
     'Colours around us',
