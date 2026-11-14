@@ -9,6 +9,7 @@ export const LESSON_PLAYERS = [
   'match',
   'squish',
   'compare',
+  'choose',
   'place',
   'train',
   'yesno',
@@ -22,7 +23,7 @@ export const CARD_COLOURS = ['blue', 'orange', 'pink', 'green', 'red']
 
 export const PICTURE_PLAYERS = ['shark', 'balloons']
 
-export const CHOICE_PLAYERS = ['bubbles', 'squish', 'compare', 'place', 'train', 'why']
+export const CHOICE_PLAYERS = ['bubbles', 'squish', 'compare', 'choose', 'place', 'train', 'why']
 
 export const LESSON_CHARACTERS = [
   'baby',
