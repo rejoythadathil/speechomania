@@ -19,6 +19,7 @@ Keep the top-left corner empty (the game tag sits there) and the main subject ce
 10. **Detective (Why?):** cosy library with bookshelves, a friendly child detective in a brown cap holding a magnifying glass, a lamp.
 11. **Who can't? (Can and can't):** jungle meadow, a lion and a snake side by side looking at a little river, a monkey in a tree.
 12. **Story (Colours around us):** open picture book on a table with a rainbow coming out of it, a red apple, a green frog and a yellow banana.
+13. **Which one? (Objects by use, and later where, which, how and if questions):** bright, tidy child's bedroom in soft sky blue, a friendly round magnifying glass with a gentle smiling face floating in the middle, and below it two large white picture cards side by side on a low wooden table, one showing an open umbrella and the other a pair of scissors, a window with a light rain cloud outside. Save as `app.speechomania/src/assets/scenes/choose.webp` (cropped to 16:10, 1280×800).
 
 ## Sprites (transparent PNG, 1024×1024, single object centred, no ground shadow)
 - **Shark game:** shark (mouth closed), shark (mouth open), fish ×3 (blue, yellow striped, orange puffer), seaweed, coral, shell, bubble cluster.

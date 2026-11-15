@@ -317,6 +317,7 @@
 
 .foot {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -333,10 +334,10 @@
 }
 
 .after {
+  flex: 1 0 100%;
   color: var(--child-ink-muted);
   font-size: 13px;
   font-weight: 600;
-  text-align: right;
 }
 
 .meta {
