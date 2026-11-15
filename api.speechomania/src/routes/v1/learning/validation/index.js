@@ -1,5 +1,6 @@
 import Joi from 'joi'
 import { pageQuery } from '../../../../../common-service/http/validation/index.js'
+import { LESSON_LEVELS } from '../../lessons/constants/index.js'
 import { EVENT_STEPS, SHELF_SHOWS } from '../constants/index.js'
 
 export const childParams = Joi.object({ id: Joi.string().uuid().required() })
@@ -18,7 +19,8 @@ export const gamesQuery = Joi.object({
   q: Joi.string().trim().max(60).allow(''),
   show: Joi.string()
     .valid(...SHELF_SHOWS)
-    .default('all')
+    .default('all'),
+  level: Joi.string().valid(...LESSON_LEVELS)
 })
 
 export const assessmentParams = Joi.object({

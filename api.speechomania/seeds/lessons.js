@@ -824,7 +824,34 @@ const parts = (slug, title, flash, game, gameName, status = 'published', after =
   [slug, `${title}, part 2: ${gameName}`, { ...game, after: `${slug}-cards` }, status]
 ]
 
-export const LESSONS = [
+const LEVELS = {
+  'action-words': 'indigo',
+  feelings: 'indigo',
+  'objects-by-use': 'indigo',
+  'ask-me': 'indigo',
+  colours: 'indigo',
+  'can-and-cant': 'indigo',
+  'morning-routine': 'indigo',
+  'describing-words': 'blue',
+  'where-is-it': 'blue',
+  'short-words': 'blue',
+  'he-she': 'blue',
+  they: 'blue',
+  'bigger-smaller': 'green',
+  opposites: 'green',
+  'a-or-an': 'green',
+  'a-or-the': 'green',
+  'this-these': 'green',
+  why: 'green'
+}
+const levelled = ([slug, title, content, status]) => [
+  slug,
+  title,
+  { ...content, level: LEVELS[slug.replace(/-cards$/, '')] },
+  status
+]
+
+const LESSON_LIST = [
   ...parts('can-and-cant', 'Can and can’t', canAndCantCards, canAndCant, 'Who can’t?'),
   ...parts('action-words', 'Action words', actionWordsCards, actionWords, 'Feed the shark'),
   ...parts('feelings', 'Feelings', feelingsCards, feelings, 'Balloon pop'),
@@ -884,3 +911,5 @@ export const LESSONS = [
     'draft'
   ]
 ]
+
+export const LESSONS = LESSON_LIST.map(levelled)

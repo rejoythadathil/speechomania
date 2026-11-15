@@ -588,3 +588,31 @@
   background: var(--child-amber-soft);
   color: var(--child-ink);
 }
+
+.levelChip::before {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--level);
+  vertical-align: -1px;
+  content: '';
+}
+
+.level {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--child-ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.level::before {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--level);
+  content: '';
+}
