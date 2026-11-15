@@ -11,6 +11,7 @@ import {
   badgeStars,
   bestBySlug,
   lockedAfter,
+  levelsOf,
   friendsFor,
   maxStars,
   newFriend,
@@ -722,5 +723,71 @@ describe('scoring rules', () => {
         ])
       ).get('feelings')
     ).toEqual({ times: 3, stars: 5 })
+  })
+})
+
+describe('levels', () => {
+  test('lessons carry a VIBGYOR level and the shelf filters by it', async () => {
+    const levelParent = await makeUser('parent')
+    const learner = await makeChild(levelParent, admin, mentor)
+    const steps = Array.from({ length: 15 }, (_, index) => ({ text: `Step ${index + 1}` }))
+    const make = async (level) => {
+      const created = await call(admin, 'POST', '/lessons', {
+        slug: `level-${level}-${crypto.randomUUID().slice(0, 8)}`,
+        title: `Level ${level}`,
+        content: { level, steps }
+      })
+      expect(created.status).toBe(201)
+      return publishFixture(admin, created.body.id)
+    }
+    const violet = await make('violet')
+    const indigo = await make('indigo')
+    expect(
+      (
+        await call(admin, 'POST', '/lessons', {
+          slug: `level-bad-${crypto.randomUUID().slice(0, 8)}`,
+          title: 'Bad',
+          content: { level: 'pink', steps }
+        })
+      ).status
+    ).toBe(400)
+    await call(admin, 'PUT', `/children/${learner.id}/lessons`, {
+      slugs: [violet.slug, indigo.slug]
+    })
+    const shelf = await call(levelParent, 'GET', `/learning/children/${learner.id}/lessons`, null, {
+      level: 'violet'
+    })
+    expect(shelf.status).toBe(200)
+    expect(shelf.body.items.map((item) => [item.slug, item.level])).toEqual([
+      [violet.slug, 'violet']
+    ])
+    const me = await call(levelParent, 'GET', `/learning/children/${learner.id}`)
+    expect(me.body.levels).toEqual([
+      { level: 'violet', total: 1, played: 0 },
+      { level: 'indigo', total: 1, played: 0 }
+    ])
+    const other = await makeUser('parent')
+    expect(
+      (
+        await call(other, 'GET', `/learning/children/${learner.id}/lessons`, null, {
+          level: 'violet'
+        })
+      ).status
+    ).toBe(404)
+    const listed = await call(admin, 'GET', '/lessons', null, { level: 'violet', q: violet.slug })
+    expect(listed.body.items.map((item) => item.level)).toEqual(['violet'])
+  })
+
+  test('levelsOf keeps VIBGYOR order and skips empty levels', () => {
+    const games = [
+      { level: 'blue', best: 3 },
+      { level: 'violet', best: null },
+      { level: 'blue', best: null },
+      { level: null, best: 1 }
+    ]
+    expect(levelsOf(games, ['violet', 'indigo', 'blue'])).toEqual([
+      { level: 'violet', total: 1, played: 0 },
+      { level: 'blue', total: 2, played: 1 }
+    ])
   })
 })

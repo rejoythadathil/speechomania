@@ -17,6 +17,8 @@ export const LESSON_PLAYERS = [
   'cards'
 ]
 
+export const LESSON_LEVELS = ['violet', 'indigo', 'blue', 'green', 'yellow', 'orange', 'red']
+
 export const CARD_LAYOUTS = ['row', 'in', 'on', 'under', 'beside', 'behind', 'in front of']
 
 export const CARD_COLOURS = ['blue', 'orange', 'pink', 'green', 'red']
