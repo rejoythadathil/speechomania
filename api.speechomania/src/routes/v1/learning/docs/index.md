@@ -1,6 +1,6 @@
 # learning
 
-The API behind child mode. Parent only: the child has no login and plays inside the parent's session. Ownership is checked in the query (`children.parent_id`), so another parent's child is 404 and staff get 403. The read routes are also served to guests under `/v1/guest/learning` for the one child tagged `metadata.guest` (see `guest/docs`).
+The API behind child mode. Parent only: the child has no login and plays inside the parent's session. Ownership is checked in the query (`children.parent_id`), so another parent's child is 404 and staff get 403.
 
 | Method | Path | Input | Returns |
 |---|---|---|---|

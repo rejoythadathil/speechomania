@@ -28,7 +28,8 @@ export function LoginView() {
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null)
 
-  if (auth.status === 'signed-in') return <Navigate to={homeFor(auth.user)} replace />
+  if (auth.status === 'signed-in' || auth.status === 'new')
+    return <Navigate to={homeFor(auth)} replace />
 
   async function submit(event) {
     event.preventDefault()
