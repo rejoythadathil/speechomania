@@ -263,7 +263,11 @@ export function PlaySession({
       ) : null}
       <TopBar
         {...bar}
-        onBack={() => (pages && !result ? setLeaving(true) : onLeave())}
+        onBack={() => {
+          celebrate.reset()
+          if (pages && !result) setLeaving(true)
+          else onLeave()
+        }}
         centre={page ? <Progress pages={pages} at={at} answers={answers.current} /> : null}
       />
 
