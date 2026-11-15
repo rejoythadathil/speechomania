@@ -491,6 +491,122 @@ const why = {
   }))
 }
 
+const uses = [
+  ['Which one do we eat with?', 'spoon', 'spoon', 'comb', 'comb', 'We eat with a spoon.'],
+  ['Which one do we drink from?', 'cup', 'cup', 'shoes', 'shoe', 'We drink from a cup.'],
+  [
+    'Which one do we brush our teeth with?',
+    'toothbrush',
+    'toothbrush',
+    'spoon',
+    'spoon',
+    'We brush our teeth with a toothbrush.'
+  ],
+  [
+    'Which one do we comb our hair with?',
+    'comb',
+    'comb',
+    'plate',
+    'plate',
+    'We comb our hair with a comb.'
+  ],
+  [
+    'Which one do we wear on our feet?',
+    'shoes',
+    'shoe',
+    'hat',
+    'hat',
+    'We wear shoes on our feet.'
+  ],
+  [
+    'Which one do we wear on our head?',
+    'hat',
+    'hat',
+    'socks',
+    'socks',
+    'We wear a hat on our head.'
+  ],
+  ['Which one do we write with?', 'pencil', 'pencil', 'cup', 'cup', 'We write with a pencil.'],
+  [
+    'Which one do we cut paper with?',
+    'scissors',
+    'scissors',
+    'spoon',
+    'spoon',
+    'We cut paper with scissors.'
+  ],
+  ['Which one do we sleep on?', 'bed', 'bed', 'chair', 'chair', 'We sleep on a bed.'],
+  ['Which one do we sit on?', 'chair', 'chair', 'book', 'book', 'We sit on a chair.'],
+  [
+    'Which one do we wash our hands with?',
+    'soap',
+    'soap',
+    'crayon',
+    'crayon',
+    'We wash our hands with soap.'
+  ],
+  ['Which one do we colour with?', 'crayon', 'crayon', 'key', 'key', 'We colour with a crayon.'],
+  [
+    'Which one do we use when it rains?',
+    'umbrella',
+    'umbrella',
+    'scissors',
+    'scissors',
+    'We use an umbrella when it rains.'
+  ],
+  [
+    'Which one do we eat food from?',
+    'plate',
+    'plate',
+    'shoes',
+    'shoe',
+    'We eat food from a plate.'
+  ],
+  [
+    'Which one do we carry our books in?',
+    'bag',
+    'bag',
+    'cup',
+    'cup',
+    'We carry our books in a bag.'
+  ],
+  [
+    'Which one do we open the door with?',
+    'key',
+    'key',
+    'pencil',
+    'pencil',
+    'We open the door with a key.'
+  ],
+  [
+    'Which one do we wear when it is cold?',
+    'coat',
+    'coat',
+    'shorts',
+    'shorts',
+    'We wear a coat when it is cold.'
+  ],
+  [
+    'Which one do we wipe our hands with?',
+    'tissue',
+    'tissue',
+    'plate',
+    'plate',
+    'We wipe our hands with a tissue.'
+  ]
+]
+const objectsByUse = {
+  player: 'choose',
+  lines: { ...play, intro: line('Listen to the question. Tap the right one.') },
+  steps: uses.map(([text, answer, answerArt, other, otherArt, sentence], index) => ({
+    text,
+    choices: index % 2 ? [other, answer] : [answer, other],
+    art: index % 2 ? [otherArt, answerArt] : [answerArt, otherArt],
+    answer,
+    sentence: line(sentence)
+  }))
+}
+
 const story = (...pages) => ({
   player: 'story',
   lines: { outro: line('The end. Great reading!') },
@@ -553,7 +669,7 @@ const heOrShe = pronoun(
     ['she', ['girl-jumping'], 'jumping'],
     ['he', ['sleeping'], 'sleeping'],
     ['she', ['girl-waving'], 'waving'],
-    ['she', ['dancing'], 'dancing'],
+    ['she', ['girl-dancing'], 'dancing'],
     ['he', ['writing'], 'writing'],
     ['she', ['runner-girl'], 'running'],
     ['he', ['cooking'], 'cooking'],
@@ -576,10 +692,10 @@ const they = pronoun(
     ['they', ['sleeping', 'girl-sleeping'], 'sleeping'],
     ['he', ['waving'], 'waving'],
     ['they', ['waving', 'girl-waving', 'waving'], 'waving'],
-    ['she', ['dancing'], 'dancing'],
+    ['she', ['girl-dancing'], 'dancing'],
     ['they', ['eating', 'girl-eating'], 'eating'],
     ['he', ['writing'], 'writing'],
-    ['they', ['singing', 'dancing'], 'singing'],
+    ['they', ['singing', 'girl-singing'], 'singing'],
     ['she', ['girl-painting'], 'painting'],
     ['they', ['painting', 'girl-painting'], 'painting'],
     ['he', ['riding'], 'cycling']
@@ -689,6 +805,20 @@ const thisTheseCards = cards(
   )
 )
 
+const usesCards = cards(
+  uses.map(([, answer, art, , , sentence]) => card(sentence, [art], [answer]))
+)
+
+const pronounColour = { he: 'blue', she: 'pink', they: 'orange' }
+const pronounCards = (game) =>
+  cards(
+    game.steps.map((step) =>
+      card(step.sentence.text, step.art, [step.answer], {
+        colours: [pronounColour[step.answer]]
+      })
+    )
+  )
+
 const parts = (slug, title, flash, game, gameName, status = 'published', after = null) => [
   [`${slug}-cards`, `${title}, part 1: flashcards`, after ? { ...flash, after } : flash, status],
   [slug, `${title}, part 2: ${gameName}`, { ...game, after: `${slug}-cards` }, status]
@@ -721,9 +851,10 @@ export const LESSONS = [
   ),
   ...parts('ask-me', 'Ask me', askCards, askMe, 'Yes or no'),
   ...parts('why', 'Why?', whyCards, why, 'Find the reason'),
+  ...parts('objects-by-use', 'Objects by use', usesCards, objectsByUse, 'Which one?'),
   ...parts('this-these', 'This and these', thisTheseCards, thisOrThese, 'Word bubbles'),
-  ['he-she', 'He and she', heOrShe, 'draft'],
-  ['they', 'He, she and they', they, 'draft'],
+  ...parts('he-she', 'He and she', pronounCards(heOrShe), heOrShe, 'Word bubbles'),
+  ...parts('they', 'He, she and they', pronounCards(they), they, 'Word bubbles'),
   [
     'colours',
     'Colours around us',
