@@ -8,7 +8,7 @@ import {
   signOut
 } from 'firebase/auth'
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { api, setGuest } from '@/services/api.js'
+import { api } from '@/services/api.js'
 import { auth } from '@/services/firebase.js'
 
 const AuthContext = createContext(null)
@@ -22,21 +22,16 @@ export function AuthProvider({ children }) {
   const loadProfile = useCallback(async (firebaseUser) => {
     try {
       const user = await api('/auth/me')
-      setGuest(false)
       setState({ status: 'signed-in', user, error: null })
     } catch (error) {
-      const google = firebaseUser.providerData.some((p) => p.providerId === 'google.com')
-      if (error.status === 403 && google) {
-        const child = await api('/guest').catch(() => null)
-        if (child) {
-          setGuest(true)
-          setState({
-            status: 'signed-in',
-            user: { role: 'guest', full_name: firebaseUser.displayName, child },
-            error: null
-          })
-          return
-        }
+      const google = firebaseUser.providerData.some((item) => item.providerId === 'google.com')
+      if (google && error.details?.[0]?.message === 'unknown') {
+        setState({
+          status: 'new',
+          user: { email: firebaseUser.email, full_name: firebaseUser.displayName },
+          error: null
+        })
+        return
       }
       await signOut(auth)
       setState({ status: 'signed-out', user: null, error: error.message })
@@ -50,7 +45,6 @@ export function AuthProvider({ children }) {
           loadProfile(firebaseUser)
           return
         }
-        setGuest(false)
         setState((current) => ({ status: 'signed-out', user: null, error: current.error }))
       }),
     [loadProfile]
@@ -77,11 +71,18 @@ export function AuthProvider({ children }) {
           throw error
         }
       },
+      signUp: async (childName) => {
+        await api('/signup', {
+          method: 'POST',
+          body: { child_name: childName, consent_given: true }
+        })
+        await loadProfile(auth.currentUser)
+      },
       setUser: (user) => setState((current) => ({ ...current, user })),
       resetPassword: (email) => sendPasswordResetEmail(auth, email),
       signOut: () => signOut(auth)
     }),
-    [state]
+    [loadProfile, state]
   )
 
   return <AuthContext value={value}>{children}</AuthContext>
@@ -89,7 +90,7 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => use(AuthContext)
 
-export function homeFor(user) {
-  if (user?.role === 'guest') return `/learn/${user.child.id}`
+export function homeFor({ status, user }) {
+  if (status === 'new') return '/welcome'
   return user?.role === 'parent' ? '/learn' : '/dashboard'
 }

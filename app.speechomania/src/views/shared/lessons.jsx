@@ -27,6 +27,7 @@ import { useResource } from '@/hooks/use-resource.js'
 import { api, fieldErrors } from '@/services/api.js'
 import { GameTag } from './lesson-content.jsx'
 import { formatDate } from '@/utils/format'
+import { LEVELS, levelOf } from '@/utils/levels'
 
 const STATUS_OPTIONS = ['all', 'published', 'draft', 'superseded', 'archived'].map((id) => ({
   id,
@@ -114,11 +115,28 @@ function NewLessonModal({ isOpen, onOpenChange }) {
   )
 }
 
+const LEVEL_OPTIONS = [
+  { id: 'all', label: 'All levels' },
+  ...LEVELS.map((level) => ({ id: level.id, label: level.name }))
+]
+
+function LevelTag({ id }) {
+  const level = levelOf(id)
+  if (!level) return <span className="text-text-tertiary">—</span>
+  return (
+    <span className="inline-flex items-center gap-1.5 text-body-medium text-text-primary">
+      <span className="size-2.5 rounded-full" style={{ background: level.colour }} />
+      {level.name}
+    </span>
+  )
+}
+
 export function LessonsView() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const isAdmin = user.role === 'admin'
   const [status, setStatus] = useState(isAdmin ? 'all' : 'published')
+  const [level, setLevel] = useState('all')
   const { page, pageSize, setPage, setPageSize, params } = usePageParams(20)
   const [search, setSearch] = useState(() => params.get('q') ?? '')
   const [creating, setCreating] = useState(false)
@@ -126,6 +144,7 @@ export function LessonsView() {
   const lessons = useResource('/lessons', {
     q,
     status: status === 'all' ? undefined : status,
+    level: level === 'all' ? undefined : level,
     page,
     page_size: pageSize
   })
@@ -175,6 +194,17 @@ export function LessonsView() {
                 }}
               />
             ) : null}
+            <SelectField
+              size="sm"
+              className="w-40"
+              aria-label="Level"
+              options={LEVEL_OPTIONS}
+              value={level}
+              onChange={(value) => {
+                setLevel(value)
+                setPage(1)
+              }}
+            />
           </>
         }
         footer={
@@ -197,6 +227,7 @@ export function LessonsView() {
             <Table aria-label="Lessons" onRowAction={(id) => navigate(`/lessons/${id}`)}>
               <TableHeader>
                 <TableColumn isRowHeader>Lesson</TableColumn>
+                <TableColumn>Level</TableColumn>
                 <TableColumn>Game</TableColumn>
                 <TableColumn>Versions</TableColumn>
                 <TableColumn>Steps</TableColumn>
@@ -213,6 +244,9 @@ export function LessonsView() {
                           {lesson.slug}
                         </span>
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      <LevelTag id={lesson.level} />
                     </TableCell>
                     <TableCell>
                       <GameTag player={lesson.player} />

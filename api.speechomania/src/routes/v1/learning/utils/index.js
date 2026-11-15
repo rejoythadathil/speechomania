@@ -103,3 +103,16 @@ export function shelfSlugs(assigned, show, played, cards) {
   }[show]
   return keep ? assigned.filter(keep) : assigned
 }
+
+export function levelsOf(games, order) {
+  return order
+    .map((level) => {
+      const mine = games.filter((game) => game.level === level)
+      return {
+        level,
+        total: mine.length,
+        played: mine.filter((game) => game.best !== null).length
+      }
+    })
+    .filter((row) => row.total)
+}

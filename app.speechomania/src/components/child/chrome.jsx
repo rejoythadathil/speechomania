@@ -1,10 +1,16 @@
 import { cx } from '@/utils/cx'
-import { BreakIcon, GrownUpIcon, MuteIcon, SayAgainIcon } from './child-icons.jsx'
+import { BackIcon, BreakIcon, GrownUpIcon, MuteIcon, SayAgainIcon } from './child-icons.jsx'
 import styles from './child.module.css'
 
-export function TopBar({ centre, onGrownUp, onBreak, muted, onMute }) {
+export function TopBar({ centre, onBack, onGrownUp, onBreak, muted, onMute }) {
   return (
     <header className={cx(styles.chrome, styles.top)}>
+      {onBack ? (
+        <button type="button" className={styles.pill} onClick={onBack}>
+          <BackIcon size={30} />
+          <span className={styles.label}>Back</span>
+        </button>
+      ) : null}
       <button type="button" className={styles.pill} onClick={onGrownUp}>
         <GrownUpIcon size={34} />
         <span className={styles.label}>Parent</span>
