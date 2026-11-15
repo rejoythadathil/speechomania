@@ -5,6 +5,7 @@ import { mediaUrl } from '../../../../../common-service/storage/service/index.js
 import { signAudio } from '../../../../../common-service/voice/service/index.js'
 import { pageArray, pageOf } from '../../../../../common-service/http/utils/index.js'
 import { MAX_EVENTS_PER_ATTEMPT } from '../constants/index.js'
+import { LESSON_LEVELS } from '../../lessons/constants/index.js'
 import { ASSESS_STEP } from '../../assessments/constants/index.js'
 import {
   keepCollected,
@@ -31,6 +32,7 @@ import {
   coverOf,
   firstStep,
   lockedAfter,
+  levelsOf,
   friendsFor,
   maxStars,
   newFriend,
@@ -53,22 +55,9 @@ const attemptFields = {
   completed_at: true
 }
 
-const GUEST = { metadata: { path: ['guest'], equals: true } }
-const ownerOf = (user) => (user.role === 'guest' ? GUEST : { parent_id: user.id })
-
-export async function getGuestChild() {
-  const child = await db.children.findFirst({
-    where: { ...GUEST, deleted_at: null, status: 'active' },
-    select: { id: true, display_name: true },
-    orderBy: { created_at: 'asc' }
-  })
-  if (!child) throw learnerNotFound()
-  return child
-}
-
 async function findLearner(tx, user, id) {
   const child = await tx.children.findFirst({
-    where: { id, ...ownerOf(user), deleted_at: null, status: 'active' },
+    where: { id, parent_id: user.id, deleted_at: null, status: 'active' },
     select: {
       id: true,
       display_name: true,
@@ -115,6 +104,7 @@ export async function getLearner(user, id) {
     slug: lesson.slug,
     title: lesson.title,
     player: gamePlayer(lesson.content),
+    level: lesson.content.level ?? null,
     cover: coverOf(lesson.content),
     max_stars: maxStars(lesson.content),
     best: best.get(lesson.slug.toLowerCase())?.stars ?? null
@@ -127,6 +117,7 @@ export async function getLearner(user, id) {
     stars: _sum.stars ?? 0,
     games_total: games.length,
     games_played: games.filter((game) => game.best !== null).length,
+    levels: levelsOf(games, LESSON_LEVELS),
     badges: games
       .filter((game) => game.best !== null && game.best >= badgeStars(game.max_stars))
       .map(({ slug, title, player, cover }) => ({ slug, title, player, cover })),
@@ -163,7 +154,8 @@ export async function listShelf(user, id, window) {
       where: {
         status: 'published',
         slug: { in: slugs },
-        ...(window.q ? { title: { contains: window.q, mode: 'insensitive' } } : {})
+        ...(window.q ? { title: { contains: window.q, mode: 'insensitive' } } : {}),
+        ...(window.level ? { content: { path: ['level'], equals: window.level } } : {})
       },
       select: { id: true, slug: true, title: true, content: true },
       orderBy: [{ title: 'asc' }, { id: 'asc' }]
@@ -192,6 +184,7 @@ export async function listShelf(user, id, window) {
         locked_after: after ? { slug: after, title: titles.get(after) ?? after } : null,
         ...lesson,
         player: gamePlayer(content),
+        level: content.level ?? null,
         contrast: content.contrast ?? null,
         step_count: content.steps?.length ?? 0,
         cover: coverOf(content),

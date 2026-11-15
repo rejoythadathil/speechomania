@@ -40,6 +40,7 @@ export const GAME_ART = {
   match: ['cards'],
   squish: ['clamp'],
   compare: ['scale', 'elephant'],
+  choose: ['eyes', 'raised-hand'],
   place: ['box', 'cat'],
   train: ['engine', 'wagon'],
   yesno: ['thumbs-up', 'thumbs-down'],

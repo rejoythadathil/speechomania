@@ -134,7 +134,7 @@ function StepBody({ player, step }) {
       </>
     )
   }
-  if (player === 'compare') {
+  if (player === 'compare' || player === 'choose') {
     return (
       <div className="flex flex-wrap gap-1.5">
         {step.choices.map((choice, index) => (

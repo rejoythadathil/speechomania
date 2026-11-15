@@ -64,7 +64,7 @@ async function currentOnly(tx) {
   }
 }
 
-export async function listLessons(user, { status, q, ...window }) {
+export async function listLessons(user, { status, level, q, ...window }) {
   const page = await pageOf(
     db.lessons,
     {
@@ -72,7 +72,8 @@ export async function listLessons(user, { status, q, ...window }) {
         AND: [
           await visible(db, user),
           status ? { status } : await currentOnly(db),
-          q ? { OR: [{ title: containsText(q) }, { slug: containsText(q) }] } : {}
+          q ? { OR: [{ title: containsText(q) }, { slug: containsText(q) }] } : {},
+          level ? { content: { path: ['level'], equals: level } } : {}
         ]
       },
       select: {
@@ -99,6 +100,7 @@ export async function listLessons(user, { status, q, ...window }) {
     items: page.items.map(({ content, ...lesson }) => ({
       ...lesson,
       player: content?.player ?? 'story',
+      level: content?.level ?? null,
       step_count: stepCount(content),
       ...versionSummary(counts, lesson.slug)
     }))

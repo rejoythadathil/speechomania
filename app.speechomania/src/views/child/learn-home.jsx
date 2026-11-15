@@ -15,6 +15,7 @@ import { sceneFor } from '@/components/child/scenes.js'
 import { BrandMark } from '@/components/shared/brand-mark.jsx'
 import { useResource } from '@/hooks/use-resource.js'
 import { cx } from '@/utils/cx'
+import { levelOf } from '@/utils/levels'
 import styles from './learn-home.module.css'
 
 const PAGE_SIZE = 6
@@ -84,6 +85,11 @@ function GameCard({ lesson, next, onOpen }) {
         <span className={styles.title}>{lesson.title}</span>
         <span className={styles.foot}>
           <span className={styles.tag}>{scene.tag}</span>
+          {levelOf(lesson.level) ? (
+            <span className={styles.level} style={{ '--level': levelOf(lesson.level).colour }}>
+              {levelOf(lesson.level).name}
+            </span>
+          ) : null}
           {locked ? (
             <span className={styles.after}>Finish {locked.title} first</span>
           ) : (
@@ -178,14 +184,16 @@ export function LearnHomeView() {
   })
   const [search, setSearch] = useState('')
   const [show, setShow] = useState('all')
+  const [level, setLevel] = useState(null)
   const q = useDeferredValue(search.trim())
   const shelf = useResource(`/learning/children/${learner.id}/lessons`, {
     page,
     page_size: PAGE_SIZE,
     q,
-    show
+    show,
+    level: level ?? undefined
   })
-  const filtered = Boolean(q) || show !== 'all'
+  const filtered = Boolean(q) || show !== 'all' || Boolean(level)
   const games = shelf.data?.items ?? []
   const next = games.find((lesson) => !lesson.times_completed && !lesson.locked_after) ?? null
   const toTry = learner.games_total - learner.games_played
@@ -193,9 +201,15 @@ export function LearnHomeView() {
   return (
     <div className={styles.root}>
       <header className={styles.bar}>
-        <span className={styles.brand}>
-          <BrandMark size={30} />
-          <b>Speechomania</b>
+        <span className={styles.actions}>
+          <button type="button" className={styles.action} onClick={bar.onGrownUp}>
+            <BackIcon size={22} />
+            <span>Back</span>
+          </button>
+          <span className={styles.brand}>
+            <BrandMark size={30} />
+            <b>Speechomania</b>
+          </span>
         </span>
         <span className={styles.actions}>
           <button
@@ -298,6 +312,25 @@ export function LearnHomeView() {
                       aria-label="Find a game"
                     />
                   </label>
+                  {learner.levels?.length > 1 ? (
+                    <div className={styles.chips} role="group" aria-label="Colour level">
+                      {[null, ...learner.levels.map((row) => row.level)].map((value) => (
+                        <button
+                          key={value ?? 'every'}
+                          type="button"
+                          className={cx(styles.chip, value && styles.levelChip)}
+                          style={value ? { '--level': levelOf(value).colour } : undefined}
+                          aria-pressed={level === value}
+                          onClick={() => {
+                            setLevel(value)
+                            setPage(1)
+                          }}
+                        >
+                          {value ? levelOf(value).name : 'Every colour'}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                   <div className={styles.chips} role="group" aria-label="Show">
                     {SHOWS.map(([value, label]) => (
                       <button

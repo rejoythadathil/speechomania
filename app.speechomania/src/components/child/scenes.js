@@ -91,6 +91,17 @@ export const SCENES = {
       ['raised-hand', 'Tap the short word']
     ]
   },
+  choose: {
+    accent: '#2f7fc1',
+    tag: 'Which one?',
+    background: 'linear-gradient(#e3f1fc, #b5d8f5)',
+    decor: [['magnifier', 78, 80, 110]],
+    how: [
+      ['sound-on', 'Listen'],
+      ['eyes', 'Look at the pictures'],
+      ['raised-hand', 'Tap the right one']
+    ]
+  },
   compare: {
     accent: '#3f9a5b',
     tag: 'Weigh it up',

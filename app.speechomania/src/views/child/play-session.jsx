@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { ART } from '@/components/child/art.jsx'
 import { NextIcon } from '@/components/child/child-icons.jsx'
 import { BottomBar, TopBar } from '@/components/child/chrome.jsx'
+import { LeaveGameSheet } from '@/components/child/sheets.jsx'
 import { ReadAlong } from '@/components/child/read-along.jsx'
 import { sceneFor } from '@/components/child/scenes.js'
 import { Scenery } from '@/components/child/scenery.jsx'
@@ -183,6 +184,7 @@ export function PlaySession({
   const [waiting, setWaiting] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const [leaving, setLeaving] = useState(false)
   const answers = useRef([])
   const { speak, stop } = voice
 
@@ -261,6 +263,7 @@ export function PlaySession({
       ) : null}
       <TopBar
         {...bar}
+        onBack={() => (pages && !result ? setLeaving(true) : onLeave())}
         centre={page ? <Progress pages={pages} at={at} answers={answers.current} /> : null}
       />
 
@@ -355,6 +358,16 @@ export function PlaySession({
           ) : null
         }
       />
+      {leaving ? (
+        <LeaveGameSheet
+          onStay={() => setLeaving(false)}
+          onLeave={() => {
+            stop()
+            setLeaving(false)
+            onLeave()
+          }}
+        />
+      ) : null}
     </div>
   )
 }

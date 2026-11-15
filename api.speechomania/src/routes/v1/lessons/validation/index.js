@@ -9,6 +9,7 @@ import {
   CHOICE_PLAYERS,
   LESSON_ACTIONS,
   LESSON_CHARACTERS,
+  LESSON_LEVELS,
   LESSON_LINES,
   LESSON_PLAYERS,
   LESSON_STATUSES,
@@ -127,7 +128,7 @@ const stepsFor = (player) => {
   if (player === 'pick') return pickStep
   if (player === 'yesno') return yesNoStep
   if (player === 'match') return matchStep
-  if (player === 'compare') return compareStep
+  if (player === 'compare' || player === 'choose') return compareStep
   if (player === 'place') return placeStep
   if (PICTURE_PLAYERS.includes(player)) return pictureStep
   if (CHOICE_PLAYERS.includes(player)) return choiceStep
@@ -142,6 +143,7 @@ const slugRule = Joi.string()
 
 const content = Joi.object({
   after: slugRule,
+  level: Joi.string().valid(...LESSON_LEVELS),
   player: Joi.string()
     .valid(...LESSON_PLAYERS)
     .default('story'),
@@ -167,6 +169,7 @@ export const idParams = Joi.object({ id: Joi.string().uuid().required() })
 
 export const listQuery = Joi.object({
   status: Joi.string().valid(...LESSON_STATUSES),
+  level: Joi.string().valid(...LESSON_LEVELS),
   q: Joi.string().trim().max(100).allow(''),
   ...pageQuery
 })

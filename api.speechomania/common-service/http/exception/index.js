@@ -24,7 +24,8 @@ export const accountInactive = () =>
 export const accountUnknown = () =>
   new HttpError(
     403,
-    'This account is not on Speechomania. Sign in with the email Speechomania invited you with.'
+    'This account is not on Speechomania. Sign in with the email Speechomania invited you with.',
+    [{ field: 'account', message: 'unknown' }]
   )
 
 export const tooManyRequests = () =>

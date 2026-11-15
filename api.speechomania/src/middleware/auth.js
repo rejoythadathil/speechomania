@@ -8,15 +8,18 @@ import {
   signInRequired
 } from '../../common-service/http/exception/index.js'
 
-export async function requireAuth(c, next) {
+async function decodedToken(c) {
   const [scheme, token] = (c.req.header('authorization') ?? '').split(' ')
   if (scheme !== 'Bearer' || !token) throw signInRequired()
-  let decoded
   try {
-    decoded = await verifyToken(token)
+    return await verifyToken(token)
   } catch {
     throw sessionExpired()
   }
+}
+
+export async function requireAuth(c, next) {
+  const decoded = await decodedToken(c)
   const user = await db.users.findFirst({
     where: { firebase_uid: decoded.uid, deleted_at: null },
     select: { id: true, email: true, full_name: true, role: true, status: true }
@@ -34,21 +37,16 @@ export async function requireAuth(c, next) {
   await next()
 }
 
-export async function requireGuest(c, next) {
-  const [scheme, token] = (c.req.header('authorization') ?? '').split(' ')
-  if (scheme !== 'Bearer' || !token) throw signInRequired()
-  let decoded
-  try {
-    decoded = await verifyToken(token)
-  } catch {
-    throw sessionExpired()
+export async function requireNewGoogle(c, next) {
+  const decoded = await decodedToken(c)
+  if (decoded.firebase?.sign_in_provider !== 'google.com' || !decoded.email_verified) {
+    throw accountUnknown()
   }
-  if (decoded.firebase?.sign_in_provider !== 'google.com') throw accountUnknown()
   const member = await db.users.findFirst({
     where: { firebase_uid: decoded.uid },
     select: { id: true }
   })
   if (member) throw forbidden()
-  c.set('user', { id: null, role: 'guest' })
+  c.set('google', { uid: decoded.uid, email: decoded.email, name: decoded.name ?? null })
   await next()
 }
