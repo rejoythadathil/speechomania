@@ -6,10 +6,10 @@ Text to speech with ElevenLabs, with word timings for read-along. Each line beco
 |---|---|
 | `service/index.js` | `voiceReady`, `audioKey(text)`, `speechFor(text)` → `{ key, duration, words, generated }` |
 | `utils/index.js` | `audioBase(text, { voiceId, model })`, `wordTimings(text, alignment)`, `lessonLines(content)` (every spoken line in lesson content) |
-| `constants/index.js` | `VOICE_SETTINGS` (calm, 0.8× speed), ElevenLabs URL and output format, audio folder |
+| `constants/index.js` | `VOICE_SETTINGS` (lively, 0.95× speed), ElevenLabs URL and output format, audio folder |
 | `exception/index.js` | `voiceNotConfigured()`, `voiceFailed(status, text)` |
 
-Config: `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` (default Lily), `ELEVENLABS_MODEL`, plus the S3 settings.
+Config: `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` (default Jessica, a young American woman), `ELEVENLABS_MODEL`, plus the S3 settings.
 
 Used by `scripts/lesson-audio.js` (`bun run audio <slug>`), which writes audio into a lesson draft, and by the `learning` feature, which signs the URLs.
 

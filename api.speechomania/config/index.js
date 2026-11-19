@@ -25,7 +25,7 @@ const schema = Joi.object({
   S3_MEDIA_BUCKET: Joi.string().default('speechomania-local-media'),
   MEDIA_URL_TTL_SECONDS: Joi.number().integer().min(60).max(86400).default(3600),
   ELEVENLABS_API_KEY: Joi.string().allow(''),
-  ELEVENLABS_VOICE_ID: Joi.string().default('pFZP5JQG7iQjIQuC4Bku'),
+  ELEVENLABS_VOICE_ID: Joi.string().default('cgSgspJ2msm6clMCkdW9'),
   ELEVENLABS_MODEL: Joi.string().default('eleven_multilingual_v2')
 }).unknown(true)
 
