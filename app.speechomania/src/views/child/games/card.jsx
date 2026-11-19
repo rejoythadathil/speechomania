@@ -73,7 +73,7 @@ export function CardGame({ step, voice, onDone }) {
       >
         <span className={styles.learnInner}>
           <span className={cx(styles.learnFace, styles.learnBack)} aria-hidden="true">
-            <img src={ART.cards} alt="" draggable="false" />
+            <img src={ART.picture} alt="" draggable="false" />
           </span>
           <span
             className={cx(styles.learnFace, styles.learnFront)}

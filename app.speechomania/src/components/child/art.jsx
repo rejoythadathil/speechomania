@@ -37,7 +37,7 @@ export const GAME_ART = {
   shark: ['shark', 'fish'],
   balloons: ['balloon', 'smiling'],
   bubbles: ['bubbles', 'octopus'],
-  match: ['cards'],
+  match: ['picture'],
   squish: ['clamp'],
   compare: ['scale', 'elephant'],
   choose: ['eyes', 'raised-hand'],
@@ -45,7 +45,7 @@ export const GAME_ART = {
   train: ['engine', 'wagon'],
   yesno: ['thumbs-up', 'thumbs-down'],
   why: ['detective', 'magnifier'],
-  cards: ['cards']
+  cards: ['picture']
 }
 
 export const ACTION_ART = {
