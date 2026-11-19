@@ -1,8 +1,10 @@
 import { RiFileCopyLine, RiSearchLine, RiUserAddLine, RiUserLine } from '@remixicon/react'
 import { useState } from 'react'
 import { useParams } from 'react-router'
+import { Chip } from '@/components/base/badges/chip'
 import { Button } from '@/components/base/buttons/button'
 import { Input } from '@/components/base/input/input'
+import { Textarea } from '@/components/base/textarea/textarea'
 import {
   Table,
   TableBody,
@@ -227,6 +229,72 @@ function EditModal({ person, onClose, onSaved }) {
   )
 }
 
+const DELETION_FILTERS = [
+  { id: 'all', label: 'All parents' },
+  { id: 'pending', label: 'Asked to delete' },
+  { id: 'declined', label: 'Deletion declined' }
+]
+
+const deletionOf = (person) => person.metadata?.deletion_request ?? null
+
+function DeclineModal({ person, onClose, onDeclined }) {
+  const [note, setNote] = useState('')
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState(null)
+  const errors = fieldErrors(error)
+
+  async function submit(event) {
+    event.preventDefault()
+    setPending(true)
+    setError(null)
+    try {
+      await api(`/users/${person.id}/deletion/decline`, { method: 'POST', body: { note } })
+      onDeclined()
+    } catch (caught) {
+      setError(caught)
+      setPending(false)
+    }
+  }
+
+  return (
+    <Modal
+      isOpen
+      onOpenChange={onClose}
+      title={`Decline ${person.full_name}’s request`}
+      description="Their account stays as it is. They see your note and can ask again."
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" form="decline-deletion" disabled={pending}>
+            {pending ? 'Declining…' : 'Decline request'}
+          </Button>
+        </>
+      }
+    >
+      <form id="decline-deletion" onSubmit={submit} className="flex flex-col gap-4" noValidate>
+        <FormAlert error={error && !Object.keys(errors).length ? error : null} />
+        {deletionOf(person)?.reason ? (
+          <p className="text-body-regular text-text-secondary">
+            Their reason: {deletionOf(person).reason}
+          </p>
+        ) : null}
+        <Textarea
+          label="Note for the parent"
+          value={note}
+          onChange={setNote}
+          rows={3}
+          autoFocus
+          isRequired
+          isInvalid={Boolean(errors.note)}
+          hint={errors.note}
+        />
+      </form>
+    </Modal>
+  )
+}
+
 export function PeopleView() {
   const { role } = useParams()
   const { user } = useAuth()
@@ -234,9 +302,16 @@ export function PeopleView() {
   const { page, pageSize, setPage, setPageSize, params } = usePageParams(20)
   const [search, setSearch] = useState(() => params.get('q') ?? '')
   const [modal, setModal] = useState(null)
+  const [deletion, setDeletion] = useState('all')
   const q = useDebounced(search)
   const copy = COPY[role]
-  const people = useResource(copy ? '/users' : null, { role, q, page, page_size: pageSize })
+  const people = useResource(copy ? '/users' : null, {
+    role,
+    q,
+    deletion: role === 'parent' && deletion !== 'all' ? deletion : undefined,
+    page,
+    page_size: pageSize
+  })
   if (!copy) return <NotFoundView />
 
   return (
@@ -266,6 +341,19 @@ export function PeopleView() {
                 setPage(1)
               }}
             />
+            {role === 'parent' ? (
+              <SelectField
+                className="w-48"
+                size="sm"
+                placeholder="Deletion requests"
+                options={DELETION_FILTERS}
+                value={deletion}
+                onChange={(value) => {
+                  setDeletion(value)
+                  setPage(1)
+                }}
+              />
+            ) : null}
           </>
         }
         footer={
@@ -318,11 +406,41 @@ export function PeopleView() {
                     </TableCell>
                     <TableCell>{person.phone || '—'}</TableCell>
                     <TableCell>
-                      <StatusChip value={person.status} />
+                      <span className="flex flex-wrap items-center gap-1.5">
+                        <StatusChip value={person.status} />
+                        {deletionOf(person)?.status === 'pending' ? (
+                          <Chip variant="caption" color="rose">
+                            Asked to delete
+                          </Chip>
+                        ) : null}
+                        {deletionOf(person)?.status === 'declined' ? (
+                          <Chip variant="caption" color="neutral">
+                            Deletion declined
+                          </Chip>
+                        ) : null}
+                      </span>
                     </TableCell>
                     <TableCell>{formatDate(person.created_at)}</TableCell>
                     <TableCell>
                       <span className="flex justify-end gap-2">
+                        {deletionOf(person)?.status === 'pending' ? (
+                          <>
+                            <Button
+                              variant="secondary"
+                              size="xs"
+                              onClick={() => setModal({ type: 'decline', person })}
+                            >
+                              Decline
+                            </Button>
+                            <Button
+                              variant="danger"
+                              size="xs"
+                              onClick={() => setModal({ type: 'erase', person })}
+                            >
+                              Erase
+                            </Button>
+                          </>
+                        ) : null}
                         <Button
                           variant="secondary"
                           size="xs"
@@ -348,7 +466,11 @@ export function PeopleView() {
           ) : (
             <EmptyState
               icon={RiUserLine}
-              title={q ? 'No one matches' : `No ${copy.title.toLowerCase()} yet`}
+              title={
+                q || (role === 'parent' && deletion !== 'all')
+                  ? 'No one matches'
+                  : `No ${copy.title.toLowerCase()} yet`
+              }
               description={`Invite a ${copy.singular} to get started.`}
             />
           )}
@@ -368,6 +490,29 @@ export function PeopleView() {
           }}
         />
       ) : null}
+      {modal?.type === 'decline' ? (
+        <DeclineModal
+          person={modal.person}
+          onClose={() => setModal(null)}
+          onDeclined={() => {
+            setModal(null)
+            notify('Request declined')
+            people.reload()
+          }}
+        />
+      ) : null}
+      <ConfirmDialog
+        isOpen={modal?.type === 'erase'}
+        onOpenChange={() => setModal(null)}
+        title={`Erase ${modal?.person?.full_name}’s account?`}
+        message={`This permanently deletes their children, every game result and mentor remark about them, and their name, email and phone. They can no longer sign in. This cannot be undone.${deletionOf(modal?.person ?? {})?.reason ? ` Their reason: ${deletionOf(modal.person).reason}` : ''}`}
+        confirmLabel="Erase everything"
+        onConfirm={async () => {
+          await api(`/users/${modal.person.id}/erase`, { method: 'POST' })
+          notify('Account erased')
+          people.reload()
+        }}
+      />
       <ConfirmDialog
         isOpen={modal?.type === 'remove'}
         onOpenChange={() => setModal(null)}

@@ -52,7 +52,12 @@ function pageTitle(role, pathname) {
 
 const BADGES = {
   '/children': { tone: 'warn', icon: RiErrorWarningFill, label: 'need attention' },
-  '/change-requests': { tone: 'info', icon: RiTimeFill, label: 'waiting for an answer' }
+  '/change-requests': { tone: 'info', icon: RiTimeFill, label: 'waiting for an answer' },
+  '/people/parent': {
+    tone: 'warn',
+    icon: RiErrorWarningFill,
+    label: 'asked to delete their account'
+  }
 }
 
 function NavItem({ item, pathname, count }) {

@@ -11,6 +11,7 @@ import { LearnStartView } from '@/views/child/learn-start.jsx'
 import { LessonPlayerView } from '@/views/child/lesson-player.jsx'
 import { AssessmentDetailView } from '@/views/shared/assessment-detail.jsx'
 import { AssessmentsView } from '@/views/shared/assessments.jsx'
+import { AccountView } from '@/views/shared/account.jsx'
 import { ChangeRequestsView } from '@/views/shared/change-requests.jsx'
 import { ChildDetailView } from '@/views/shared/child-detail.jsx'
 import { ChildrenView } from '@/views/shared/children.jsx'
@@ -18,6 +19,7 @@ import { DashboardView } from '@/views/shared/dashboard.jsx'
 import { LessonDetailView } from '@/views/shared/lesson-detail.jsx'
 import { LessonsView } from '@/views/shared/lessons.jsx'
 import { LandingView } from '@/views/public/landing.jsx'
+import { PrivacyView, TermsView } from '@/views/public/legal.jsx'
 import { WelcomeView } from '@/views/public/welcome.jsx'
 import { StartView } from '@/views/public/start.jsx'
 import { TryView } from '@/views/public/try.jsx'
@@ -63,6 +65,8 @@ export const router = createBrowserRouter([
   { path: '/start', element: <StartView /> },
   { path: '/login', element: <LoginView /> },
   { path: '/welcome', element: <WelcomeView /> },
+  { path: '/privacy', element: <PrivacyView /> },
+  { path: '/terms', element: <TermsView /> },
   {
     element: <RequireAuth />,
     children: [
@@ -88,6 +92,10 @@ export const router = createBrowserRouter([
           { path: 'children', element: <ChildrenView /> },
           { path: 'children/:id', element: <ChildDetailView /> },
           { path: 'lessons/:id', element: <LessonDetailView /> },
+          {
+            element: <RequireRole roles={['parent']} />,
+            children: [{ path: 'account', element: <AccountView /> }]
+          },
           {
             element: <RequireRole roles={['admin', 'mentor']} />,
             children: [

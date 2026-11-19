@@ -7,6 +7,7 @@ import {
   RiParentLine,
   RiShieldUserLine,
   RiUserHeartLine,
+  RiUserSettingsLine,
   RiUserStarLine
 } from '@remixicon/react'
 
@@ -49,7 +50,8 @@ export const NAVIGATION = {
       label: 'Family',
       items: [
         { to: '/dashboard', label: 'Overview', icon: RiDashboardLine },
-        { to: '/children', label: 'My children', icon: RiUserHeartLine }
+        { to: '/children', label: 'My children', icon: RiUserHeartLine },
+        { to: '/account', label: 'Account', icon: RiUserSettingsLine }
       ]
     }
   ]

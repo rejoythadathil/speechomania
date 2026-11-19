@@ -59,7 +59,8 @@ api.speechomania/
       auth/                      #GET and PATCH /auth/me
       search/                    #global header search over the scoped list services
       dashboard/                 #role-aware counts
-      users/                     #admin: invite, list, edit, remove mentors, parents, admins
+      account/                   #parent only: ask for, see or cancel account erasure
+      users/                     #admin: invite, list, edit, remove mentors, parents, admins; erase or decline a parent's erasure request
       children/                  #scoped list and detail, create, edit, mentor, lessons, archive
       remarks/                   #per child; parents see shared only; unread inbox for admins
       lessons/                   #versions, publish, new draft, archive
