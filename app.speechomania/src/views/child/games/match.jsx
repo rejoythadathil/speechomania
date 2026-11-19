@@ -68,7 +68,7 @@ export function MatchGame(props) {
               >
                 <span className={styles.cardInner}>
                   <span className={styles.cardBack}>
-                    <img src={ART.sparkles} alt="" draggable="false" />
+                    <img src={ART.picture} alt="" draggable="false" />
                   </span>
                   <span className={styles.cardFront}>
                     <Art name={card.art} className={styles.cardArt} />
