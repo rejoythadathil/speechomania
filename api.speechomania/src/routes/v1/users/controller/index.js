@@ -27,3 +27,13 @@ export async function remove(c) {
   await service.deleteUser(c.get('user'), c.get('valid').params.id, requestCtx(c))
   return c.body(null, 204)
 }
+
+export async function erase(c) {
+  await service.eraseParent(c.get('user'), c.get('valid').params.id, requestCtx(c))
+  return c.body(null, 204)
+}
+
+export async function decline(c) {
+  const { params, body } = c.get('valid')
+  return c.json(await service.declineDeletion(c.get('user'), params.id, body, requestCtx(c)))
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router'
+import { Link, Navigate } from 'react-router'
 import { Button } from '@/components/base/buttons/button'
 import { LinkButton } from '@/components/base/buttons/link-button'
 import { Input } from '@/components/base/input/input'
@@ -132,7 +132,10 @@ export function LoginView() {
           </LinkButton>
         </form>
       </main>
-      <footer className={styles.footer}>A product of Autism Synergies</footer>
+      <footer className={styles.footer}>
+        A product of Autism Synergies · <Link to="/privacy">Privacy</Link> ·{' '}
+        <Link to="/terms">Terms</Link>
+      </footer>
     </div>
   )
 }

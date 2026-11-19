@@ -213,7 +213,7 @@ for (const [index, name] of childNames.entries()) {
       },
       assigned_lessons:
         index < 2 ? games : index % 11 === 5 ? [] : games.slice(0, 1 + Math.floor(random() * 4)),
-      consent_version: 'v1',
+      consent_version: 'v2',
       consent_at: ago(daysAgo),
       metadata: tag,
       created_at: ago(daysAgo)

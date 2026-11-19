@@ -5,6 +5,7 @@ import { NUDGE_EVERY, PLAY_LIMIT, REST } from '@/components/child/use-screen-tim
 import { useResource } from '@/hooks/use-resource.js'
 import { cx } from '@/utils/cx'
 import styles from './landing.module.css'
+import { PublicFooter } from './public-footer.jsx'
 import { PublicHeader } from './public-header.jsx'
 
 const PLAYERS = [
@@ -273,12 +274,7 @@ export function LandingView() {
         </section>
       </main>
 
-      <footer className={styles.foot}>
-        <div className={styles.wrap}>
-          <span>Speechomania</span>
-          <span>Made in India</span>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   )
 }

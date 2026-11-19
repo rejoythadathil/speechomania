@@ -1,5 +1,6 @@
 import { db } from '../../../../../common-service/db/service/index.js'
 import { pageArray } from '../../../../../common-service/http/utils/index.js'
+import { DELETION_REQUEST } from '../../account/constants/index.js'
 import { SERIES_LENGTH, STALE_DAYS } from '../constants/index.js'
 import {
   caseload,
@@ -163,8 +164,25 @@ export async function followUpPage(user, window) {
   return pageArray(items, window)
 }
 
+const deletionRequests = () =>
+  db.users.count({
+    where: {
+      role: 'parent',
+      deleted_at: null,
+      metadata: { path: [DELETION_REQUEST, 'status'], equals: 'pending' }
+    }
+  })
+
 export async function badges(user) {
   if (user.role === 'parent') return {}
-  const [care, pending] = await Promise.all([followUp(user), pendingRequests(user)])
-  return { '/children': care.items.length, '/change-requests': pending }
+  const [care, pending, deletions] = await Promise.all([
+    followUp(user),
+    pendingRequests(user),
+    user.role === 'admin' ? deletionRequests() : 0
+  ])
+  return {
+    '/children': care.items.length,
+    '/change-requests': pending,
+    ...(user.role === 'admin' ? { '/people/parent': deletions } : {})
+  }
 }

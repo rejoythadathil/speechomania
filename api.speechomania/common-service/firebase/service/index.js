@@ -1,7 +1,7 @@
 import { applicationDefault, getApps, initializeApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { config } from '../../../config/index.js'
-import { EMAIL_EXISTS } from '../constants/index.js'
+import { EMAIL_EXISTS, USER_NOT_FOUND } from '../constants/index.js'
 
 const options =
   config.APP_ENV === 'prod'
@@ -26,3 +26,11 @@ export async function createAuthUser({ email, fullName }) {
 export const inviteLink = (email) => auth.generatePasswordResetLink(email)
 
 export const setAuthUserDisabled = (uid, disabled) => auth.updateUser(uid, { disabled })
+
+export async function deleteAuthUser(uid) {
+  try {
+    await auth.deleteUser(uid)
+  } catch (error) {
+    if (error.code !== USER_NOT_FOUND) throw error
+  }
+}

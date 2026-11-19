@@ -6,4 +6,7 @@ export const cannotDisableSelf = () => new HttpError(400, 'You cannot disable yo
 
 export const cannotRemoveSelf = () => new HttpError(400, 'You cannot remove your own account')
 
+export const noDeletionRequest = () =>
+  new HttpError(409, 'This parent has not asked for their account to be deleted')
+
 export const parentHasChildren = () => new HttpError(409, "Remove this parent's children first")

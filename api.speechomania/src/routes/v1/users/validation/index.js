@@ -1,6 +1,7 @@
 import Joi from 'joi'
 import { pageQuery } from '../../../../../common-service/http/validation/index.js'
 import { ROLES, USER_STATUSES } from '../constants/index.js'
+import { DELETION_STATUSES } from '../../account/constants/index.js'
 
 const phone = Joi.string()
   .trim()
@@ -14,6 +15,7 @@ export const listQuery = Joi.object({
   role: Joi.string().valid(...ROLES),
   status: Joi.string().valid(...USER_STATUSES),
   q: Joi.string().trim().max(100).allow(''),
+  deletion: Joi.string().valid(...DELETION_STATUSES),
   ...pageQuery
 })
 
@@ -38,3 +40,7 @@ export const updateBody = Joi.object({
   status: Joi.string().valid('active', 'disabled'),
   metadata
 }).min(1)
+
+export const declineBody = Joi.object({
+  note: Joi.string().trim().min(1).max(500).required()
+})

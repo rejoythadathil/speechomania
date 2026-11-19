@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 import { db } from '../../../../../common-service/db/service/index.js'
 import { call, googleUser, makePublishedLesson, makeUser } from '../../../../../test/helpers.js'
+import { CONSENT_VERSION } from '../../children/constants/index.js'
 
 const body = { child_name: 'Meera', consent_given: true }
 let admin, lesson
@@ -42,7 +43,7 @@ describe('signup', () => {
     const child = await db.children.findUnique({ where: { id: created.child.id } })
     expect(child.parent_id).toBe(parent.id)
     expect(child.mentor_id).toBeNull()
-    expect(child.consent_version).toBe('v1')
+    expect(child.consent_version).toBe(CONSENT_VERSION)
     const published = await db.lessons.count({ where: { status: 'published' } })
     expect(child.assigned_lessons).toHaveLength(published)
     expect(child.assigned_lessons).toContain(lesson.slug)
