@@ -3,7 +3,7 @@ import { sceneFor } from './scenes.js'
 import styles from './child.module.css'
 
 export function GameThumb({ player, cover }) {
-  if (GAME_SCENES[player]) {
+  if (GAME_SCENES[player] && !(player === 'cards' && cover)) {
     return (
       <span className={styles.thumb} aria-hidden="true">
         <img

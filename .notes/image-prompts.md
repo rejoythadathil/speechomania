@@ -37,7 +37,7 @@ Keep the top-left corner empty (the game tag sits there) and the main subject ce
 - **Game badges (round medal with the game's sprite inside, its theme colour as the medal face):** one for each of the 12 games.
 
 ## Status (2026-11-04)
-In use as game scenes: shark, balloons, bubbles, compare, place, train, yesno, pick.
+In use as game scenes: shark, balloons, bubbles, compare, place, train, yesno, pick, and since 2026-11-20 cards, choose, match, squish, why and story (generated from the rewritten prompts in `.notes/images-to-generate.md`). Every game type now has a scene.
 
 Regenerate before use:
 - **Memory cards:** the result showed tarot cards with "Sun" and "Moon" written on them. Ask for plain rounded cards with no writing and no tarot look.
