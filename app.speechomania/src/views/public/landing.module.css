@@ -557,6 +557,20 @@
   border-top: 1px solid var(--line);
 }
 
+.footLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.footLinks a {
+  color: inherit;
+}
+
+.footLinks a:hover {
+  color: var(--ink);
+}
+
 @media (max-width: 520px) {
   .game {
     padding: 8px;

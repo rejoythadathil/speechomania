@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router'
+import { Link, Navigate } from 'react-router'
 import { homeFor, useAuth } from '@/hooks/use-auth.jsx'
 import { cx } from '@/utils/cx'
 import base from './landing.module.css'
@@ -65,8 +65,15 @@ export function WelcomeView() {
               }}
             />
             <span>
-              I am this child’s parent or guardian and I agree to Speechomania storing their details
-              and learning progress (consent v1).
+              I am this child’s parent or guardian. I agree to the{' '}
+              <Link to="/terms" target="_blank">
+                terms
+              </Link>{' '}
+              and to Speechomania keeping their details and learning progress as the{' '}
+              <Link to="/privacy" target="_blank">
+                privacy policy
+              </Link>{' '}
+              explains (consent v2).
             </span>
           </label>
           {error ? (

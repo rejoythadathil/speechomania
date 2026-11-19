@@ -607,6 +607,92 @@ const objectsByUse = {
   }))
 }
 
+const pick3 = ([word, art]) => ({ word, art: art ?? word })
+const choose = (intro, rows) => ({
+  player: 'choose',
+  lines: { ...play, intro: line(intro) },
+  steps: rows.map(([text, options, sentence], index) => {
+    const items = options.map(pick3)
+    const turn = index % items.length
+    const order = [...items.slice(turn), ...items.slice(0, turn)]
+    return {
+      text,
+      choices: order.map((item) => item.word),
+      art: order.map((item) => item.art),
+      answer: items[0].word,
+      sentence: line(sentence)
+    }
+  })
+})
+const chooseCards = (game) =>
+  cards(
+    game.steps.map((step) =>
+      card(step.sentence.text, [step.art[step.choices.indexOf(step.answer)]], [step.answer])
+    )
+  )
+
+const whereQuestions = choose('Listen to the question. Tap the right place.', [
+  ['Where do we sleep?', [['bed'], ['chair'], ['door']], 'We sleep on a bed.'],
+  ['Where do we sit?', [['chair'], ['bed'], ['door']], 'We sit on a chair.'],
+  ['Where do fish live?', [['water'], ['tree'], ['house']], 'Fish live in water.'],
+  [
+    'Where do we cook food?',
+    [['kitchen'], ['garden'], ['bedroom', 'bed']],
+    'We cook food in the kitchen.'
+  ],
+  ['Where do birds live?', [['nest'], ['basket'], ['box']], 'Birds live in a nest.'],
+  [
+    'Where do we take a bath?',
+    [['bathroom', 'bath'], ['living room', 'sofa'], ['kitchen']],
+    'We take a bath in the bathroom.'
+  ],
+  ['Where do we see stars?', [['sky', 'night-sky'], ['bed'], ['box']], 'We see stars in the sky.'],
+  ['Where do we wash our hands?', [['sink'], ['bed'], ['door']], 'We wash our hands at the sink.'],
+  ['Where do cars go?', [['road'], ['water'], ['sofa']], 'Cars go on the road.'],
+  [
+    'Where do trains go?',
+    [['railway track', 'railway'], ['garden'], ['kitchen']],
+    'Trains go on the railway track.'
+  ],
+  ['Where do we go to learn?', [['school'], ['hospital']], 'We go to school to learn.'],
+  [
+    'Where do we play on swings?',
+    [['playground'], ['shop']],
+    'We play on swings in the playground.'
+  ],
+  [
+    'Where do we go when we are sick?',
+    [['hospital'], ['school']],
+    'We go to the hospital when we are sick.'
+  ],
+  ['Where do we buy vegetables?', [['market'], ['beach']], 'We buy vegetables at the market.'],
+  ['Where do we swim?', [['swimming pool', 'swimming'], ['shop']], 'We swim in the swimming pool.'],
+  ['Where do we watch a movie?', [['cinema'], ['hospital']], 'We watch a movie at the cinema.']
+])
+
+const whoDoes = choose('Listen. Who does it? Tap the right one.', [
+  ['Who flies?', [['bird'], ['dog'], ['cat']], 'A bird flies.'],
+  ['Who can climb a tree?', [['monkey'], ['fish'], ['cow']], 'A monkey can climb a tree.'],
+  ['Who roars?', [['lion'], ['sheep'], ['rabbit']], 'A lion roars.'],
+  ['Who barks?', [['dog'], ['bird'], ['cow']], 'A dog barks.'],
+  ['Who hops?', [['rabbit'], ['snake'], ['horse']], 'A rabbit hops.'],
+  ['Who crawls?', [['baby'], ['bird'], ['elephant']], 'A baby crawls.'],
+  ['Who can run very fast?', [['leopard'], ['turtle'], ['pig']], 'A leopard can run very fast.'],
+  [
+    'Who stays under water all day?',
+    [['fish'], ['monkey'], ['cat']],
+    'A fish stays under water all day.'
+  ],
+  ['Who quacks?', [['duck'], ['lion'], ['cow']], 'A duck quacks.'],
+  ['Who has a long neck?', [['giraffe'], ['pig'], ['mouse']], 'A giraffe has a long neck.'],
+  ['Who has a trunk?', [['elephant'], ['rabbit'], ['duck']], 'An elephant has a trunk.'],
+  ['Who moves very slowly?', [['snail'], ['horse'], ['rabbit']], 'A snail moves very slowly.'],
+  ['Who gives us milk?', [['cow'], ['lion'], ['snake']], 'A cow gives us milk.'],
+  ['Who says moo?', [['cow'], ['dog'], ['duck']], 'A cow says moo.'],
+  ['Who hisses?', [['snake'], ['dog'], ['horse']], 'A snake hisses.'],
+  ['Who says baa?', [['sheep'], ['cat'], ['lion']], 'A sheep says baa.']
+])
+
 const story = (...pages) => ({
   player: 'story',
   lines: { outro: line('The end. Great reading!') },
@@ -828,6 +914,8 @@ const LEVELS = {
   'action-words': 'indigo',
   feelings: 'indigo',
   'objects-by-use': 'indigo',
+  'where-questions': 'indigo',
+  'who-does-it': 'blue',
   'ask-me': 'indigo',
   colours: 'indigo',
   'can-and-cant': 'indigo',
@@ -879,6 +967,14 @@ const LESSON_LIST = [
   ...parts('ask-me', 'Ask me', askCards, askMe, 'Yes or no'),
   ...parts('why', 'Why?', whyCards, why, 'Find the reason'),
   ...parts('objects-by-use', 'Objects by use', usesCards, objectsByUse, 'Which one?'),
+  ...parts(
+    'where-questions',
+    'Where questions',
+    chooseCards(whereQuestions),
+    whereQuestions,
+    'Which one?'
+  ),
+  ...parts('who-does-it', 'Who does it?', chooseCards(whoDoes), whoDoes, 'Which one?'),
   ...parts('this-these', 'This and these', thisTheseCards, thisOrThese, 'Word bubbles'),
   ...parts('he-she', 'He and she', pronounCards(heOrShe), heOrShe, 'Word bubbles'),
   ...parts('they', 'He, she and they', pronounCards(they), they, 'Word bubbles'),

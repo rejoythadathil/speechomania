@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
-import { Outlet, useNavigate, useParams } from 'react-router'
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router'
 import { BreakSheet, GrownUpSheet, NudgeSheet, RestSheet } from '@/components/child/sheets.jsx'
 import { useCelebrate } from '@/components/child/use-celebrate.js'
 import { useScreenTime } from '@/components/child/use-screen-time.js'
@@ -19,6 +19,7 @@ const prefersReduced = () => window.matchMedia(REDUCED).matches
 export function LearningLayout() {
   const { childId } = useParams()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const learner = useResource(`/learning/children/${childId}`)
   const reduced = useSyncExternalStore(subscribe, prefersReduced)
   const [muted, setMuted] = useState(false)
@@ -34,6 +35,11 @@ export function LearningLayout() {
   useEffect(() => {
     if (interrupted) stop()
   }, [interrupted, stop])
+
+  const { reset } = celebrate
+  useEffect(() => {
+    reset()
+  }, [pathname, sheet, interrupted, reset])
 
   const closeSheet = useCallback(() => setSheet(null), [])
   const leave = useCallback(

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { Button } from '@/components/base/buttons/button'
 import { Checkbox } from '@/components/base/checkbox/checkbox'
 import { Input } from '@/components/base/input/input'
@@ -103,8 +104,8 @@ export function ChildFormModal({ isOpen, onOpenChange, child, onSaved }) {
 
   const consentLabel =
     user.role === 'parent'
-      ? 'I am this child’s parent or guardian and I agree to Speechomania storing their details and learning progress (consent v1).'
-      : 'The parent has given written consent for Speechomania to store this child’s details and learning progress (consent v1).'
+      ? 'I am this child’s parent or guardian and I agree to Speechomania keeping their details and learning progress as the privacy policy explains (consent v2).'
+      : 'The parent has given written consent for Speechomania to store this child’s details and learning progress (consent v2).'
 
   return (
     <Modal
@@ -167,6 +168,17 @@ export function ChildFormModal({ isOpen, onOpenChange, child, onSaved }) {
             <Checkbox isSelected={form.consent_given} onChange={set('consent_given')}>
               {consentLabel}
             </Checkbox>
+            <span className="pl-6 text-caption-1-medium text-text-tertiary">
+              Read the{' '}
+              <Link className="text-text-brand underline" to="/privacy" target="_blank">
+                privacy policy
+              </Link>{' '}
+              and{' '}
+              <Link className="text-text-brand underline" to="/terms" target="_blank">
+                terms
+              </Link>
+              .
+            </span>
             {errors.consent_given ? (
               <span className="text-body-2-medium text-text-error-primary">
                 {errors.consent_given}
