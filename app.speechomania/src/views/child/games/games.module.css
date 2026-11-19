@@ -521,11 +521,12 @@
 }
 
 .cardBack {
-  background: linear-gradient(#6d82d6, #4a5cc0);
+  background: linear-gradient(#d6ebff, #bfdcfb);
+  border: 4px solid #fff;
 }
 
 .cardBack img {
-  width: 46%;
+  width: 58%;
 }
 
 .cardFront {
