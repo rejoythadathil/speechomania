@@ -74,7 +74,7 @@ Names: reading, eating, jumping, waving, tired, peek, excited, calm
 Done: sheets C, D, E, F, G, H, J, K, O and the four children of P (its faces came out cropped and are not used). Still needed: A, B, I.
 
 ## Already done (from the first sheets)
-lion, rabbit, panda, fox, koala, penguin, owl, frog, bear, unicorn, balloon, pop, cloud, cards, octopus, bubbles, box, chair, tree, cat, dog, mouse, duck, bird, star, glowing-star, trophy, medal, scale, tropical-fish, fish, blowfish, seaweed, coral, shell, thumbs-up, thumbs-down, clamp. The realistic shark is replaced by the friendly one on Sheet F.
+lion, rabbit, panda, fox, koala, penguin, owl, frog, bear, unicorn, balloon, pop, cloud, octopus, bubbles, box, chair, tree, cat, dog, mouse, duck, bird, star, glowing-star, trophy, medal, scale, tropical-fish, fish, blowfish, seaweed, coral, shell, thumbs-up, thumbs-down, clamp. The realistic shark is replaced by the friendly one on Sheet F.
 
 ## Redo in the new style (optional, for one consistent look)
 The first sheets (sea life, place objects, rewards, avatars) are more detailed than sheets C–K, which use flat colours and small smiling faces. Generate these with the same style block so everything matches.

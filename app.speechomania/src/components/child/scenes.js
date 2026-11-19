@@ -6,7 +6,7 @@ export const SCENES = {
     decor: [['books', 78, 80, 100]],
     how: [
       ['sound-on', 'Listen'],
-      ['cards', 'Look at the card'],
+      ['picture', 'Look at the card'],
       ['arrow-right', 'Next card']
     ]
   },
