@@ -203,7 +203,7 @@ export function LearnHomeView() {
     <div className={styles.root}>
       <header className={styles.bar}>
         <span className={styles.actions}>
-          <button type="button" className={styles.action} onClick={bar.onGrownUp}>
+          <button type="button" className={styles.action} onClick={bar.onGrownUp} aria-label="Back">
             <BackIcon size={22} />
             <span>Back</span>
           </button>
@@ -222,11 +222,16 @@ export function LearnHomeView() {
           >
             {bar.muted ? <MuteIcon size={22} /> : <SayAgainIcon size={22} />}
           </button>
-          <button type="button" className={styles.action} onClick={bar.onBreak}>
+          <button type="button" className={styles.action} onClick={bar.onBreak} aria-label="Break">
             <BreakIcon size={20} />
             <span>Break</span>
           </button>
-          <button type="button" className={styles.action} onClick={bar.onGrownUp}>
+          <button
+            type="button"
+            className={styles.action}
+            onClick={bar.onGrownUp}
+            aria-label="Parent"
+          >
             <GrownUpIcon size={22} />
             <span>Parent</span>
           </button>
