@@ -7,6 +7,15 @@ import win from '@/assets/sounds/win.m4a'
 const SOUNDS = { ding, soft, win }
 const fire = confetti.create(null, { resize: true, useWorker: false })
 const VOLUME = { normal: 1, quiet: 0.5 }
+const pending = new Set()
+
+function later(run, ms) {
+  const timer = setTimeout(() => {
+    pending.delete(timer)
+    run()
+  }, ms)
+  pending.add(timer)
+}
 
 function originOf(element) {
   if (!element) return { x: 0.5, y: 0.5 }
@@ -66,10 +75,14 @@ export function useCelebrate({ motion, sound, muted }) {
           origin: originOf(element)
         })
         if (motion !== 'full' || !big) return
-        setTimeout(() => burst({ angle: 60, spread: 60, origin: { x: 0, y: 0.7 } }), 300)
-        setTimeout(() => burst({ angle: 120, spread: 60, origin: { x: 1, y: 0.7 } }), 500)
+        later(() => burst({ angle: 60, spread: 60, origin: { x: 0, y: 0.7 } }), 300)
+        later(() => burst({ angle: 120, spread: 60, origin: { x: 1, y: 0.7 } }), 500)
       },
-      reset: () => fire.reset()
+      reset: () => {
+        pending.forEach(clearTimeout)
+        pending.clear()
+        fire.reset()
+      }
     }
   }, [motion, sound, muted])
 }
