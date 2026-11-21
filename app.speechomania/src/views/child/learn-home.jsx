@@ -197,6 +197,7 @@ export function LearnHomeView() {
   const games = shelf.data?.items ?? []
   const next = games.find((lesson) => !lesson.times_completed && !lesson.locked_after) ?? null
   const toTry = learner.games_total - learner.games_played
+  const won = learner.trophies.filter((game) => game.prize)
 
   return (
     <div className={styles.root}>
@@ -375,29 +376,24 @@ export function LearnHomeView() {
               <div className={styles.sectionHead}>
                 <h2 id="trophies-title">My trophies</h2>
                 <span className={styles.count}>
-                  {learner.trophies.filter((game) => game.prize).length} of {learner.games_total}
+                  {won.length} of {learner.games_total}
                 </span>
               </div>
-              {learner.trophies.length ? (
+              {won.length ? (
                 <ul className={styles.shelf}>
-                  {learner.trophies.map((game) => (
-                    <li
-                      key={game.slug}
-                      className={cx(styles.shelfItem, !game.prize && styles.shelfEmpty)}
-                    >
+                  {won.map((game) => (
+                    <li key={game.slug} className={styles.shelfItem}>
                       <span
                         className={styles.shelfArt}
                         style={{ background: sceneFor(game.player).background }}
                       >
                         <img src={ART[gameArt(game)]} alt="" draggable="false" loading="lazy" />
-                        {game.prize ? (
-                          <img
-                            className={styles.shelfPrize}
-                            src={ART[game.prize]}
-                            alt={game.prize}
-                            draggable="false"
-                          />
-                        ) : null}
+                        <img
+                          className={styles.shelfPrize}
+                          src={ART[game.prize]}
+                          alt={game.prize}
+                          draggable="false"
+                        />
                       </span>
                       <span className={styles.shelfTitle}>{game.title}</span>
                     </li>

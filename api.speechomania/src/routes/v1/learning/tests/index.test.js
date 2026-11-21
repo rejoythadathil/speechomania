@@ -505,6 +505,7 @@ describe('badges', () => {
     const before = (await call(parent, 'GET', `/learning/children/${child.id}`)).body
     expect(before).toMatchObject({ games_total: 1, games_played: 1 })
     expect(before.badges).toEqual([])
+    expect(before.trophies.every((game) => game.prize)).toBe(true)
     const started = await call(parent, 'POST', `/learning/children/${child.id}/attempts`, {
       lesson_id: pick.id
     })
