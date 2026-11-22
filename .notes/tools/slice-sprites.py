@@ -57,6 +57,23 @@ def slice_sheet(path, names, out_dir, gap=40, tol=28, size=512, min_area=1500, g
     print(json.dumps(report))
     return True
 
+def unring(path, k, size=512):
+    a = np.asarray(Image.open(path).convert('RGBA')).astype(int)
+    rgb, alpha = a[..., :3], a[..., 3]
+    outside = ndimage.binary_dilation(alpha < 20, iterations=k)
+    light = (rgb.min(axis=2) > 190) & ((rgb.max(axis=2) - rgb.min(axis=2)) < 35)
+    labels, _ = ndimage.label(light | outside)
+    touching = np.unique(labels[outside])
+    gone = np.isin(labels, touching[touching > 0])
+    gone = ndimage.binary_dilation(gone, iterations=1) & (light | outside | (alpha < 255))
+    a[..., 3] = np.where(gone, 0, alpha)
+    sprite = Image.fromarray(a.astype(np.uint8))
+    sprite = sprite.crop(sprite.getbbox())
+    side = max(sprite.size)
+    square = Image.new('RGBA', (int(side * 1.08), int(side * 1.08)), (0, 0, 0, 0))
+    square.paste(sprite, ((square.width - sprite.width) // 2, (square.height - sprite.height) // 2))
+    square.resize((size, size), Image.LANCZOS).save(path, 'WEBP', quality=86, method=6)
+
 def slice_grid(path, a, fg, names, out_dir, grid, size, min_area):
     cols, rows = grid
     h, w = fg.shape
@@ -93,4 +110,9 @@ if __name__ == '__main__':
     plan = json.load(open(sys.argv[1]))
     out = sys.argv[2]
     ok = all([slice_sheet(p['path'], p['names'], out, gap=p.get('gap', 40), grid=p.get('grid')) for p in plan])
+    for p in plan:
+        if p.get('unring'):
+            for name in p['names']:
+                if name:
+                    unring(f'{out}/{name}.webp', p['unring'])
     sys.exit(0 if ok else 1)

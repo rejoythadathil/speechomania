@@ -83,7 +83,7 @@ const actionWords = {
 }
 
 const moods = [
-  ['happy', 'smiling'],
+  ['happy', 'happy'],
   ['sad', 'sad'],
   ['angry', 'angry'],
   ['scared', 'scared'],
@@ -144,7 +144,7 @@ const pairs = [
   ['hot', 'cold', 'hot', 'cold'],
   ['big', 'small', 'elephant', 'mouse'],
   ['fast', 'slow', 'rocket', 'snail'],
-  ['open', 'closed', 'open', 'locked'],
+  ['open', 'closed', 'door-open', 'door'],
   ['day', 'night', 'sun', 'moon'],
   ['full', 'empty', 'full', 'empty'],
   ['old', 'young', 'old-man', 'baby'],
@@ -153,7 +153,7 @@ const pairs = [
   ['healthy', 'sick', 'strong', 'sick'],
   ['tall', 'short', 'giraffe', 'turtle'],
   ['heavy', 'light', 'rock', 'feather'],
-  ['happy', 'sad', 'smiling', 'sad'],
+  ['happy', 'sad', 'happy', 'sad'],
   ['hard', 'soft', 'rock', 'teddy'],
   ['awake', 'asleep', 'running', 'sleeping']
 ]
@@ -174,7 +174,7 @@ const opposites = {
 }
 
 const contractions = [
-  ['do', 'not', 'don’t', 'Don’t touch the fire.', ['raised-hand', 'fire']],
+  ['do', 'not', 'don’t', 'Don’t touch the fire.', ['stop-hand', 'fire']],
   ['I', 'am', 'I’m', 'I’m jumping.', ['cartwheel']],
   ['can', 'not', 'can’t', 'The duck can’t climb.', ['duck', 'ladder']],
   ['is', 'not', 'isn’t', 'He isn’t awake.', ['sleeping']],

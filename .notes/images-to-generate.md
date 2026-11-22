@@ -1,16 +1,93 @@
-# Images to generate (2026-11-20)
+# Images to generate
 
-Status: all six were generated and added on 2026-11-20 (`app.speechomania/src/assets/scenes/`). Keep these prompts as the pattern for future scenes.
+Status (2026-11-22):
+- **Done 2026-11-22: Sheets Q, R, S, T and V** (50 pictures) are in the app.
+- **To do: Sheet U, places** (12 pictures: kitchen, garden, playground, market, shop, hospital, cinema, beach, road, railway, house, night sky). These are the last emoji left in the lessons.
+- **Redo on Sheet R:** picture 9 (down) shows the boy at the top of the slide like picture 8, so up and down look the same; picture 2 (shy) covers his eyes instead of peeking. Regenerate those two if possible.
+- **Done: the six game scenes** (2026-11-20), kept at the end of this file as a pattern.
 
-Six game scenes are missing. Each block below is complete: paste one whole block into Gemini.
+## How to send them back
+1. Paste one whole block into Gemini. Each block already includes the style, so every sheet matches the existing pictures.
+2. Open the result and tap the **download** button. Don't take a screenshot.
+3. Save it in `images-generated/new-spirite/` as `sheet-<letter>.png` (for example `sheet-q.png`).
+4. Check it: the right number of pictures in the right order, nothing touching, no words or numbers, a plain white background. If one picture is wrong, reply in the same Gemini chat (for example "same sheet, but make picture 7 an open hand, not a fist").
 
-How to send them back:
-1. Open the result and tap the **download** button. Don't take a screenshot: Gemini's buttons and the screen border end up in the picture.
-2. Save it in `images-generated/` with the name given for that scene (for example `cards.png`).
-3. Check it: no words, letters or numbers anywhere, flat cartoon (not photo-like), the main picture in the middle, and nothing important in the bottom-right corner.
-4. If a result breaks a rule, reply in the same Gemini chat with the fix (for example "same picture, but remove the writing on the cards") rather than starting again.
+The names under each block are what each picture becomes, in grid order. They're for slicing, not for Gemini. I cut each sheet with `.notes/tools/slice-sprites.py`, swap the emoji out in the lessons, and show you every lesson locally before anything is merged.
 
-I crop each one to 16:10 without the Gemini mark, resize to 1280×800 WebP and save it under `app.speechomania/src/assets/scenes/`.
+Three names are new on purpose, because the old ones are also button or tip icons in the app: `happy` replaces `smiling`, `stop-hand` replaces `raised-hand`, and `door`/`door-open` replace `locked`/`open` in Opposites. The lessons will point at the new names, so the Parent lock and the how-to-play tips don't change.
+
+## Sheet Q: Feelings 1
+Used in: Feelings (14 of its 15 pictures are emoji) and Opposites.
+
+```text
+A sprite sheet of 12 items. Each is the same boy (warm brown skin, short black hair, round friendly face, blue T-shirt), head and shoulders only, exactly like a school photo, all the same size, showing one feeling clearly with his face and hands: 1) happy, with a big warm smile, 2) sad, with a small frown and droopy eyes, 3) angry, with a frown and crossed arms, not shouting, 4) scared, with wide eyes and hands near his face, 5) surprised, with raised eyebrows and a round open mouth, 6) crying, with two soft tears on his cheeks, 7) laughing, with closed happy eyes and an open smile, 8) nervous, biting his lip with a small sweat drop, 9) thinking, with one finger on his chin and eyes looking up, 10) sleepy, yawning with half-closed eyes, 11) sick, with a thermometer in his mouth and a tired face, 12) hot, with red cheeks and sweat drops, fanning his face with one hand.
+
+Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 4 columns and 3 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
+```
+
+Names in order: happy, sad, angry, scared, surprised, crying, laughing, nervous, thinking, sleepy, sick, hot
+
+## Sheet R: Feelings 2, farm animals and more
+Used in: Feelings, Opposites, Who does it?, Short words and Where questions.
+
+```text
+A sprite sheet of 12 items. The first three are the same boy (warm brown skin, short black hair, round friendly face, blue T-shirt), head and shoulders only, exactly like a school photo, all the same size: 1) tired, with heavy eyes and drooping shoulders, 2) shy, peeking between his fingers with a small smile, 3) cold, shivering in a woolly scarf and cap with his arms hugging himself. Then: 4) a friendly white cow with brown patches, 5) a fluffy white sheep, 6) a pink pig, 7) one child's open hand held up with the palm facing forward, meaning stop, 8) the same boy, full body this time, sitting at the top of a small slide and pointing up, 9) the same boy, full body, at the bottom of the same small slide, having slid down, 10) a woven cane basket, 11) a bird's nest on a short branch with three small eggs in it, 12) a small round pond of calm blue water with gentle ripples and one lily pad, no fish.
+
+Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 4 columns and 3 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
+```
+
+Names in order: tired, peek, cold, cow, sheep, pig, stop-hand, up, down, basket, nest, water
+
+## Sheet S: Things we use
+Used in: Objects by use, Why?, Ask me and Describing words.
+
+```text
+A sprite sheet of 12 items: 1) a steel spoon, 2) a cup with a handle, 3) a round steel plate, 4) a comb, 5) a toothbrush with toothpaste on it, 6) a bar of soap with a few bubbles, 7) a folded tissue, 8) a yellow pencil, 9) a red crayon, 10) a pair of child-safe scissors with rounded blue handles, 11) a door key, 12) a kitchen knife with a wooden handle.
+
+Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 4 columns and 3 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
+```
+
+Names in order: spoon, cup, plate, comb, toothbrush, soap, tissue, pencil, crayon, scissors, key, knife
+
+## Sheet T: Clothes and home
+Used in: Objects by use, Why?, Where questions and Short words.
+
+```text
+A sprite sheet of 12 items: 1) a pair of children's shoes, 2) a pair of socks, 3) a sun hat, 4) a warm winter coat, 5) a pair of shorts, 6) a school bag, 7) a bed with a pillow and blanket, 8) a sofa, 9) a bathroom wash basin with a tap, 10) a bathtub with bubbles, 11) a dustbin with a lid, 12) a wooden ladder.
+
+Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 4 columns and 3 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
+```
+
+Names in order: shoe, socks, hat, coat, shorts, bag, bed, sofa, sink, bath, wastebasket, ladder
+
+## Sheet U: Places
+Used in: Where questions and Where is it?
+
+```text
+A sprite sheet of 12 items. Each place is drawn as one small, compact, rounded scene that fits inside its cell like a sticker, viewed from the front: 1) a kitchen: a counter with a gas stove, a pot and a shelf of jars, 2) a garden: a small bed of flowers behind a low wooden fence, 3) a playground: a swing and a small slide on a patch of grass, 4) a vegetable market: a stall with a striped awning and baskets of tomatoes, carrots and greens, 5) a small corner shop with an awning and shelves of packets and jars, 6) a small white hospital building with a red cross on it, 7) a cinema: a small building with a big screen and red curtains, 8) a beach: a patch of sand with a small wave, a palm tree and a bucket, 9) a short stretch of road with a dashed middle line curving away, 10) a short stretch of railway track with wooden sleepers and a signal post, 11) a cosy small house seen from the front, square and simple, 12) a rounded patch of night sky with a smiling crescent moon and a few stars.
+
+Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 4 columns and 3 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
+```
+
+Names in order: kitchen, garden, playground, market, shop, hospital, cinema, beach, road, railway, house, night-sky
+
+## Sheet V: Doors
+Used in: A or the, and Opposites (open and closed).
+
+```text
+A sprite sheet of 2 items, both the same wooden door in the same frame: 1) the door closed, 2) the door wide open, showing a little light inside.
+
+Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 2 columns and 1 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
+```
+
+Names in order: door, door-open
+
+## Next: the Violet lessons
+Any items the Violet lessons need that we don't have (for example dosa, idli, saree, auto-rickshaw) will be added here as more sheets once the lesson words are mapped.
+
+# Game scenes (done 2026-11-20)
+
+Each block is a complete Gemini prompt for a 16:10 scene. Kept as the pattern for future scenes.
 
 ## 1. Flashcards (do this first: every part 1 lesson opens on it)
 Save as `cards.png`.
@@ -101,6 +178,3 @@ SCENE: an open picture book lies on a wooden table against a plain cream wall. A
 
 DO NOT INCLUDE: any words, letters, numbers or writing, including on the book pages; extra objects; people; photo-like lighting or realistic textures; logos, signatures or watermarks
 ```
-
-## Next: the Violet lessons
-No images are needed yet. Once the Violet lesson words are mapped, any Indian items OpenMoji doesn't have (for example dosa, idli, saree, auto-rickshaw) will be added here as sticker prompts.
