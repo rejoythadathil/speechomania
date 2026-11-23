@@ -1,0 +1,153 @@
+{
+  "pageSize": "A4",
+  "pageMargins": [44, 48, 44, 56],
+  "info": { "title": "{{child.name}}’s learning report", "author": "Speechomania" },
+  "watermark": {
+    "text": "{{watermark}}",
+    "opacity": 0.07,
+    "angle": -38,
+    "fontSize": 26,
+    "color": "#136197"
+  },
+  "defaultStyle": { "font": "Helvetica", "fontSize": 10, "color": "#1f2a37", "lineHeight": 1.2 },
+  "styles": {
+    "brand": { "fontSize": 9, "bold": true, "color": "#1479bb" },
+    "title": { "fontSize": 22, "bold": true, "margin": [0, 4, 0, 2] },
+    "muted": { "color": "#5b6472" },
+    "heading": { "fontSize": 13, "bold": true, "margin": [0, 18, 0, 6], "color": "#136197" },
+    "statValue": { "fontSize": 18, "bold": true },
+    "tableHead": { "bold": true, "fillColor": "#eef5fb" }
+  },
+  "content": [
+    { "text": "SPEECHOMANIA", "style": "brand" },
+    { "text": "{{child.name}}’s learning report", "style": "title" },
+    { "text": "Made on {{today}} for {{parent.name}}", "style": "muted" },
+    {
+      "margin": [0, 16, 0, 0],
+      "table": {
+        "widths": ["*", "*", "*"],
+        "body": [
+          [
+            {
+              "stack": [
+                { "text": "Stars", "style": "muted" },
+                { "text": "{{stars}}", "style": "statValue" }
+              ]
+            },
+            {
+              "stack": [
+                { "text": "Games played", "style": "muted" },
+                { "text": "{{played}} of {{total}}", "style": "statValue" }
+              ]
+            },
+            {
+              "stack": [
+                { "text": "Trophies won", "style": "muted" },
+                { "text": "{{trophies}}", "style": "statValue" }
+              ]
+            }
+          ]
+        ]
+      },
+      "layout": "lightHorizontalLines"
+    },
+    {
+      "$if": "levels",
+      "$then": [
+        { "text": "Games by colour level", "style": "heading" },
+        {
+          "table": {
+            "headerRows": 1,
+            "widths": ["*", 90, 90],
+            "body": [
+              [
+                { "text": "Level", "style": "tableHead" },
+                { "text": "Played", "style": "tableHead" },
+                { "text": "Games", "style": "tableHead" }
+              ],
+              {
+                "$each": "levels",
+                "$as": "level",
+                "$item": ["{{level.name}}", "{{level.played}}", "{{level.total}}"]
+              }
+            ]
+          },
+          "layout": "lightHorizontalLines"
+        }
+      ]
+    },
+    {
+      "$if": "lessons",
+      "$then": [
+        { "text": "Games", "style": "heading" },
+        {
+          "table": {
+            "headerRows": 1,
+            "widths": ["*", 60, 70, 70],
+            "body": [
+              [
+                { "text": "Game", "style": "tableHead" },
+                { "text": "Level", "style": "tableHead" },
+                { "text": "Times played", "style": "tableHead" },
+                { "text": "Best stars", "style": "tableHead" }
+              ],
+              {
+                "$each": "lessons",
+                "$as": "lesson",
+                "$item": [
+                  "{{lesson.title}}",
+                  "{{lesson.level}}",
+                  "{{lesson.times}}",
+                  "{{lesson.stars}}"
+                ]
+              }
+            ]
+          },
+          "layout": "lightHorizontalLines"
+        }
+      ]
+    },
+    {
+      "$if": "assessments",
+      "$then": [
+        { "text": "Check-ins", "style": "heading" },
+        {
+          "table": {
+            "headerRows": 1,
+            "widths": ["*", 90, 110],
+            "body": [
+              [
+                { "text": "Check-in", "style": "tableHead" },
+                { "text": "Status", "style": "tableHead" },
+                { "text": "Result", "style": "tableHead" }
+              ],
+              {
+                "$each": "assessments",
+                "$as": "check",
+                "$item": ["{{check.title}}", "{{check.status}}", "{{check.result}}"]
+              }
+            ]
+          },
+          "layout": "lightHorizontalLines"
+        }
+      ]
+    },
+    {
+      "$if": "remarks",
+      "$then": [
+        { "text": "Notes from the mentor", "style": "heading" },
+        {
+          "$each": "remarks",
+          "$as": "remark",
+          "$item": {
+            "margin": [0, 0, 0, 8],
+            "stack": [
+              { "text": "{{remark.date}} · {{remark.author}}", "style": "muted", "fontSize": 9 },
+              "{{remark.body}}"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

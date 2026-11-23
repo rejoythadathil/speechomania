@@ -57,3 +57,39 @@ export async function everyRow(fetchPage, max = MAX_ROWS) {
   }
   return items
 }
+
+const valueAt = (data, path) =>
+  path.split('.').reduce((value, key) => (value == null ? undefined : value[key]), data)
+
+const filled = (value) => (Array.isArray(value) ? value.length > 0 : Boolean(value))
+
+export function fillTemplate(template, data) {
+  if (typeof template === 'string')
+    return template.replace(/{{\s*([\w.]+)\s*}}/g, (_, path) => String(valueAt(data, path) ?? ''))
+  if (Array.isArray(template))
+    return template.flatMap((item) => {
+      if (item && typeof item === 'object' && '$each' in item)
+        return (valueAt(data, item.$each) ?? []).map((entry) =>
+          fillTemplate(item.$item, { ...data, [item.$as ?? 'item']: entry })
+        )
+      if (item && typeof item === 'object' && '$if' in item) {
+        const chosen = filled(valueAt(data, item.$if)) ? item.$then : item.$else
+        if (chosen === undefined) return []
+        return Array.isArray(chosen) ? fillTemplate(chosen, data) : [fillTemplate(chosen, data)]
+      }
+      return [fillTemplate(item, data)]
+    })
+  if (template && typeof template === 'object')
+    return Object.fromEntries(
+      Object.entries(template).map(([key, value]) => [key, fillTemplate(value, data)])
+    )
+  return template
+}
+
+export const longDate = (value) =>
+  new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata'
+  }).format(new Date(value))

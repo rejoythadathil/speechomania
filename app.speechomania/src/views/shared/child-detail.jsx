@@ -1,6 +1,7 @@
 import {
   RiArrowLeftLine,
   RiBookOpenLine,
+  RiFilePdf2Line,
   RiLockLine,
   RiPencilLine,
   RiPlayLine
@@ -14,6 +15,7 @@ import { Chip } from '@/components/base/badges/chip'
 import { Input } from '@/components/base/input/input'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog.jsx'
 import { DataState } from '@/components/shared/data-state.jsx'
+import { ExportButton } from '@/components/shared/export-button.jsx'
 import { EmptyState } from '@/components/shared/empty-state.jsx'
 import { FormAlert } from '@/components/shared/form-alert.jsx'
 import { Modal } from '@/components/shared/modal.jsx'
@@ -302,6 +304,14 @@ export function ChildDetailView() {
                   >
                     Edit profile
                   </Button>
+                ) : null}
+                {user.role === 'parent' && data.status === 'active' ? (
+                  <ExportButton
+                    path={`/reports/children/${data.id}/progress`}
+                    label="Learning report (PDF)"
+                    icon={RiFilePdf2Line}
+                    size="medium"
+                  />
                 ) : null}
                 {user.role === 'parent' ? (
                   <Button

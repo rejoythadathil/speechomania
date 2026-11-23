@@ -1,7 +1,14 @@
+import { createRequire } from 'node:module'
 import writeExcelFile from 'write-excel-file/node'
 import { valkey } from '../../cache/service/index.js'
 import { logger } from '../../logger/service/index.js'
-import { EXPORTS_PER_MINUTE, RENDER_QUEUE, RENDER_SLOTS, XLSX_TYPE } from '../constants/index.js'
+import {
+  EXPORTS_PER_MINUTE,
+  PDF_FONTS,
+  RENDER_QUEUE,
+  RENDER_SLOTS,
+  XLSX_TYPE
+} from '../constants/index.js'
 import { reportsBusy, tooManyExports } from '../exception/index.js'
 
 let running = 0
@@ -31,6 +38,26 @@ export async function limitExports(user) {
     logger.warn({ err: error }, 'export limiter unavailable')
   }
   if (count > EXPORTS_PER_MINUTE) throw tooManyExports()
+}
+
+const pdfmake = createRequire(import.meta.url)('pdfmake')
+const builtInFonts = new Set(Object.values(PDF_FONTS.Helvetica))
+pdfmake.addFonts(PDF_FONTS)
+pdfmake.setLocalAccessPolicy((path) => builtInFonts.has(path))
+pdfmake.setUrlAccessPolicy(() => false)
+
+export async function pdfFile(definition, footerText = 'Speechomania') {
+  const document = {
+    ...definition,
+    footer: (page, pages) => ({
+      text: `${footerText} · Page ${page} of ${pages}`,
+      alignment: 'center',
+      fontSize: 8,
+      color: '#5b6472',
+      margin: [0, 20, 0, 0]
+    })
+  }
+  return Buffer.from(await pdfmake.createPdf(document).getBuffer())
 }
 
 export const xlsxFile = async (sheets) => Buffer.from(await writeExcelFile(sheets).toBuffer())

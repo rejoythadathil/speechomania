@@ -71,3 +71,47 @@ describe('reports', () => {
     await expect(limitExports(user)).rejects.toMatchObject({ status: 429 })
   })
 })
+
+describe('templates', () => {
+  test('placeholders fill, $each repeats and $if drops empty sections', async () => {
+    const { fillTemplate } = await import('../utils/index.js')
+    const template = {
+      title: '{{child.name}}’s report',
+      content: [
+        {
+          $if: 'rows',
+          $then: [{ text: 'Rows' }, { $each: 'rows', $as: 'row', $item: '{{row.n}}' }]
+        },
+        { $if: 'notes', $then: { text: 'Notes' }, $else: { text: 'No notes' } },
+        '{{missing}}'
+      ]
+    }
+    expect(
+      fillTemplate(template, { child: { name: 'Riya' }, rows: [{ n: 1 }, { n: 2 }], notes: [] })
+    ).toEqual({
+      title: 'Riya’s report',
+      content: [{ text: 'Rows' }, '1', '2', { text: 'No notes' }, '']
+    })
+  })
+
+  test('a filled report renders to a small PDF quickly without reaching files or the network', async () => {
+    const { fillTemplate } = await import('../utils/index.js')
+    const { pdfFile } = await import('../service/index.js')
+    const template = (await import('../templates/progress-report.json')).default
+    const definition = fillTemplate(template, {
+      child: { name: 'Riya' },
+      lessons: Array.from({ length: 60 }, (_, index) => ({
+        title: `Game ${index}`,
+        level: 'Indigo',
+        times: 1,
+        stars: '2 of 3'
+      }))
+    })
+    const started = performance.now()
+    const pdf = await pdfFile(definition)
+    expect(performance.now() - started).toBeLessThan(500)
+    expect(pdf.length).toBeLessThan(100_000)
+    await expect(pdfFile({ content: [{ image: '/etc/passwd' }] })).rejects.toThrow()
+    await expect(pdfFile({ content: [{ image: 'https://example.com/x.png' }] })).rejects.toThrow()
+  })
+})
