@@ -14,6 +14,7 @@ import {
   TableRow
 } from '@/components/base/table/table'
 import { DataState } from '@/components/shared/data-state.jsx'
+import { ExportButton } from '@/components/shared/export-button.jsx'
 import { EmptyState } from '@/components/shared/empty-state.jsx'
 import { ListFooter } from '@/components/shared/list-footer.jsx'
 import { PageHeader } from '@/components/shared/page-header.jsx'
@@ -25,6 +26,8 @@ import { useAuth } from '@/hooks/use-auth.jsx'
 import { useDebounced } from '@/hooks/use-debounced.js'
 import { usePageParams } from '@/hooks/use-page-params.js'
 import { useResource } from '@/hooks/use-resource.js'
+import { api } from '@/services/api.js'
+import { dateCell, exportFileName, fetchAllPages, label, sheetOf } from '@/utils/export.js'
 import { age, formatDate, initials } from '@/utils/format'
 import { ChildFormModal } from './child-form.jsx'
 
@@ -57,6 +60,38 @@ function ChildrenList() {
     page_size: pageSize
   })
   const canAdd = user.role === 'admin' || user.role === 'parent'
+  const filters = {
+    q,
+    status: status === 'all' ? undefined : status,
+    unassigned: unassigned || undefined
+  }
+
+  async function exportChildren() {
+    const all = await fetchAllPages((page, size) =>
+      api('/children', { query: { ...filters, page, page_size: size } })
+    )
+    const columns = [
+      { label: 'Name', width: 26, value: (child) => child.display_name },
+      { label: 'Age', width: 8, value: (child) => age(child.date_of_birth) },
+      { label: 'Parent', width: 24, value: (child) => child.parent_name },
+      ...(user.role === 'admin'
+        ? [{ label: 'Mentor', width: 24, value: (child) => child.mentor_name ?? 'Not assigned' }]
+        : []),
+      { label: 'Lessons assigned', width: 16, value: (child) => child.assigned_lessons.length },
+      { label: 'Status', width: 12, value: (child) => label(child.status) },
+      { label: 'Added', width: 14, value: (child) => dateCell(child.created_at) }
+    ]
+    return {
+      fileName: exportFileName(user.role === 'admin' ? 'children' : 'my-children', [
+        filters.status,
+        unassigned && 'waiting-for-mentor',
+        q && `search-${q}`
+      ]),
+      sheets: [sheetOf('Children', columns, all.items)],
+      rows: all.items.length,
+      complete: all.complete
+    }
+  }
 
   return (
     <>
@@ -110,6 +145,11 @@ function ChildrenList() {
                   Waiting for a mentor
                 </Checkbox>
               </>
+            ) : null}
+            {user.role !== 'parent' && children.data?.total ? (
+              <span className="ml-auto">
+                <ExportButton build={exportChildren} />
+              </span>
             ) : null}
           </>
         }

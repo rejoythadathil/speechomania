@@ -23,6 +23,10 @@ export const app = new Hono()
       maxAge: 600
     })
   )
+  .use('/v1/*', async (c, next) => {
+    await next()
+    c.header('Cache-Control', 'no-store')
+  })
   .use('/v1/*', bodyLimit({ maxSize: 1024 * 1024 }))
   .use('/v1/*', rateLimit)
   .get('/health', async (c) => {
