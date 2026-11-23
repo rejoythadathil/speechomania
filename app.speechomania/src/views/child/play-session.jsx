@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ART } from '@/components/child/art.jsx'
 import { NextIcon } from '@/components/child/child-icons.jsx'
 import { BottomBar, TopBar } from '@/components/child/chrome.jsx'
@@ -9,9 +9,10 @@ import { Scenery } from '@/components/child/scenery.jsx'
 import child from '@/components/child/child.module.css'
 import { cx } from '@/utils/cx'
 import { GAMES, shuffle } from './games/index.js'
-import { tallyOf } from './games/use-round.js'
+import { sample, tallyOf } from './games/use-round.js'
 import styles from './lesson-player.module.css'
 import { RewardReveal } from './reward-reveal.jsx'
+import { inSets } from './sets.js'
 
 const PAIRS_PER_BOARD = 3
 
@@ -24,7 +25,8 @@ export const LINES = {
   outro: { text: 'You did it!' },
   reward: { text: 'You earned a trophy!' },
   medal: { text: 'You earned a medal!' },
-  sticker: { text: 'You earned a star! Let’s play again.' }
+  sticker: { text: 'You earned a star! Let’s play again.' },
+  rest: { text: 'Well done! Take a little rest.' }
 }
 
 export function prizeOf(got, total) {
@@ -69,6 +71,7 @@ export function lessonPages(content, lines, { cards = [], check = null } = {}) {
     step_data: content.steps[index],
     steps: content.steps,
     contrast: content.contrast,
+    labels: content.labels,
     lines
   })
   let pages
@@ -78,7 +81,7 @@ export function lessonPages(content, lines, { cards = [], check = null } = {}) {
     pages = indexes.map((index) => ({ step: 'story', index }))
   } else if (player === 'pick') {
     const round = (step) => {
-      const order = shuffle(indexes)
+      const order = sample(indexes, content.rounds)
       const sides = balancedSides(order.length)
       return order.map((index, position) => ({ step, index, side: sides[position] }))
     }
@@ -91,12 +94,13 @@ export function lessonPages(content, lines, { cards = [], check = null } = {}) {
       return { step: 'play', index: group[0], group }
     })
   } else {
-    pages = shuffle(indexes)
-      .slice(0, Math.min(content.rounds ?? indexes.length, indexes.length))
-      .map((index) => ({ step: 'play', index }))
+    pages = sample(indexes, content.rounds, content.ordered).map((index) => ({
+      step: 'play',
+      index
+    }))
   }
   if (pages.length && lines.intro) pages[0] = { ...pages[0], intro: lines.intro }
-  const learning = cards.map((card, index) => ({
+  const learning = sample(cards, content.rounds, true).map((card, index) => ({
     step: 'card',
     index,
     player: 'card',
@@ -104,15 +108,14 @@ export function lessonPages(content, lines, { cards = [], check = null } = {}) {
     steps: [],
     lines
   }))
-  const playing = [...pages, ...quizPages(content, check)].map((page) => ({
-    ...page,
-    player,
-    ...data(page.index)
-  }))
-  return [...learning, ...playing]
+  const playing = [...inSets(pages), ...quizPages(content, check)].map((page) =>
+    page.step === 'break' ? page : { ...page, player, ...data(page.index) }
+  )
+  return [...inSets(learning), ...playing]
 }
 
-const kindOf = (page) => (page.step === 'card' ? 'card' : page.step === 'quiz' ? 'quiz' : 'game')
+const kindOf = (page) => (['card', 'quiz', 'break'].includes(page.step) ? page.step : 'game')
+const answered = (pages) => pages.filter((page) => page.step !== 'break').length
 
 export function assessmentPages(items, settings) {
   const order = items.map((_, index) => index)
@@ -134,15 +137,20 @@ export function assessmentPages(items, settings) {
 }
 
 function Progress({ pages: all, at: position, answers }) {
-  const kind = kindOf(all[position])
-  const pages = all.filter((page) => kindOf(page) === kind)
-  const at = all.slice(0, position).filter((page) => kindOf(page) === kind).length
-  const results = answers.filter((answer) => kindOf(answer) === kind)
+  const current = all[position]
+  const kind = kindOf(current)
+  const sameSet = (page) => kindOf(page) === kind && page.set === current.set
+  const pages = all.filter(sameSet)
+  const at = all.slice(0, position).filter(sameSet).length
+  const before = all.filter(
+    (page, index) => kindOf(page) === kind && !sameSet(page) && index < position
+  )
+  const results = answers.filter((answer) => kindOf(answer) === kind).slice(before.length)
   const cards = kind === 'card'
   return (
     <ol
       className={cx(styles.progress, cards && styles.dots)}
-      aria-label={`${cards ? 'Card' : 'Round'} ${at + 1} of ${pages.length}`}
+      aria-label={`${cards ? 'Card' : 'Round'} ${at + 1} of ${pages.length}${current.sets > 1 ? `, set ${current.set} of ${current.sets}` : ''}`}
     >
       {pages.map((page, index) => {
         const result = results[index]
@@ -161,6 +169,28 @@ function Progress({ pages: all, at: position, answers }) {
         )
       })}
     </ol>
+  )
+}
+
+function SetBreak({ page, lines, voice, celebrate, onNext }) {
+  const star = useRef(null)
+  const { speak } = voice
+  useEffect(() => {
+    celebrate.finale(star.current, false)
+    if (lines.rest) speak(lines.rest)
+  }, [celebrate, lines.rest, speak])
+  return (
+    <section className={cx(child.card, styles.panel)}>
+      <img ref={star} className={styles.setStar} src={ART.medal} alt="" draggable="false" />
+      <h1>
+        Set {page.set} of {page.sets} done!
+      </h1>
+      <p className={styles.setRest}>Take a little rest.</p>
+      <button type="button" className={child.go} onClick={onNext} autoFocus>
+        Keep going
+        <NextIcon size={28} />
+      </button>
+    </section>
   )
 }
 
@@ -227,7 +257,7 @@ export function PlaySession({
       send({ events: [event], steps_completed: answers.current.length })
       if (page.step === 'story') return setWaiting(true)
       if (at + 1 < pages.length) return setAt(at + 1)
-      finish(pages.length)
+      finish(answered(pages))
     },
     [at, finish, pages, send]
   )
@@ -236,18 +266,29 @@ export function PlaySession({
     stop()
     setWaiting(false)
     if (at + 1 < pages.length) return setAt(at + 1)
-    finish(pages.length)
+    finish(answered(pages))
   }
 
   const page = pages?.[at]
   const step = page?.step_data ?? null
   const scene = sceneFor(page?.player ?? cover.player)
-  const Game = page ? (GAMES[page.player] ?? GAMES.story) : null
+  const resting = page?.step === 'break'
+  const Game = page && !resting ? (GAMES[page.player] ?? GAMES.story) : null
 
   return (
     <div className={styles.root} style={{ background: scene.background }}>
       <Scenery player={page?.player ?? cover.player} />
-      {page ? (
+      {resting ? (
+        <SetBreak
+          key={at}
+          page={page}
+          lines={lines}
+          voice={voice}
+          celebrate={celebrate}
+          onNext={next}
+        />
+      ) : null}
+      {Game ? (
         <Game
           key={at}
           page={page}
@@ -268,10 +309,12 @@ export function PlaySession({
           if (pages && !result) setLeaving(true)
           else onLeave()
         }}
-        centre={page ? <Progress pages={pages} at={at} answers={answers.current} /> : null}
+        centre={
+          page && !resting ? <Progress pages={pages} at={at} answers={answers.current} /> : null
+        }
       />
 
-      {page && page.step !== 'card' ? (
+      {page && page.step !== 'card' && !resting ? (
         <section className={cx(child.card, child.caption)} aria-live="polite">
           <span className={child.kicker}>
             {page.step === 'learn'
@@ -346,7 +389,7 @@ export function PlaySession({
       ) : null}
 
       <BottomBar
-        onSayAgain={page ? voice.replay : null}
+        onSayAgain={page && !resting ? voice.replay : null}
         next={
           page?.step === 'story' || page?.step === 'card' ? (
             <button

@@ -230,7 +230,7 @@ export function LessonsView() {
                 <TableColumn>Level</TableColumn>
                 <TableColumn>Game</TableColumn>
                 <TableColumn>Versions</TableColumn>
-                <TableColumn>Steps</TableColumn>
+                <TableColumn>Each play</TableColumn>
                 <TableColumn>Status</TableColumn>
                 <TableColumn>Published</TableColumn>
               </TableHeader>
@@ -249,7 +249,7 @@ export function LessonsView() {
                       <LevelTag id={lesson.level} />
                     </TableCell>
                     <TableCell>
-                      <GameTag player={lesson.player} />
+                      <GameTag player={lesson.player} tag={lesson.tag} />
                     </TableCell>
                     <TableCell>
                       <span className="flex flex-col">
@@ -266,7 +266,11 @@ export function LessonsView() {
                         ) : null}
                       </span>
                     </TableCell>
-                    <TableCell>{lesson.step_count}</TableCell>
+                    <TableCell>
+                      {lesson.per_play < lesson.step_count
+                        ? `${lesson.per_play} of ${lesson.step_count}`
+                        : lesson.step_count}
+                    </TableCell>
                     <TableCell>
                       <StatusChip value={lesson.status} />
                     </TableCell>

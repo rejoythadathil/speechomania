@@ -1,0 +1,7 @@
+[
+  {"path": "new-spirite/sheet-q.png", "names": ["happy", "sad", "angry", "scared", "surprised", "crying", "laughing", "nervous", "thinking", "sleepy", "sick", "hot"], "grid": [4, 3], "unring": 7},
+  {"path": "new-spirite/sheet-r.png", "names": ["tired", "peek", "cold", "cow", "sheep", "pig", "stop-hand", "up", "down", "basket", "nest", "water"], "grid": [4, 3], "unring": 7},
+  {"path": "new-spirite/sheet-s.png", "names": ["spoon", "cup", "plate", "comb", "toothbrush", "soap", "tissue", "pencil", "crayon", "scissors", "key", "knife"], "grid": [4, 3], "unring": 7},
+  {"path": "new-spirite/sheet-t.png", "names": ["shoe", "socks", "hat", "coat", "shorts", "bag", "bed", "sofa", "sink", "bath", "wastebasket", "ladder"], "grid": [4, 3], "unring": 7},
+  {"path": "new-spirite/sheet-v.png", "names": ["door", "door-open"], "grid": [2, 1], "unring": 7}
+]

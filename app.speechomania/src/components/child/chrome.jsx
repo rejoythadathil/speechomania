@@ -6,12 +6,12 @@ export function TopBar({ centre, onBack, onGrownUp, onBreak, muted, onMute }) {
   return (
     <header className={cx(styles.chrome, styles.top)}>
       {onBack ? (
-        <button type="button" className={styles.pill} onClick={onBack}>
+        <button type="button" className={styles.pill} onClick={onBack} aria-label="Back">
           <BackIcon size={30} />
           <span className={styles.label}>Back</span>
         </button>
       ) : null}
-      <button type="button" className={styles.pill} onClick={onGrownUp}>
+      <button type="button" className={styles.pill} onClick={onGrownUp} aria-label="Parent">
         <GrownUpIcon size={34} />
         <span className={styles.label}>Parent</span>
       </button>
@@ -27,7 +27,7 @@ export function TopBar({ centre, onBack, onGrownUp, onBreak, muted, onMute }) {
       >
         {muted ? <MuteIcon size={34} /> : <SayAgainIcon size={34} />}
       </button>
-      <button type="button" className={styles.pill} onClick={onBreak}>
+      <button type="button" className={styles.pill} onClick={onBreak} aria-label="Break">
         <BreakIcon size={30} />
         <span className={styles.label}>Break</span>
       </button>
@@ -39,7 +39,12 @@ export function BottomBar({ onSayAgain, next }) {
   return (
     <footer className={cx(styles.chrome, styles.bottom)}>
       {onSayAgain ? (
-        <button type="button" className={styles.pill} onClick={onSayAgain}>
+        <button
+          type="button"
+          className={styles.pill}
+          onClick={onSayAgain}
+          aria-label="Say it again"
+        >
           <SayAgainIcon size={34} />
           <span className={styles.label}>Say it again</span>
         </button>

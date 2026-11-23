@@ -1,9 +1,9 @@
 import sys, json
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 from scipy import ndimage
 
-def slice_sheet(path, names, out_dir, gap=40, tol=28, size=512, min_area=1500, grid=None):
+def slice_sheet(path, names, out_dir, gap=40, tol=28, size=512, min_area=1500, grid=None, boxes=None, split=()):
     im = Image.open(path).convert('RGB')
     a = np.asarray(im).astype(int)
     white = (a.min(axis=2) > 255 - tol)
@@ -14,8 +14,8 @@ def slice_sheet(path, names, out_dir, gap=40, tol=28, size=512, min_area=1500, g
     bg = np.isin(labels, edge[edge > 0])
     fg = ~bg
     fg = ndimage.binary_opening(fg, iterations=2)
-    if grid:
-        return slice_grid(path, a, fg, names, out_dir, grid, size, min_area)
+    if grid or boxes:
+        return slice_grid(path, a, fg, names, out_dir, grid, size, min_area, boxes, split)
     grouped, n = ndimage.label(ndimage.binary_dilation(fg, iterations=gap))
     boxes = []
     for i, sl in enumerate(ndimage.find_objects(grouped), 1):
@@ -57,17 +57,56 @@ def slice_sheet(path, names, out_dir, gap=40, tol=28, size=512, min_area=1500, g
     print(json.dumps(report))
     return True
 
-def slice_grid(path, a, fg, names, out_dir, grid, size, min_area):
-    cols, rows = grid
+def unring(path, k, size=512):
+    a = np.asarray(Image.open(path).convert('RGBA')).astype(int)
+    rgb, alpha = a[..., :3], a[..., 3]
+    outside = ndimage.binary_dilation(alpha < 20, iterations=k)
+    light = (rgb.min(axis=2) > 190) & ((rgb.max(axis=2) - rgb.min(axis=2)) < 35)
+    labels, _ = ndimage.label(light | outside)
+    touching = np.unique(labels[outside])
+    gone = np.isin(labels, touching[touching > 0])
+    gone = ndimage.binary_dilation(gone, iterations=1) & (light | outside | (alpha < 255))
+    a[..., 3] = np.where(gone, 0, alpha)
+    bits, count = ndimage.label(a[..., 3] > 20)
+    if count > 1:
+        areas = ndimage.sum(np.ones_like(bits), bits, range(1, count + 1))
+        a[..., 3] = np.where(np.isin(bits, [i + 1 for i, s in enumerate(areas) if s < areas.max() * 0.01]), 0, a[..., 3])
+    sprite = Image.fromarray(a.astype(np.uint8))
+    sprite = sprite.crop(sprite.getbbox())
+    side = max(sprite.size)
+    square = Image.new('RGBA', (int(side * 1.08), int(side * 1.08)), (0, 0, 0, 0))
+    square.paste(sprite, ((square.width - sprite.width) // 2, (square.height - sprite.height) // 2))
+    square.resize((size, size), Image.LANCZOS).save(path, 'WEBP', quality=86, method=6)
+
+def slice_grid(path, a, fg, names, out_dir, grid, size, min_area, boxes=None, split=()):
     h, w = fg.shape
     alpha = np.clip(ndimage.gaussian_filter(np.where(fg, 255.0, 0.0), 0.8), 0, 255).astype(np.uint8)
     rgba = np.dstack([a.astype(np.uint8), alpha])
     empty = []
     for index, name in enumerate(names):
-        r, c = divmod(index, cols)
-        y0, y1 = r * h // rows, (r + 1) * h // rows
-        x0, x1 = c * w // cols, (c + 1) * w // cols
+        inside = None
+        if boxes and isinstance(boxes[index][0], list):
+            xs_, ys_ = [pt[0] for pt in boxes[index]], [pt[1] for pt in boxes[index]]
+            x0, y0, x1, y1 = min(xs_), min(ys_), max(xs_), max(ys_)
+            poly = Image.new('L', (x1 - x0, y1 - y0), 0)
+            ImageDraw.Draw(poly).polygon([(x - x0, y - y0) for x, y in boxes[index]], fill=1)
+            inside = np.asarray(poly).astype(bool)
+        elif boxes:
+            x0, y0, x1, y1 = boxes[index]
+        else:
+            r, c = divmod(index, grid[0])
+            y0, y1 = r * h // grid[1], (r + 1) * h // grid[1]
+            x0, x1 = c * w // grid[0], (c + 1) * w // grid[0]
         cell = fg[y0:y1, x0:x1]
+        if inside is not None:
+            cell = cell & inside
+        if index in split:
+            px = a[y0:y1, x0:x1]
+            drawn = (px.max(axis=2) < 110) & cell
+            parts, count = ndimage.label(drawn)
+            areas = ndimage.sum(drawn, parts, range(1, count + 1))
+            body = np.isin(parts, [i + 1 for i, s in enumerate(areas) if s >= areas.max() * 0.3])
+            cell = ndimage.binary_dilation(ndimage.binary_fill_holes(ndimage.binary_closing(body, iterations=1)), iterations=1) & cell
         labels, n = ndimage.label(cell)
         sizes = ndimage.sum(cell, labels, range(1, n + 1)) if n else []
         border = set(np.unique(np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]]))) - {0}
@@ -86,11 +125,16 @@ def slice_grid(path, a, fg, names, out_dir, grid, size, min_area):
         square = Image.new('RGBA', (int(side * 1.08), int(side * 1.08)), (0, 0, 0, 0))
         square.paste(sprite, ((square.width - sprite.width) // 2, (square.height - sprite.height) // 2))
         square.resize((size, size), Image.LANCZOS).save(f'{out_dir}/{name}.webp', 'WEBP', quality=86, method=6)
-    print(json.dumps({'sheet': path.split('/')[-1], 'grid': grid, 'empty_cells': empty}))
+    print(json.dumps({'sheet': path.split('/')[-1], 'grid': grid or 'boxes', 'empty_cells': empty}))
     return not empty
 
 if __name__ == '__main__':
     plan = json.load(open(sys.argv[1]))
     out = sys.argv[2]
-    ok = all([slice_sheet(p['path'], p['names'], out, gap=p.get('gap', 40), grid=p.get('grid')) for p in plan])
+    ok = all([slice_sheet(p['path'], p['names'], out, gap=p.get('gap', 40), grid=p.get('grid'), boxes=p.get('boxes'), split=p.get('split', ())) for p in plan])
+    for p in plan:
+        if p.get('unring'):
+            for name in p['names']:
+                if name:
+                    unring(f'{out}/{name}.webp', p['unring'])
     sys.exit(0 if ok else 1)

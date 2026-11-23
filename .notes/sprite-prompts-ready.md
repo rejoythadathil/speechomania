@@ -1,8 +1,10 @@
 # Ready-to-use sprite prompts
 
+**Replaced on 2026-11-22.** Sheets O and P were generated and are in use. Sheets B, I and A were never generated; their pictures are now in `.notes/images-to-generate.md` (Sheets Q to V), with feelings drawn as the boy instead of round yellow faces. Generate from that file, not this one.
+
 Copy one prompt block into the image generator as it is. Each block already includes the style, so all sheets match. Generate in this order: O and P first, then B, I and A. L, M and N are optional.
 
-Save each sheet as `images-generated/new-spirit/sheet-<letter>.png` (for example `sheet-o.png`). The names under each prompt are what each picture becomes, in grid order; they are for slicing, not for the generator.
+Save each sheet as `images-generated/new-spirite/sheet-<letter>.png` (for example `sheet-o.png`). The names under each prompt are what each picture becomes, in grid order; they are for slicing, not for the generator.
 
 ## Sheet O: Girl actions
 Needed now: unlocks the He and she and They lessons.

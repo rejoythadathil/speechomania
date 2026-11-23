@@ -34,5 +34,6 @@ export const lessonsRoute = new Hono()
     controller.check
   )
   .post('/:id/publish', allow('admin'), validate({ params: idParams }), controller.publish)
+  .post('/:id/voice', allow('admin'), validate({ params: idParams }), controller.voice)
   .post('/:id/draft', allow('admin'), validate({ params: idParams }), controller.draft)
   .delete('/:id', allow('admin'), validate({ params: idParams }), controller.remove)

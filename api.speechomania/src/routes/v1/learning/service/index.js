@@ -121,13 +121,15 @@ export async function getLearner(user, id) {
     badges: games
       .filter((game) => game.best !== null && game.best >= badgeStars(game.max_stars))
       .map(({ slug, title, player, cover }) => ({ slug, title, player, cover })),
-    trophies: games.map(({ slug, title, player, cover, best, max_stars }) => ({
-      slug,
-      title,
-      player,
-      cover,
-      prize: prizeOf(best, max_stars)
-    })),
+    trophies: games
+      .map(({ slug, title, player, cover, best, max_stars }) => ({
+        slug,
+        title,
+        player,
+        cover,
+        prize: prizeOf(best, max_stars)
+      }))
+      .filter((game) => game.prize),
     friends: friendsFor(_sum.stars ?? 0)
   }
 }
@@ -185,6 +187,7 @@ export async function listShelf(user, id, window) {
         ...lesson,
         player: gamePlayer(content),
         level: content.level ?? null,
+        tag: content.tag ?? null,
         contrast: content.contrast ?? null,
         step_count: content.steps?.length ?? 0,
         cover: coverOf(content),

@@ -3,6 +3,7 @@ import {
   RiArrowDownLine,
   RiArrowLeftLine,
   RiArrowUpLine,
+  RiCloseLine,
   RiDeleteBinLine,
   RiGitBranchLine,
   RiPlayLine
@@ -20,6 +21,7 @@ import { FormAlert } from '@/components/shared/form-alert.jsx'
 import { Modal } from '@/components/shared/modal.jsx'
 import { ListFooter } from '@/components/shared/list-footer.jsx'
 import { Panel } from '@/components/shared/panel.jsx'
+import { PicturePicker } from '@/components/shared/picture-picker.jsx'
 import { SelectField } from '@/components/shared/select-field.jsx'
 import { StatusChip } from '@/components/shared/status-chip.jsx'
 import { useToast } from '@/components/shared/toast.jsx'
@@ -27,6 +29,7 @@ import { useAuth } from '@/hooks/use-auth.jsx'
 import { useResource } from '@/hooks/use-resource.js'
 import { api } from '@/services/api.js'
 import { formatDate, formatDateTime } from '@/utils/format'
+import { Art } from '@/components/child/art.jsx'
 import { LessonPreview } from '@/views/child/preview-player.jsx'
 import { GamePanel, LinesPanel, StepsPanel } from './lesson-content.jsx'
 
@@ -41,18 +44,83 @@ function StepFacts({ step }) {
   return <p className="text-body-2-regular text-text-tertiary">{facts.join(' · ')}</p>
 }
 
+const SHOW_OPTIONS = [5, 10, 15, 20, 25, 30, 40]
+
+const wordsOf = (text) =>
+  text
+    .split(',')
+    .map((word) => word.trim())
+    .filter(Boolean)
+    .slice(0, 4)
+
+function CardFields({ step, onChange }) {
+  const [words, setWords] = useState((step.keys ?? []).join(', '))
+  const art = step.art ?? []
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {art.map((name, index) => (
+          <span
+            key={`${name}-${index}`}
+            className="flex items-center gap-1 rounded-lg border border-[var(--line)] py-0.5 pr-0.5 pl-1.5"
+          >
+            <Art name={name} className="size-8" />
+            <span className="text-caption-1-medium text-text-secondary">{name}</span>
+            <IconButton
+              size="small"
+              icon={RiCloseLine}
+              aria-label={`Remove the picture ${name}`}
+              onClick={() => onChange({ art: art.filter((_, at) => at !== index) })}
+            />
+          </span>
+        ))}
+        {art.length < 3 ? (
+          <PicturePicker onPick={(name) => onChange({ art: [...art, name] })} />
+        ) : null}
+      </div>
+      <Input
+        label="Highlighted words"
+        hint="Up to four words from the sentence, separated by commas"
+        value={words}
+        onChange={(text) => {
+          setWords(text)
+          const keys = wordsOf(text)
+          onChange({ keys, colours: (step.colours ?? []).slice(0, keys.length) })
+        }}
+        size="small"
+      />
+    </div>
+  )
+}
+
 function StepEditor({ lesson, onSaved }) {
+  const notify = useToast()
+  const player = lesson.content.player ?? 'story'
+  const cards = player === 'cards'
   const [title, setTitle] = useState(lesson.title)
+  const [rounds, setRounds] = useState(lesson.content.rounds ?? null)
   const [steps, setSteps] = useState(() =>
     lesson.content.steps.map((step) => ({ key: crypto.randomUUID(), ...step }))
   )
   const [pending, setPending] = useState(false)
   const [error, setError] = useState(null)
 
-  const fixedSteps = (lesson.content.player ?? 'story') !== 'story'
+  const canAdd = player === 'story' || cards
+  const pool = steps.filter((step) => step.text.trim()).length
+  const showOptions = [
+    ...SHOW_OPTIONS.filter((count) => count < pool).map((count) => ({
+      id: String(count),
+      label: `${count} each play`
+    })),
+    { id: 'all', label: `All ${pool} each play` }
+  ]
+  const change = (key, patch) =>
+    setSteps((current) => current.map((step) => (step.key === key ? { ...step, ...patch } : step)))
   const update = (key, text) =>
     setSteps((current) =>
-      current.map((step) => (step.key === key ? { ...step, text, audio: null } : step))
+      current.map(({ audio, ...step }) =>
+        step.key === key ? { ...step, text } : { ...step, ...(audio ? { audio } : {}) }
+      )
     )
   const remove = (key) => setSteps((current) => current.filter((step) => step.key !== key))
   const move = (index, delta) =>
@@ -64,14 +132,52 @@ function StepEditor({ lesson, onSaved }) {
     })
 
   async function save() {
+    const kept = steps.filter((step) => step.text.trim())
+    const bare = cards ? kept.findIndex((step) => !step.art?.length) : -1
+    if (bare >= 0) {
+      setError(new Error(`Card ${bare + 1} needs a picture`))
+      return null
+    }
     setPending(true)
     setError(null)
     try {
+      const { rounds: _rounds, ...rest } = lesson.content
       const content = {
-        ...lesson.content,
-        steps: steps.filter((step) => step.text.trim()).map(({ key: _key, ...step }) => step)
+        ...rest,
+        ...(rounds && rounds < kept.length ? { rounds } : {}),
+        steps: kept.map(({ key: _key, ...step }) => step)
       }
-      onSaved(await api(`/lessons/${lesson.id}`, { method: 'PATCH', body: { title, content } }))
+      const saved = await api(`/lessons/${lesson.id}`, {
+        method: 'PATCH',
+        body: { title, content }
+      })
+      onSaved(saved)
+      return saved
+    } catch (caught) {
+      setError(caught)
+      return null
+    } finally {
+      setPending(false)
+    }
+  }
+
+  async function recordVoice() {
+    if (!(await save())) return
+    setPending(true)
+    try {
+      const voiced = await api(`/lessons/${lesson.id}/voice`, { method: 'POST' })
+      const audioOf = new Map(voiced.content.steps.map((step) => [step.text, step.audio]))
+      setSteps((current) =>
+        current.map((step) =>
+          audioOf.get(step.text) ? { ...step, audio: audioOf.get(step.text) } : step
+        )
+      )
+      onSaved(voiced)
+      notify(
+        voiced.voiced.lines
+          ? `Voice recorded for ${voiced.voiced.lines} ${voiced.voiced.lines === 1 ? 'line' : 'lines'}`
+          : 'Every line already has voice'
+      )
     } catch (caught) {
       setError(caught)
     } finally {
@@ -82,31 +188,52 @@ function StepEditor({ lesson, onSaved }) {
   return (
     <Panel
       title="Edit draft"
-      description="Each step is one page of the lesson. Keep the language short and concrete."
+      description={
+        cards
+          ? 'Every card is kept in the pool. Each play shows the number you choose, picked fresh every time.'
+          : 'Each step is one page of the lesson. Keep the language short and concrete.'
+      }
       actions={
-        <Button onClick={save} disabled={pending}>
-          {pending ? 'Saving…' : 'Save draft'}
-        </Button>
+        <span className="flex gap-2">
+          <Button variant="secondary" onClick={recordVoice} disabled={pending}>
+            Record voice
+          </Button>
+          <Button onClick={save} disabled={pending}>
+            {pending ? 'Saving…' : 'Save draft'}
+          </Button>
+        </span>
       }
     >
       <div className="flex flex-col gap-3">
         <FormAlert error={error} />
         <Input label="Title" value={title} onChange={setTitle} isRequired />
+        {player === 'story' ? null : (
+          <SelectField
+            label="Each play shows"
+            className="flex w-60 flex-col gap-1"
+            options={showOptions}
+            value={rounds && rounds < pool ? String(rounds) : 'all'}
+            onChange={(value) => setRounds(value === 'all' ? null : Number(value))}
+          />
+        )}
         <ol className="flex flex-col gap-2">
           {steps.map((step, index) => (
             <li key={step.key} className="inset flex gap-3 p-2">
               <span className="mt-1 inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-accent-50 text-caption-1-semibold text-accent-700">
                 {index + 1}
               </span>
-              <div className="flex flex-1 flex-col gap-1">
+              <div className="flex flex-1 flex-col gap-2">
                 <Textarea
-                  aria-label={`Step ${index + 1}`}
+                  aria-label={`${cards ? 'Card' : 'Step'} ${index + 1}`}
                   value={step.text}
                   onChange={(text) => update(step.key, text)}
                   rows={2}
                   autoResize
                   maxLength={500}
                 />
+                {cards ? (
+                  <CardFields step={step} onChange={(patch) => change(step.key, patch)} />
+                ) : null}
                 <StepFacts step={step} />
               </div>
               <div className="flex flex-col gap-1">
@@ -134,18 +261,21 @@ function StepEditor({ lesson, onSaved }) {
             </li>
           ))}
         </ol>
-        {fixedSteps ? null : (
+        {canAdd ? (
           <Button
             variant="secondary"
             leadingIcon={RiAddLine}
             className="self-start"
             onClick={() =>
-              setSteps((current) => [...current, { key: crypto.randomUUID(), text: '' }])
+              setSteps((current) => [
+                ...current,
+                { key: crypto.randomUUID(), text: '', ...(cards ? { art: [], keys: [] } : {}) }
+              ])
             }
           >
-            Add step
+            {cards ? 'Add card' : 'Add step'}
           </Button>
-        )}
+        ) : null}
       </div>
     </Panel>
   )
@@ -260,13 +390,19 @@ function FlowPanel({ lesson, editable, onChanged }) {
         {player === 'cards' ? (
           <li>
             <span className="text-body-2-medium text-text-primary">Flashcards</span> ·{' '}
-            {lesson.cards.length} cards, each flips and is read aloud. The game is the part 2
-            lesson.
+            {lesson.per_play < lesson.cards.length
+              ? `${lesson.per_play} of ${lesson.cards.length} cards each play, picked fresh every time`
+              : `${lesson.cards.length} cards`}
+            , each flips and is read aloud. The game is the next part.
           </li>
         ) : (
           <li>
             <span className="text-body-2-medium text-text-primary">{story ? 'Story' : 'Game'}</span>{' '}
-            · {lesson.step_count} {story ? 'pages' : 'activities'}
+            ·{' '}
+            {story || lesson.per_play >= lesson.step_count
+              ? `${lesson.step_count} ${story ? 'pages' : 'activities'}`
+              : `${lesson.per_play} of ${lesson.step_count} activities each play`}
+            {story ? '' : ', in sets of 5 with a short break between sets'}
           </li>
         )}
         <li className={player === 'cards' ? 'hidden' : 'flex flex-col gap-2'}>

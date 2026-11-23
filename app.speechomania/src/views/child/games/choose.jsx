@@ -6,7 +6,7 @@ import { useRound } from './use-round.js'
 import styles from './games.module.css'
 
 export function ChooseGame(props) {
-  const { step } = props
+  const { step, page } = props
   const round = useRound(props)
   const [picked, setPicked] = useState(null)
   const { shaking, shake, stop } = useShake()
@@ -14,7 +14,7 @@ export function ChooseGame(props) {
   return (
     <div className={styles.stage}>
       <div className={styles.column}>
-        <div className={styles.versus}>
+        <div className={cx(styles.versus, step.choices.length > 3 && styles.many)}>
           {step.choices.map((choice, index) => (
             <button
               key={choice}
@@ -38,7 +38,7 @@ export function ChooseGame(props) {
               }}
             >
               <Art name={step.art[index]} className={styles.versusArt} />
-              <span>{choice}</span>
+              {page.labels === false ? null : <span>{choice}</span>}
             </button>
           ))}
         </div>

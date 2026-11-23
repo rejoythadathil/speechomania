@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { media } from '../../storage/service/index.js'
-import { audioKey, speechFor, voiceReady } from '../service/index.js'
+import { audioKey, speechFor, storedSpeech, voiceReady } from '../service/index.js'
 import { audioBase, lessonLines, wordTimings } from '../utils/index.js'
 
 const alignment = (text, step = 0.1) => ({
@@ -46,6 +46,18 @@ describe.if(voiceReady)('speechFor', () => {
     await media.write(key, 'mp3')
     await media.write(`${base}.json`, JSON.stringify({ duration: 1, words: [] }))
     expect(await speechFor(text)).toEqual({ key, duration: 1, words: [], generated: false })
+    await media.delete(key)
+    await media.delete(`${base}.json`)
+  })
+
+  test('storedSpeech finds a stored recording and never generates a missing one', async () => {
+    const text = `Test line ${crypto.randomUUID()}`
+    const key = audioKey(text)
+    const base = key.replace(/\.mp3$/, '')
+    expect(await storedSpeech(text)).toBeNull()
+    await media.write(key, 'mp3')
+    await media.write(`${base}.json`, JSON.stringify({ duration: 2, words: [] }))
+    expect(await storedSpeech(text)).toEqual({ key, duration: 2, words: [] })
     await media.delete(key)
     await media.delete(`${base}.json`)
   })

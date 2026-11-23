@@ -14,8 +14,11 @@ export const noSteps = () => new HttpError(400, 'Add at least one step before pu
 export const tooFewActivities = (count, minimum) =>
   new HttpError(
     400,
-    `A lesson needs at least ${minimum} activities to publish; this one has ${count}`
+    `A lesson needs at least ${minimum} activities in each play to publish; this one shows ${count}`
   )
+
+export const voiceUnavailable = () =>
+  new HttpError(503, 'Voice recording is not set up on this server')
 
 export const onlyCurrentChecks = () =>
   new HttpError(409, 'Only the draft or the published version can change its check')

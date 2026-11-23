@@ -25,12 +25,19 @@ export function roundsLabel(content) {
   const player = playerOf(content)
   const steps = content.steps?.length ?? 0
   if (player === 'story') return `${steps} pages`
-  if (player === 'cards') return `${steps} flashcards`
-  if (player === 'pick') return `${steps} questions`
+  if (player === 'cards' || player === 'pick') {
+    const shown = Math.min(content.rounds ?? steps, steps)
+    const unit = player === 'cards' ? 'flashcards' : 'questions'
+    return shown < steps
+      ? `${shown} ${unit} each play, picked from ${steps} (${steps - shown} spare)`
+      : `${steps} ${unit}`
+  }
   const pool = player === 'match' ? Math.floor(steps / PAIRS_PER_BOARD) : steps
   const rounds = Math.min(content.rounds ?? pool, pool)
   const unit = player === 'match' ? 'boards' : 'rounds'
-  return rounds < pool ? `${rounds} ${unit} picked from ${pool}` : `${rounds} ${unit}`
+  return rounds < pool
+    ? `${rounds} ${unit} each play, picked from ${pool} (${pool - rounds} spare)`
+    : `${rounds} ${unit}`
 }
 
 function Voice({ line }) {
@@ -233,7 +240,9 @@ export function GamePanel({ lesson }) {
           />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <span className="text-title-3-semibold text-text-primary">{scene.tag}</span>
+          <span className="text-title-3-semibold text-text-primary">
+            {lesson.content.tag ?? scene.tag}
+          </span>
           {lesson.content.contrast ? (
             <p className="text-body-2-regular text-text-secondary">
               Focus word: {lesson.content.contrast}
@@ -347,13 +356,13 @@ export function StepsPanel({ lesson }) {
   )
 }
 
-export function GameTag({ player, cover }) {
+export function GameTag({ player, cover, tag }) {
   return (
     <span className="flex shrink-0 items-center gap-2">
       <span className="w-14 shrink-0">
         <GameThumb player={player ?? 'story'} cover={cover} />
       </span>
-      <span className="text-body-2-medium text-text-secondary">{sceneFor(player).tag}</span>
+      <span className="text-body-2-medium text-text-secondary">{tag ?? sceneFor(player).tag}</span>
     </span>
   )
 }

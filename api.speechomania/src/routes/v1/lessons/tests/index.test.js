@@ -1,7 +1,10 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 import { db } from '../../../../../common-service/db/service/index.js'
 import { call, makePublishedLesson, makeUser } from '../../../../../test/helpers.js'
-import { learnCards, versionSummary } from '../utils/index.js'
+import { editedInAdmin } from '../service/index.js'
+import { learnCards, perPlay, versionSummary } from '../utils/index.js'
+import { audioKey, voiceReady } from '../../../../../common-service/voice/service/index.js'
+import { media } from '../../../../../common-service/storage/service/index.js'
 
 let admin, mentor, parent
 
@@ -26,15 +29,111 @@ describe('lessons', () => {
     expect((await call(admin, 'POST', `/lessons/${draft.body.id}/publish`)).status).toBe(400)
   })
 
-  test('a lesson needs at least 15 activities to publish', async () => {
-    const draft = await call(admin, 'POST', '/lessons', {
+  test('a lesson needs at least 5 activities to publish', async () => {
+    const steps = (length) => Array.from({ length }, (_, index) => ({ text: `Page ${index}` }))
+    const short = await call(admin, 'POST', '/lessons', {
       slug: `short-${crypto.randomUUID().slice(0, 8)}`,
       title: 'Short',
-      content: { steps: Array.from({ length: 14 }, (_, index) => ({ text: `Page ${index}` })) }
+      content: { steps: steps(4) }
     })
-    const refused = await call(admin, 'POST', `/lessons/${draft.body.id}/publish`)
+    const refused = await call(admin, 'POST', `/lessons/${short.body.id}/publish`)
     expect(refused.status).toBe(400)
-    expect(refused.body.error.message).toContain('at least 15 activities')
+    expect(refused.body.error.message).toContain('at least 5 activities')
+    const twelve = await call(admin, 'POST', '/lessons', {
+      slug: `twelve-${crypto.randomUUID().slice(0, 8)}`,
+      title: 'Twelve',
+      content: { steps: steps(12) }
+    })
+    expect((await call(admin, 'POST', `/lessons/${twelve.body.id}/publish`)).status).toBe(200)
+  })
+
+  test('a Which one? game takes up to six pictures, in a fixed order and without labels', async () => {
+    const step = (count) => ({
+      text: 'Find the red one.',
+      choices: ['red', 'yellow', 'green', 'blue', 'orange', 'pink', 'grey'].slice(0, count),
+      art: ['apple', 'banana', 'frog', 'car', 'blowfish', 'pig', 'elephant'].slice(0, count),
+      answer: 'red'
+    })
+    const create = (count) =>
+      call(admin, 'POST', '/lessons', {
+        slug: `colours-${crypto.randomUUID().slice(0, 8)}`,
+        title: 'Colours',
+        content: { player: 'choose', ordered: true, labels: false, steps: [step(count)] }
+      })
+    const six = await create(6)
+    expect(six.status).toBe(201)
+    expect(six.body.content).toMatchObject({ ordered: true, labels: false })
+    expect((await create(7)).status).toBe(400)
+  })
+
+  test('a lesson keeps a pool and shows a set number of activities in each play', async () => {
+    const steps = Array.from({ length: 20 }, (_, index) => ({ text: `Card ${index}` }))
+    expect(perPlay({ player: 'cards', steps })).toBe(20)
+    expect(perPlay({ player: 'cards', rounds: 5, steps })).toBe(5)
+    expect(perPlay({ player: 'cards', rounds: 40, steps })).toBe(20)
+    expect(perPlay({ player: 'match', rounds: 2, steps })).toBe(6)
+    expect(perPlay({ player: 'story', rounds: 2, steps })).toBe(20)
+    const cards = steps.map((step) => ({ ...step, art: ['apple'] }))
+    const make = (rounds) =>
+      call(admin, 'POST', '/lessons', {
+        slug: `pool-${crypto.randomUUID().slice(0, 8)}`,
+        title: 'Pool',
+        content: { player: 'cards', rounds, steps: cards }
+      })
+    const five = await make(5)
+    expect(five.body).toMatchObject({ step_count: 20, per_play: 5 })
+    expect((await call(admin, 'POST', `/lessons/${five.body.id}/publish`)).status).toBe(200)
+    const four = await make(4)
+    expect((await call(admin, 'POST', `/lessons/${four.body.id}/publish`)).status).toBe(400)
+  })
+
+  test('only admins record voice, only into a draft, reusing stored lines', async () => {
+    const lesson = await makePublishedLesson(admin)
+    expect((await call(mentor, 'POST', `/lessons/${lesson.id}/voice`)).status).toBe(403)
+    if (!voiceReady) return
+    expect((await call(admin, 'POST', `/lessons/${lesson.id}/voice`)).status).toBe(409)
+    const text = `Voice test ${crypto.randomUUID()}`
+    const base = audioKey(text).replace(/\.mp3$/, '')
+    await media.write(`${base}.mp3`, 'mp3')
+    await media.write(`${base}.json`, JSON.stringify({ duration: 1, words: [] }))
+    const draft = await call(admin, 'POST', '/lessons', {
+      slug: `voice-${crypto.randomUUID().slice(0, 8)}`,
+      title: 'Voice',
+      content: { steps: [{ text }] }
+    })
+    const voiced = await call(admin, 'POST', `/lessons/${draft.body.id}/voice`)
+    expect(voiced.status).toBe(200)
+    expect(voiced.body.voiced).toEqual({ lines: 1, generated: 0 })
+    expect(voiced.body.content.steps[0].audio.key).toBe(`${base}.mp3`)
+    await media.delete(`${base}.mp3`)
+    await media.delete(`${base}.json`)
+  })
+
+  test('a draft opened with signed voice and picture links saves back without them', async () => {
+    const audio = { key: 'audio/x.mp3', duration: 1, words: [] }
+    const draft = await call(admin, 'POST', '/lessons', {
+      slug: `signed-${crypto.randomUUID().slice(0, 8)}`,
+      title: 'Signed',
+      content: { lines: { intro: { text: 'Hi', audio } }, steps: [{ text: 'One', audio }] }
+    })
+    const signed = {
+      lines: { intro: { text: 'Hi', audio: { ...audio, url: 'https://media/x.mp3?sig' } } },
+      steps: [{ text: 'One', audio: { ...audio, url: 'https://media/x.mp3?sig' }, image_url: 'u' }]
+    }
+    const saved = await call(admin, 'PATCH', `/lessons/${draft.body.id}`, { content: signed })
+    expect(saved.status).toBe(200)
+    const row = await db.lessons.findUnique({ where: { id: draft.body.id } })
+    expect(row.content.steps[0]).toEqual({ text: 'One', audio })
+    expect(row.content.lines.intro.audio).toEqual(audio)
+  })
+
+  test('a lesson edited in the admin screens is marked so the lesson sync keeps it', async () => {
+    const lesson = await makePublishedLesson(admin)
+    expect(await editedInAdmin(lesson.slug)).toBe(false)
+    const draft = await call(admin, 'POST', `/lessons/${lesson.id}/draft`)
+    expect(await editedInAdmin(lesson.slug)).toBe(false)
+    await call(admin, 'PATCH', `/lessons/${draft.body.id}`, { title: 'Chitra’s version' })
+    expect(await editedInAdmin(lesson.slug)).toBe(true)
   })
 
   test('publishing a new version supersedes the old one', async () => {

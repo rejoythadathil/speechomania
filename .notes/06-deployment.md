@@ -75,8 +75,12 @@ sudo docker compose run --rm --no-deps -T -v $PWD/seeds:/app/seeds:ro api-1 sh -
 ```
 Removal runs as the database owner because the app role cannot delete audit entries.
 
-**Lesson audio on prod.** Audio is stored by a hash of the text and voice (`audio/<hash>.mp3` plus `.json` word timings), so clips recorded locally can be reused on prod at no ElevenLabs cost:
-1. Export the local bucket's `audio/` folder (not `lessons/`, which holds old photos) and `aws s3 sync` it into the prod bucket on the server.
-2. On the server: `sudo docker compose run --rm --no-deps -T -e ELEVENLABS_API_KEY=reuse-only api-1 bun scripts/lesson-audio.js <slug>`. The placeholder key makes the run fail instead of paying if a clip is missing. It creates a draft with the audio attached.
-3. Publish the draft (Lessons → Publish, or `publishLesson`). Assignments are by slug, so children keep their lessons and progress.
-Done for all 13 lessons on 2026-11-04 (v2 on prod).
+**Lesson audio on prod.** Audio is stored by a hash of the text and voice (`audio/<hash>.mp3` plus `.json` word timings), so clips recorded locally are reused on prod at no ElevenLabs cost. The server's `ELEVENLABS_VOICE_ID` and `ELEVENLABS_MODEL` must match the machine that recorded them (default Jessica, `cgSgspJ2msm6clMCkdW9`, `eleven_multilingual_v2`); `grep ELEVENLABS .env` on the server shows any override.
+1. Locally, after `bun run audio <slug>` for every changed lesson: `cd api.speechomania && bun run audio:export ~/voice` (every recording the published lessons use, plus `manifest.json` naming the voice).
+2. Copy it up: `rsync -a ~/voice/ <server>:/opt/speechomania/voice/`.
+3. On the server, from `/opt/speechomania/api.speechomania`:
+```bash
+sudo docker compose run --rm --no-deps -T -v /opt/speechomania/voice:/voice:ro api-1 bun scripts/audio-import.js /voice
+sudo docker compose run --rm --no-deps -T -v $PWD/seeds:/app/seeds:ro -e ELEVENLABS_API_KEY=reuse-only api-1 bun scripts/lessons-sync.js --voice --publish --assign
+```
+The import refuses to run when the manifest's voice differs from the server's and skips files already in the bucket. `--voice` attaches stored recordings to every line missing them and never calls ElevenLabs (also on lessons the sync keeps because they were edited in the admin screens); a line with no recording stays on the device voice and the sync prints `(N lines without voice)`. Assignments are by slug, so children keep their lessons and progress. Assessments copy their questions when saved, so re-save any assessment built before the voice arrived.

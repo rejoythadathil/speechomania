@@ -505,6 +505,7 @@ describe('badges', () => {
     const before = (await call(parent, 'GET', `/learning/children/${child.id}`)).body
     expect(before).toMatchObject({ games_total: 1, games_played: 1 })
     expect(before.badges).toEqual([])
+    expect(before.trophies.every((game) => game.prize)).toBe(true)
     const started = await call(parent, 'POST', `/learning/children/${child.id}/attempts`, {
       lesson_id: pick.id
     })
@@ -776,6 +777,40 @@ describe('levels', () => {
     ).toBe(404)
     const listed = await call(admin, 'GET', '/lessons', null, { level: 'violet', q: violet.slug })
     expect(listed.body.items.map((item) => item.level)).toEqual(['violet'])
+  })
+
+  test('a lesson can name its own game label, shown on the shelf and the lesson list', async () => {
+    const tagParent = await makeUser('parent')
+    const learner = await makeChild(tagParent, admin, mentor)
+    const steps = Array.from({ length: 15 }, (_, index) => ({ text: `Step ${index + 1}` }))
+    const make = async (extra) => {
+      const created = await call(admin, 'POST', '/lessons', {
+        slug: `tag-${crypto.randomUUID().slice(0, 8)}`,
+        title: 'Tagged',
+        content: { ...extra, steps }
+      })
+      expect(created.status).toBe(201)
+      return publishFixture(admin, created.body.id)
+    }
+    const tagged = await make({ tag: 'Find the place' })
+    const plain = await make({})
+    expect(
+      (
+        await call(admin, 'POST', '/lessons', {
+          slug: `tag-long-${crypto.randomUUID().slice(0, 8)}`,
+          title: 'Too long',
+          content: { tag: 'x'.repeat(31), steps }
+        })
+      ).status
+    ).toBe(400)
+    await call(admin, 'PUT', `/children/${learner.id}/lessons`, {
+      slugs: [tagged.slug, plain.slug]
+    })
+    const shelf = await call(tagParent, 'GET', `/learning/children/${learner.id}/lessons`)
+    const tags = Object.fromEntries(shelf.body.items.map((item) => [item.slug, item.tag]))
+    expect(tags).toEqual({ [tagged.slug]: 'Find the place', [plain.slug]: null })
+    const listed = await call(admin, 'GET', '/lessons', null, { q: tagged.slug })
+    expect(listed.body.items.map((item) => item.tag)).toEqual(['Find the place'])
   })
 
   test('levelsOf keeps VIBGYOR order and skips empty levels', () => {

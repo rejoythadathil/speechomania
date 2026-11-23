@@ -84,7 +84,7 @@ function GameCard({ lesson, next, onOpen }) {
       <span className={styles.meta}>
         <span className={styles.title}>{lesson.title}</span>
         <span className={styles.foot}>
-          <span className={styles.tag}>{scene.tag}</span>
+          <span className={styles.tag}>{lesson.tag ?? scene.tag}</span>
           {levelOf(lesson.level) ? (
             <span className={styles.level} style={{ '--level': levelOf(lesson.level).colour }}>
               {levelOf(lesson.level).name}
@@ -197,12 +197,13 @@ export function LearnHomeView() {
   const games = shelf.data?.items ?? []
   const next = games.find((lesson) => !lesson.times_completed && !lesson.locked_after) ?? null
   const toTry = learner.games_total - learner.games_played
+  const won = learner.trophies.filter((game) => game.prize)
 
   return (
     <div className={styles.root}>
       <header className={styles.bar}>
         <span className={styles.actions}>
-          <button type="button" className={styles.action} onClick={bar.onGrownUp}>
+          <button type="button" className={styles.action} onClick={bar.onGrownUp} aria-label="Back">
             <BackIcon size={22} />
             <span>Back</span>
           </button>
@@ -221,11 +222,16 @@ export function LearnHomeView() {
           >
             {bar.muted ? <MuteIcon size={22} /> : <SayAgainIcon size={22} />}
           </button>
-          <button type="button" className={styles.action} onClick={bar.onBreak}>
+          <button type="button" className={styles.action} onClick={bar.onBreak} aria-label="Break">
             <BreakIcon size={20} />
             <span>Break</span>
           </button>
-          <button type="button" className={styles.action} onClick={bar.onGrownUp}>
+          <button
+            type="button"
+            className={styles.action}
+            onClick={bar.onGrownUp}
+            aria-label="Parent"
+          >
             <GrownUpIcon size={22} />
             <span>Parent</span>
           </button>
@@ -375,29 +381,24 @@ export function LearnHomeView() {
               <div className={styles.sectionHead}>
                 <h2 id="trophies-title">My trophies</h2>
                 <span className={styles.count}>
-                  {learner.trophies.filter((game) => game.prize).length} of {learner.games_total}
+                  {won.length} of {learner.games_total}
                 </span>
               </div>
-              {learner.trophies.length ? (
+              {won.length ? (
                 <ul className={styles.shelf}>
-                  {learner.trophies.map((game) => (
-                    <li
-                      key={game.slug}
-                      className={cx(styles.shelfItem, !game.prize && styles.shelfEmpty)}
-                    >
+                  {won.map((game) => (
+                    <li key={game.slug} className={styles.shelfItem}>
                       <span
                         className={styles.shelfArt}
                         style={{ background: sceneFor(game.player).background }}
                       >
                         <img src={ART[gameArt(game)]} alt="" draggable="false" loading="lazy" />
-                        {game.prize ? (
-                          <img
-                            className={styles.shelfPrize}
-                            src={ART[game.prize]}
-                            alt={game.prize}
-                            draggable="false"
-                          />
-                        ) : null}
+                        <img
+                          className={styles.shelfPrize}
+                          src={ART[game.prize]}
+                          alt={game.prize}
+                          draggable="false"
+                        />
                       </span>
                       <span className={styles.shelfTitle}>{game.title}</span>
                     </li>

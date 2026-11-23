@@ -32,7 +32,8 @@ const audio = Joi.object({
       })
     )
     .max(300)
-    .required()
+    .required(),
+  url: Joi.any().strip()
 }).allow(null)
 
 const line = Joi.object({ text: text.required(), audio })
@@ -44,6 +45,7 @@ const storyStep = Joi.object({
   text: text.required(),
   art,
   image_key: Joi.string().max(300).allow(null, ''),
+  image_url: Joi.any().strip(),
   audio_key: Joi.string().max(300).allow(null, ''),
   audio
 })
@@ -93,6 +95,11 @@ const compareStep = choiceStep
       : helpers.message('Give one picture for each choice')
   )
 
+const chooseStep = compareStep.keys({
+  choices: Joi.array().items(word).min(2).max(6).unique().required(),
+  art: Joi.array().items(Joi.string().pattern(ART_NAME).max(40)).min(2).max(6).required()
+})
+
 const placeStep = choiceStep.keys({ art: art.length(2).required() })
 
 const matchStep = gameStep.keys({
@@ -128,7 +135,8 @@ const stepsFor = (player) => {
   if (player === 'pick') return pickStep
   if (player === 'yesno') return yesNoStep
   if (player === 'match') return matchStep
-  if (player === 'compare' || player === 'choose') return compareStep
+  if (player === 'choose') return chooseStep
+  if (player === 'compare') return compareStep
   if (player === 'place') return placeStep
   if (PICTURE_PLAYERS.includes(player)) return pictureStep
   if (CHOICE_PLAYERS.includes(player)) return choiceStep
@@ -144,11 +152,14 @@ const slugRule = Joi.string()
 const content = Joi.object({
   after: slugRule,
   level: Joi.string().valid(...LESSON_LEVELS),
+  tag: Joi.string().trim().max(30),
   player: Joi.string()
     .valid(...LESSON_PLAYERS)
     .default('story'),
   contrast: Joi.string().trim().max(40),
   rounds: Joi.number().integer().min(1).max(MAX_ROUNDS),
+  ordered: Joi.boolean(),
+  labels: Joi.boolean(),
   lines: Joi.object(Object.fromEntries(LESSON_LINES.map((name) => [name, line]))),
   steps: Joi.alternatives().conditional('player', {
     switch: LESSON_PLAYERS.map((player) => ({

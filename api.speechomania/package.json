@@ -18,7 +18,9 @@
     "migrate:status": "bun --bun prisma migrate status",
     "audio": "bun scripts/lesson-audio.js",
     "postinstall": "bun --bun prisma generate",
-    "lessons:sync": "bun scripts/lessons-sync.js"
+    "lessons:sync": "bun scripts/lessons-sync.js",
+    "audio:export": "bun scripts/audio-export.js",
+    "audio:import": "bun scripts/audio-import.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
