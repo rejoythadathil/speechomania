@@ -39,7 +39,11 @@ export async function call(user, method, path, body, query) {
     body: body === undefined ? undefined : JSON.stringify(body)
   })
   const text = await response.text()
-  return { status: response.status, body: text ? JSON.parse(text) : null }
+  return {
+    status: response.status,
+    body: text ? JSON.parse(text) : null,
+    headers: response.headers
+  }
 }
 
 export async function makeChild(parent, admin, mentor) {

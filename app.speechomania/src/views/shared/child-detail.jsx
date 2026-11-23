@@ -348,7 +348,9 @@ export function ChildDetailView() {
                       </Detail>
                     ) : null}
                     <Detail label="Mentor">{data.mentor_name ?? 'Not assigned'}</Detail>
-                    <Detail label="Parent consent">Given {formatDate(data.consent_at)}</Detail>
+                    {data.consent_at ? (
+                      <Detail label="Parent consent">Given {formatDate(data.consent_at)}</Detail>
+                    ) : null}
                     <Detail label="Enrolled">{formatDate(data.created_at)}</Detail>
                   </dl>
                   <div className="mt-3 flex flex-col gap-1.5 border-t border-[var(--line)] pt-3">
