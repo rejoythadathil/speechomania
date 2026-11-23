@@ -20,6 +20,7 @@ export const app = new Hono()
       origin: config.corsOrigins,
       allowHeaders: ['Authorization', 'Content-Type'],
       allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+      exposeHeaders: ['Content-Disposition'],
       maxAge: 600
     })
   )

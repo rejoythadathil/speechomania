@@ -7,6 +7,7 @@ import { authRoute } from './auth/route/index.js'
 import { changeRequestsRoute } from './change-requests/route/index.js'
 import { childrenRoute } from './children/route/index.js'
 import { dashboardRoute } from './dashboard/route/index.js'
+import { exportsRoute } from './exports/route/index.js'
 import { searchRoute } from './search/route/index.js'
 import { signupRoute } from './signup/route/index.js'
 import { showcaseRoute } from './showcase/route/index.js'
@@ -31,3 +32,4 @@ export const v1 = new Hono()
   .route('/learning', learningRoute)
   .route('/change-requests', changeRequestsRoute)
   .route('/audit', auditRoute)
+  .route('/exports', exportsRoute)
