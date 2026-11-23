@@ -2,10 +2,7 @@
 
 Status (2026-11-22):
 - **Done 2026-11-22: Sheets Q, R, S, T and V** (50 pictures) are in the app.
-- **To do now: Sheet U, places** (12 pictures). These are the last emoji in the lessons. Chitra asked that the market look like a market and the playground show swings, so those two lines are sharper.
-- **To do now: Sheet W** (5 pictures: hen, plain cricket bat, and the boy feeling proud, excited and calm). From the 2026-11-22 client call: the hen replaces "the baby can't swim", the plain bat fixes "Is this a ball?", and the three feelings replace cold, hot and sleepy in Feelings.
-- **Redo on Sheet R:** picture 9 (down) shows the boy at the top of the slide like picture 8, so up and down look the same; picture 2 (shy) covers his eyes instead of peeking. Regenerate those two if possible.
-- **Done: the six game scenes** (2026-11-20), kept at the end of this file as a pattern.
+- **To do now: Sheet X** (one sheet, 19 pictures). It replaces Sheets U and W and the two Sheet R redos: the 12 places (the market looks like a market, the playground shows swings), the hen, a plain bat, proud, excited and calm, and new "shy" and "down" pictures.
 
 ## How to send them back
 1. Paste one whole block into Gemini. Each block already includes the style, so every sheet matches the existing pictures.
@@ -16,6 +13,17 @@ Status (2026-11-22):
 The names under each block are what each picture becomes, in grid order. They're for slicing, not for Gemini. I cut each sheet with `.notes/tools/slice-sprites.py`, swap the emoji out in the lessons, and show you every lesson locally before anything is merged.
 
 Three names are new on purpose, because the old ones are also button or tip icons in the app: `happy` replaces `smiling`, `stop-hand` replaces `raised-hand`, and `door`/`door-open` replace `locked`/`open` in Opposites. The lessons will point at the new names, so the Parent lock and the how-to-play tips don't change.
+
+## Sheet X: Everything still missing (one sheet)
+Used in: Where questions, Where is it?, Can and can't, Ask me, Feelings and Opposites. Save it as `sheet-x.png`.
+
+```text
+A sprite sheet of 19 items. 1) a kitchen: a counter with a gas stove, a pot and a shelf of jars, 2) a garden: a small bed of flowers behind a low wooden fence, 3) a playground: two swings hanging from a swing frame on a patch of grass, clearly swings, with no slide, 4) an Indian vegetable market: a wooden stall with a striped awning, a smiling vendor behind it, baskets full of tomatoes, carrots, onions and green leafy vegetables, and a small hanging weighing scale, 5) a small corner shop with an awning and shelves of packets and jars, 6) a small white hospital building with a red cross on it, 7) a cinema: a small building with a big screen and red curtains, 8) a beach: a patch of sand with a small wave, a palm tree and a bucket, 9) a short stretch of road with a dashed middle line curving away, 10) a short stretch of railway track with wooden sleepers and a signal post, 11) a cosy small house seen from the front, square and simple, 12) a rounded patch of night sky with a smiling crescent moon and a few stars, 13) a friendly brown hen standing, 14) a plain wooden cricket bat on its own, with no ball. Items 1 to 12 are each one small, compact, rounded scene that fits inside its cell like a sticker, viewed from the front. Items 15 to 19 are the same boy (warm brown skin, short black hair, round friendly face, blue T-shirt): 15) head and shoulders only, like a school photo, feeling proud: a big smile, chin up, one thumb pointing at his chest, 16) head and shoulders, feeling excited: wide sparkling eyes, a big open smile and both hands up, 17) head and shoulders, feeling calm: eyes gently closed, a small peaceful smile, relaxed shoulders, 18) head and shoulders, feeling shy: a small bashful smile, cheeks a little pink, eyes looking down and to the side, one hand touching the back of his neck, both eyes fully visible and not covered, 19) full body, sitting on the ground at the very bottom end of a small red slide with a yellow chute and a blue ladder, his feet on the grass, having just slid down, smiling and pointing down at the ground; the slide's top is empty.
+
+Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 5 columns and 4 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. The last cell stays empty. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
+```
+
+Names in order: kitchen, garden, playground, market, shop, hospital, cinema, beach, road, railway, house, night-sky, hen, cricket-bat, proud, excited, calm, peek, down
 
 ## Sheet Q: Feelings 1
 Used in: Feelings (14 of its 15 pictures are emoji) and Opposites.
