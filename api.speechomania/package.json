@@ -25,6 +25,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
+    "ejs": "^7.0.2",
     "firebase-admin": "14.5.0",
     "hono": "4.13.14",
     "joi": "18.3.0",

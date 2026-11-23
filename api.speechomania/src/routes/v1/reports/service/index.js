@@ -3,14 +3,10 @@ import { db } from '../../../../../common-service/db/service/index.js'
 import {
   limitExports,
   pdfFile,
+  renderTemplate,
   withRenderSlot
 } from '../../../../../common-service/reports/service/index.js'
-import progressTemplate from '../../../../../common-service/reports/templates/progress-report.json'
-import {
-  everyRow,
-  fillTemplate,
-  reportFileName
-} from '../../../../../common-service/reports/utils/index.js'
+import { everyRow, reportFileName } from '../../../../../common-service/reports/utils/index.js'
 import { listForChild as listAssessments } from '../../assessments/service/index.js'
 import { getLearner, listShelf } from '../../learning/service/index.js'
 import { listForChild as listRemarks } from '../../remarks/service/index.js'
@@ -32,7 +28,7 @@ export async function progressDocument(user, childId) {
     today: new Date()
   })
   return {
-    definition: fillTemplate(progressTemplate, data),
+    definition: renderTemplate('progress-report', data),
     data,
     counts: { lessons: lessons.length, assessments: assessments.length, remarks: remarks.length },
     fileName: reportFileName('progress', [learner.display_name], 'pdf')

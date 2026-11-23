@@ -1,4 +1,6 @@
+import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import ejs from 'ejs'
 import writeExcelFile from 'write-excel-file/node'
 import { valkey } from '../../cache/service/index.js'
 import { logger } from '../../logger/service/index.js'
@@ -45,6 +47,17 @@ const builtInFonts = new Set(Object.values(PDF_FONTS.Helvetica))
 pdfmake.addFonts(PDF_FONTS)
 pdfmake.setLocalAccessPolicy((path) => builtInFonts.has(path))
 pdfmake.setUrlAccessPolicy(() => false)
+
+const templates = new Map()
+const json = (value) => JSON.stringify(value ?? '')
+
+export function renderTemplate(name, data) {
+  if (!templates.has(name)) {
+    const filename = new URL(`../templates/${name}.json.ejs`, import.meta.url).pathname
+    templates.set(name, ejs.compile(readFileSync(filename, 'utf8'), { filename }))
+  }
+  return JSON.parse(templates.get(name)({ ...data, json }))
+}
 
 export async function pdfFile(definition, footerText = 'Speechomania') {
   const document = {

@@ -1,6 +1,6 @@
 # reports
 
-PDF reports for parents, rendered on the server from a JSON template.
+PDF reports for parents, rendered on the server from an EJS template (`common-service/reports/templates/progress-report.json.ejs`).
 
 | Method | Path | Roles | Input | Returns |
 |---|---|---|---|---|
