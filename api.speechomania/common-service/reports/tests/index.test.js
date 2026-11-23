@@ -71,3 +71,73 @@ describe('reports', () => {
     await expect(limitExports(user)).rejects.toMatchObject({ status: 429 })
   })
 })
+
+describe('templates', () => {
+  const report = (extra = {}) => ({
+    child: { name: 'Riya' },
+    parent: { name: 'Priya' },
+    today: '23 Nov 2026',
+    watermark: 'Prepared for Priya · 23 Nov 2026',
+    stars: 4,
+    played: 1,
+    total: 2,
+    trophies: 1,
+    levels: [],
+    lessons: [],
+    assessments: [],
+    remarks: [],
+    ...extra
+  })
+
+  test('the EJS template fills values, repeats rows and leaves out empty sections', async () => {
+    const { renderTemplate } = await import('../service/index.js')
+    const document = renderTemplate(
+      'progress-report',
+      report({ lessons: [{ title: 'A or an', level: 'Green', times: 2, stars: '3 of 3' }] })
+    )
+    const text = JSON.stringify(document)
+    expect(document.info.title).toBe('Riya’s learning report')
+    expect(document.watermark.text).toBe('Prepared for Priya · 23 Nov 2026')
+    expect(text).toContain('["A or an","Green","2","3 of 3"]')
+    expect(text).toContain('"Games"')
+    expect(text).not.toContain('Check-ins')
+    expect(text).not.toContain('Notes from the mentor')
+  })
+
+  test('quotes and brackets in names stay text and cannot change the document', async () => {
+    const { renderTemplate } = await import('../service/index.js')
+    const name = 'Riya", "pageSize": "A0", "x": [{'
+    const document = renderTemplate(
+      'progress-report',
+      report({
+        child: { name },
+        remarks: [{ date: '1 Nov 2026', author: '<%= 7*7 %>', body: '}]' }]
+      })
+    )
+    expect(document.pageSize).toBe('A4')
+    expect(document.content[1].text).toBe(`${name}’s learning report`)
+    expect(JSON.stringify(document)).toContain('<%= 7*7 %>')
+  })
+
+  test('a filled report renders to a small PDF quickly without reaching files or the network', async () => {
+    const { pdfFile, renderTemplate } = await import('../service/index.js')
+    const started = performance.now()
+    const pdf = await pdfFile(
+      renderTemplate(
+        'progress-report',
+        report({
+          lessons: Array.from({ length: 60 }, (_, index) => ({
+            title: `Game ${index}`,
+            level: 'Indigo',
+            times: 1,
+            stars: '2 of 3'
+          }))
+        })
+      )
+    )
+    expect(performance.now() - started).toBeLessThan(500)
+    expect(pdf.length).toBeLessThan(100_000)
+    await expect(pdfFile({ content: [{ image: '/etc/passwd' }] })).rejects.toThrow()
+    await expect(pdfFile({ content: [{ image: 'https://example.com/x.png' }] })).rejects.toThrow()
+  })
+})

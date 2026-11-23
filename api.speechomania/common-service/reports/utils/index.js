@@ -57,3 +57,11 @@ export async function everyRow(fetchPage, max = MAX_ROWS) {
   }
   return items
 }
+
+export const longDate = (value) =>
+  new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata'
+  }).format(new Date(value))

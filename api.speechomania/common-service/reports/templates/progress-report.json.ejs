@@ -1,0 +1,86 @@
+{
+  "pageSize": "A4",
+  "pageMargins": [44, 48, 44, 56],
+  "info": { "title": <%- json(`${child.name}’s learning report`) %>, "author": "Speechomania" },
+  "watermark": { "text": <%- json(watermark) %>, "opacity": 0.07, "angle": -38, "fontSize": 26, "color": "#136197" },
+  "defaultStyle": { "font": "Helvetica", "fontSize": 10, "color": "#1f2a37", "lineHeight": 1.2 },
+  "styles": {
+    "brand": { "fontSize": 9, "bold": true, "color": "#1479bb" },
+    "title": { "fontSize": 22, "bold": true, "margin": [0, 4, 0, 2] },
+    "muted": { "color": "#5b6472" },
+    "heading": { "fontSize": 13, "bold": true, "margin": [0, 18, 0, 6], "color": "#136197" },
+    "statValue": { "fontSize": 18, "bold": true },
+    "tableHead": { "bold": true, "fillColor": "#eef5fb" }
+  },
+  "content": [
+    { "text": "SPEECHOMANIA", "style": "brand" },
+    { "text": <%- json(`${child.name}’s learning report`) %>, "style": "title" },
+    { "text": <%- json(`Made on ${today} for ${parent.name}`) %>, "style": "muted" },
+    {
+      "margin": [0, 16, 0, 0],
+      "table": {
+        "widths": ["*", "*", "*"],
+        "body": [[
+          { "stack": [{ "text": "Stars", "style": "muted" }, { "text": <%- json(String(stars)) %>, "style": "statValue" }] },
+          { "stack": [{ "text": "Games played", "style": "muted" }, { "text": <%- json(`${played} of ${total}`) %>, "style": "statValue" }] },
+          { "stack": [{ "text": "Trophies won", "style": "muted" }, { "text": <%- json(String(trophies)) %>, "style": "statValue" }] }
+        ]]
+      },
+      "layout": "lightHorizontalLines"
+    }
+<% if (levels.length) { %>
+    , { "text": "Games by colour level", "style": "heading" }
+    , {
+      "table": {
+        "headerRows": 1,
+        "widths": ["*", 90, 90],
+        "body": [
+          [{ "text": "Level", "style": "tableHead" }, { "text": "Played", "style": "tableHead" }, { "text": "Games", "style": "tableHead" }]
+<% for (const level of levels) { %>
+          , <%- json([level.name, String(level.played), String(level.total)]) %>
+<% } %>
+        ]
+      },
+      "layout": "lightHorizontalLines"
+    }
+<% } %>
+<% if (lessons.length) { %>
+    , { "text": "Games", "style": "heading" }
+    , {
+      "table": {
+        "headerRows": 1,
+        "widths": ["*", 60, 70, 70],
+        "body": [
+          [{ "text": "Game", "style": "tableHead" }, { "text": "Level", "style": "tableHead" }, { "text": "Times played", "style": "tableHead" }, { "text": "Best stars", "style": "tableHead" }]
+<% for (const lesson of lessons) { %>
+          , <%- json([lesson.title, lesson.level, String(lesson.times), lesson.stars]) %>
+<% } %>
+        ]
+      },
+      "layout": "lightHorizontalLines"
+    }
+<% } %>
+<% if (assessments.length) { %>
+    , { "text": "Check-ins", "style": "heading" }
+    , {
+      "table": {
+        "headerRows": 1,
+        "widths": ["*", 90, 110],
+        "body": [
+          [{ "text": "Check-in", "style": "tableHead" }, { "text": "Status", "style": "tableHead" }, { "text": "Result", "style": "tableHead" }]
+<% for (const check of assessments) { %>
+          , <%- json([check.title, check.status, check.result]) %>
+<% } %>
+        ]
+      },
+      "layout": "lightHorizontalLines"
+    }
+<% } %>
+<% if (remarks.length) { %>
+    , { "text": "Notes from the mentor", "style": "heading" }
+<% for (const remark of remarks) { %>
+    , { "margin": [0, 0, 0, 8], "stack": [{ "text": <%- json(`${remark.date} · ${remark.author}`) %>, "style": "muted", "fontSize": 9 }, <%- json(remark.body) %>] }
+<% } %>
+<% } %>
+  ]
+}

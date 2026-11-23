@@ -14,6 +14,7 @@ import { showcaseRoute } from './showcase/route/index.js'
 import { learningRoute } from './learning/route/index.js'
 import { lessonsRoute } from './lessons/route/index.js'
 import { remarksRoute } from './remarks/route/index.js'
+import { reportsRoute } from './reports/route/index.js'
 import { usersRoute } from './users/route/index.js'
 
 export const v1 = new Hono()
@@ -33,3 +34,4 @@ export const v1 = new Hono()
   .route('/change-requests', changeRequestsRoute)
   .route('/audit', auditRoute)
   .route('/exports', exportsRoute)
+  .route('/reports', reportsRoute)
