@@ -14,6 +14,7 @@ import {
   TableRow
 } from '@/components/base/table/table'
 import { DataState } from '@/components/shared/data-state.jsx'
+import { ExportButton } from '@/components/shared/export-button.jsx'
 import { EmptyState } from '@/components/shared/empty-state.jsx'
 import { ListFooter } from '@/components/shared/list-footer.jsx'
 import { PageHeader } from '@/components/shared/page-header.jsx'
@@ -110,6 +111,18 @@ function ChildrenList() {
                   Waiting for a mentor
                 </Checkbox>
               </>
+            ) : null}
+            {user.role !== 'parent' && children.data?.total ? (
+              <span className="ml-auto">
+                <ExportButton
+                  path="/exports/children"
+                  query={{
+                    q,
+                    status: status === 'all' ? undefined : status,
+                    unassigned: unassigned || undefined
+                  }}
+                />
+              </span>
             ) : null}
           </>
         }

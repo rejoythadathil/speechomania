@@ -22,6 +22,7 @@ import { sceneFor } from '@/components/child/scenes.js'
 import { ChildPicker } from '@/components/shared/child-picker.jsx'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog.jsx'
 import { DataState } from '@/components/shared/data-state.jsx'
+import { ExportButton } from '@/components/shared/export-button.jsx'
 import { EmptyState } from '@/components/shared/empty-state.jsx'
 import { FormAlert } from '@/components/shared/form-alert.jsx'
 import { ListFooter } from '@/components/shared/list-footer.jsx'
@@ -262,6 +263,14 @@ function ChildResults({ assessment, onChanged }) {
               setPage(1)
             }}
           />
+          {results.data?.total ? (
+            <span className="ml-auto">
+              <ExportButton
+                path={`/exports/assessments/${assessment.id}/results`}
+                query={{ q, status: status === 'all' ? undefined : status }}
+              />
+            </span>
+          ) : null}
         </>
       }
       footer={

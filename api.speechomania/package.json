@@ -29,7 +29,8 @@
     "hono": "4.13.14",
     "joi": "18.3.0",
     "pino": "10.4.0",
-    "prisma": "7.10.1"
+    "prisma": "7.10.1",
+    "write-excel-file": "^4.1.1"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
