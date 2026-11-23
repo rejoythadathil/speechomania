@@ -8,11 +8,20 @@ export const childScope = (user) =>
       : { parent_id: user.id }
 
 export function childView(
-  { pin_hash: pinHash, parent, mentor, date_of_birth: dateOfBirth, ...child },
+  {
+    pin_hash: pinHash,
+    parent,
+    mentor,
+    date_of_birth: dateOfBirth,
+    consent_version: consentVersion,
+    consent_at: consentAt,
+    ...child
+  },
   role
 ) {
   return {
     ...child,
+    ...(role === 'mentor' ? {} : { consent_version: consentVersion, consent_at: consentAt }),
     date_of_birth: isoDate(dateOfBirth),
     has_pin: Boolean(pinHash),
     parent_name: parent.full_name,

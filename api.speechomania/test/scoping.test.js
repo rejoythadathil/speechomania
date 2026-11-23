@@ -55,12 +55,27 @@ describe('domain scoping', () => {
     expect((await call(otherParent, 'GET', `/lessons/${assigned.id}`)).status).toBe(404)
   })
 
-  test('mentors do not receive parent emails, admins and the parent do', async () => {
-    expect((await call(mentor, 'GET', `/children/${child.id}`)).body.parent_email).toBeNull()
+  test('mentors do not receive parent emails or consent records, admins and the parent do', async () => {
+    const seen = (await call(mentor, 'GET', `/children/${child.id}`)).body
+    expect(seen.parent_email).toBeNull()
+    expect(seen).not.toHaveProperty('consent_at')
+    expect(seen).not.toHaveProperty('consent_version')
+    expect((await call(mentor, 'GET', '/children')).body.items[0]).not.toHaveProperty('consent_at')
+    expect((await call(parent, 'GET', `/children/${child.id}`)).body.consent_at).toBeTruthy()
     expect((await call(admin, 'GET', `/children/${child.id}`)).body.parent_email).toBe(parent.email)
     expect((await call(parent, 'GET', `/children/${child.id}`)).body.parent_email).toBe(
       parent.email
     )
+  })
+
+  test('no API answer may be cached, including errors', async () => {
+    for (const [user, path] of [
+      [parent, `/children/${child.id}`],
+      [otherParent, `/children/${child.id}`],
+      [null, '/children']
+    ]) {
+      expect((await call(user, 'GET', path)).headers.get('cache-control')).toBe('no-store')
+    }
   })
 
   test('a mentor moved off a child can no longer edit or delete their remarks there', async () => {
