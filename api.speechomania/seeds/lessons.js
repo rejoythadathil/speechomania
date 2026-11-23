@@ -16,6 +16,24 @@ const play = {
 const names = { swimmer: 'big boy' }
 const called = (id) => names[id] ?? id
 
+const cantRows = [
+  ['swim', 'hen', 'swimmer', 'swim'],
+  ['walk', 'snake', 'dog', 'walk'],
+  ['fly', 'snake', 'bird', 'fly'],
+  ['bark', 'bird', 'dog', 'bark'],
+  ['climb a tree', 'elephant', 'monkey', 'climb'],
+  ['ride a cycle', 'cat', 'boy', 'ride'],
+  ['sing', 'fish', 'bird', 'sing'],
+  ['go to school', 'monkey', 'girl', 'school'],
+  ['roar', 'monkey', 'lion', 'roar'],
+  ['fly', 'penguin', 'bird', 'fly'],
+  ['walk', 'fish', 'duck', 'walk'],
+  ['run fast', 'snail', 'horse', 'run'],
+  ['climb a tree', 'fish', 'cat', 'climb'],
+  ['write', 'baby', 'girl', 'write'],
+  ['talk', 'dog', 'boy', 'talk']
+]
+
 const canAndCant = {
   player: 'pick',
   contrast: cant,
@@ -25,23 +43,7 @@ const canAndCant = {
     quiz: line('Now, show me.'),
     skip: line('Let’s try another.')
   },
-  steps: [
-    ['swim', 'baby', 'swimmer', 'swim'],
-    ['walk', 'snake', 'dog', 'walk'],
-    ['fly', 'snake', 'bird', 'fly'],
-    ['bark', 'bird', 'dog', 'bark'],
-    ['climb a tree', 'elephant', 'monkey', 'climb'],
-    ['ride a cycle', 'cat', 'boy', 'ride'],
-    ['sing', 'fish', 'bird', 'sing'],
-    ['go to school', 'monkey', 'girl', 'school'],
-    ['roar', 'monkey', 'lion', 'roar'],
-    ['fly', 'penguin', 'bird', 'fly'],
-    ['walk', 'fish', 'duck', 'walk'],
-    ['run fast', 'snail', 'horse', 'run'],
-    ['climb a tree', 'fish', 'cat', 'climb'],
-    ['write', 'baby', 'girl', 'write'],
-    ['talk', 'dog', 'boy', 'talk']
-  ].map(([verb, cannot, can, act], index) => ({
+  steps: cantRows.map(([verb, cannot, can, act], index) => ({
     text: `Who ${cant} ${verb}?`,
     choices: index % 2 ? [can, cannot] : [cannot, can],
     answer: cannot,
@@ -69,7 +71,12 @@ const verbs = [
   ['juggling', 'juggling'],
   ['surfing', 'surfing']
 ]
-const doer = { walking: 'She is', dancing: 'She is', hugging: 'They are', clapping: 'We are' }
+const doer = {
+  walking: 'The girl is',
+  dancing: 'The girl is',
+  hugging: 'The boy and the girl are',
+  clapping: 'The hands are'
+}
 const actionWords = {
   player: 'shark',
   lines: { ...play, intro: line('The shark is hungry. Feed it the right fish.') },
@@ -78,7 +85,7 @@ const actionWords = {
     word,
     art: [art],
     praise: line(`Yum! ${cap(word)}!`),
-    sentence: line(`${doer[word] ?? 'He is'} ${word}.`)
+    sentence: line(`${doer[word] ?? 'The boy is'} ${word}.`)
   }))
 }
 
@@ -92,10 +99,10 @@ const moods = [
   ['laughing', 'laughing'],
   ['nervous', 'nervous'],
   ['thinking', 'thinking'],
-  ['sleepy', 'sleepy'],
+  ['proud', 'proud'],
   ['sick', 'sick'],
-  ['hot', 'hot'],
-  ['cold', 'cold'],
+  ['excited', 'excited'],
+  ['calm', 'calm'],
   ['tired', 'tired'],
   ['shy', 'peek']
 ]
@@ -367,7 +374,7 @@ const questions = [
   ['nose', 'nose', true],
   ['cat', 'fish', false, 'No. This is a fish.'],
   ['shirt', 't-shirt', true],
-  ['ball', 'cricket', false, 'No. This is a bat.'],
+  ['ball', 'cricket-bat', false, 'No. This is a bat.'],
   ['house', 'house', true],
   ['mountain', 'mountain', true],
   ['spoon', 'knife', false, 'No. This is a knife.'],
@@ -796,13 +803,18 @@ const cards = (steps) => ({
 const card = (text, art, keys = [], extra = {}) => ({ text, art, keys, ...extra })
 
 const canAndCantCards = cards(
-  canAndCant.steps.map((step) =>
-    card(step.teach.text, [step.answer, step.actor], [cant, 'can'], { colours: ['red', 'green'] })
+  cantRows.map(([verb, cannot, can]) =>
+    card(
+      `The ${called(can)} can ${verb}. The ${called(cannot)} ${cant} ${verb}.`,
+      [can, cannot],
+      ['can', cant],
+      { colours: ['green', 'red'] }
+    )
   )
 )
 
 const actionWordsCards = cards(
-  verbs.map(([word, art]) => card(`${doer[word] ?? 'He is'} ${word}.`, [art], [word]))
+  verbs.map(([word, art]) => card(`${doer[word] ?? 'The boy is'} ${word}.`, [art], [word]))
 )
 
 const feelingsCards = cards(
@@ -971,10 +983,16 @@ const LESSON_LIST = [
     'where-questions',
     'Where questions',
     chooseCards(whereQuestions),
-    whereQuestions,
-    'Which one?'
+    { ...whereQuestions, tag: 'Find the place' },
+    'Find the place'
   ),
-  ...parts('who-does-it', 'Who does it?', chooseCards(whoDoes), whoDoes, 'Which one?'),
+  ...parts(
+    'who-does-it',
+    'Who does it?',
+    chooseCards(whoDoes),
+    { ...whoDoes, tag: 'Find who' },
+    'Find who'
+  ),
   ...parts('this-these', 'This and these', thisTheseCards, thisOrThese, 'Word bubbles'),
   ...parts('he-she', 'He and she', pronounCards(heOrShe), heOrShe, 'Word bubbles'),
   ...parts('they', 'He, she and they', pronounCards(they), they, 'Word bubbles'),

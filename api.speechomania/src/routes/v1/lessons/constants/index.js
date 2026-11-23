@@ -45,7 +45,8 @@ export const LESSON_CHARACTERS = [
   'penguin',
   'duck',
   'snail',
-  'horse'
+  'horse',
+  'hen'
 ]
 
 export const LESSON_ACTIONS = [

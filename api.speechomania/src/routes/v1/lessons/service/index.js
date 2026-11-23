@@ -101,6 +101,7 @@ export async function listLessons(user, { status, level, q, ...window }) {
       ...lesson,
       player: content?.player ?? 'story',
       level: content?.level ?? null,
+      tag: content?.tag ?? null,
       step_count: stepCount(content),
       ...versionSummary(counts, lesson.slug)
     }))

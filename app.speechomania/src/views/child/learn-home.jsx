@@ -84,7 +84,7 @@ function GameCard({ lesson, next, onOpen }) {
       <span className={styles.meta}>
         <span className={styles.title}>{lesson.title}</span>
         <span className={styles.foot}>
-          <span className={styles.tag}>{scene.tag}</span>
+          <span className={styles.tag}>{lesson.tag ?? scene.tag}</span>
           {levelOf(lesson.level) ? (
             <span className={styles.level} style={{ '--level': levelOf(lesson.level).colour }}>
               {levelOf(lesson.level).name}

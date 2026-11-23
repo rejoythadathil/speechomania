@@ -2,7 +2,8 @@
 
 Status (2026-11-22):
 - **Done 2026-11-22: Sheets Q, R, S, T and V** (50 pictures) are in the app.
-- **To do: Sheet U, places** (12 pictures: kitchen, garden, playground, market, shop, hospital, cinema, beach, road, railway, house, night sky). These are the last emoji left in the lessons.
+- **To do now: Sheet U, places** (12 pictures). These are the last emoji in the lessons. Chitra asked that the market look like a market and the playground show swings, so those two lines are sharper.
+- **To do now: Sheet W** (5 pictures: hen, plain cricket bat, and the boy feeling proud, excited and calm). From the 2026-11-22 client call: the hen replaces "the baby can't swim", the plain bat fixes "Is this a ball?", and the three feelings replace cold, hot and sleepy in Feelings.
 - **Redo on Sheet R:** picture 9 (down) shows the boy at the top of the slide like picture 8, so up and down look the same; picture 2 (shy) covers his eyes instead of peeking. Regenerate those two if possible.
 - **Done: the six game scenes** (2026-11-20), kept at the end of this file as a pattern.
 
@@ -64,7 +65,7 @@ Names in order: shoe, socks, hat, coat, shorts, bag, bed, sofa, sink, bath, wast
 Used in: Where questions and Where is it?
 
 ```text
-A sprite sheet of 12 items. Each place is drawn as one small, compact, rounded scene that fits inside its cell like a sticker, viewed from the front: 1) a kitchen: a counter with a gas stove, a pot and a shelf of jars, 2) a garden: a small bed of flowers behind a low wooden fence, 3) a playground: a swing and a small slide on a patch of grass, 4) a vegetable market: a stall with a striped awning and baskets of tomatoes, carrots and greens, 5) a small corner shop with an awning and shelves of packets and jars, 6) a small white hospital building with a red cross on it, 7) a cinema: a small building with a big screen and red curtains, 8) a beach: a patch of sand with a small wave, a palm tree and a bucket, 9) a short stretch of road with a dashed middle line curving away, 10) a short stretch of railway track with wooden sleepers and a signal post, 11) a cosy small house seen from the front, square and simple, 12) a rounded patch of night sky with a smiling crescent moon and a few stars.
+A sprite sheet of 12 items. Each place is drawn as one small, compact, rounded scene that fits inside its cell like a sticker, viewed from the front: 1) a kitchen: a counter with a gas stove, a pot and a shelf of jars, 2) a garden: a small bed of flowers behind a low wooden fence, 3) a playground: two swings hanging from a swing frame on a patch of grass, clearly swings, with no slide, 4) an Indian vegetable market: a wooden stall with a striped awning, a smiling vendor behind it, baskets full of tomatoes, carrots, onions and green leafy vegetables, and a small hanging weighing scale, 5) a small corner shop with an awning and shelves of packets and jars, 6) a small white hospital building with a red cross on it, 7) a cinema: a small building with a big screen and red curtains, 8) a beach: a patch of sand with a small wave, a palm tree and a bucket, 9) a short stretch of road with a dashed middle line curving away, 10) a short stretch of railway track with wooden sleepers and a signal post, 11) a cosy small house seen from the front, square and simple, 12) a rounded patch of night sky with a smiling crescent moon and a few stars.
 
 Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 4 columns and 3 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
 ```
@@ -81,6 +82,17 @@ Cute 2D cartoon sticker illustrations for a calm learning app for young autistic
 ```
 
 Names in order: door, door-open
+
+## Sheet W: Hen, bat and three more feelings
+Used in: Can and can't (the hen can't swim), Ask me (Is this a ball? No, this is a bat) and Feelings.
+
+```text
+A sprite sheet of 5 items: 1) a friendly brown hen standing, 2) a plain wooden cricket bat on its own, with no ball, 3) the same boy (warm brown skin, short black hair, round friendly face, blue T-shirt), head and shoulders only, exactly like a school photo, feeling proud: a big smile, chin up, one thumb pointing at his chest, 4) the same boy feeling excited: wide sparkling eyes, a big open smile and both hands up, 5) the same boy feeling calm: eyes gently closed, a small peaceful smile, relaxed shoulders.
+
+Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 3 columns and 2 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. The last cell stays empty. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
+```
+
+Names in order: hen, cricket-bat, proud, excited, calm
 
 ## Next: the Violet lessons
 Any items the Violet lessons need that we don't have (for example dosa, idli, saree, auto-rickshaw) will be added here as more sheets once the lesson words are mapped.

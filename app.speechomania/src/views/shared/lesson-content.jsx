@@ -233,7 +233,9 @@ export function GamePanel({ lesson }) {
           />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <span className="text-title-3-semibold text-text-primary">{scene.tag}</span>
+          <span className="text-title-3-semibold text-text-primary">
+            {lesson.content.tag ?? scene.tag}
+          </span>
           {lesson.content.contrast ? (
             <p className="text-body-2-regular text-text-secondary">
               Focus word: {lesson.content.contrast}
@@ -347,13 +349,13 @@ export function StepsPanel({ lesson }) {
   )
 }
 
-export function GameTag({ player, cover }) {
+export function GameTag({ player, cover, tag }) {
   return (
     <span className="flex shrink-0 items-center gap-2">
       <span className="w-14 shrink-0">
         <GameThumb player={player ?? 'story'} cover={cover} />
       </span>
-      <span className="text-body-2-medium text-text-secondary">{sceneFor(player).tag}</span>
+      <span className="text-body-2-medium text-text-secondary">{tag ?? sceneFor(player).tag}</span>
     </span>
   )
 }

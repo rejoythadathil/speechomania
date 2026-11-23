@@ -1,5 +1,6 @@
 import { audit } from '../common-service/audit/service/index.js'
 import { db } from '../common-service/db/service/index.js'
+import { audioKey, storedSpeech } from '../common-service/voice/service/index.js'
 import { lessonLines } from '../common-service/voice/utils/index.js'
 import { LESSONS } from '../seeds/lessons.js'
 import { createDraftFrom, publishLesson } from '../src/routes/v1/lessons/service/index.js'
@@ -7,6 +8,7 @@ import { createBody } from '../src/routes/v1/lessons/validation/index.js'
 
 const publish = process.argv.includes('--publish')
 const assign = process.argv.includes('--assign')
+const voice = process.argv.includes('--voice')
 
 const owner = await db.users.findFirst({
   where: { role: 'admin', deleted_at: null },
@@ -41,6 +43,18 @@ function carryAudio(content, from) {
     if (known.has(line.text)) line.audio = known.get(line.text)
   }
   return content
+}
+
+async function attachVoice(content) {
+  let attached = 0
+  for (const line of lessonLines(content)) {
+    if (line.audio?.key === audioKey(line.text)) continue
+    const stored = await storedSpeech(line.text)
+    if (!stored) continue
+    line.audio = stored
+    attached += 1
+  }
+  return attached
 }
 
 const partOne = new Map()
@@ -78,6 +92,7 @@ for (const [slug, title, source, status] of LESSONS) {
   const draft = rows.find((row) => row.status === 'draft')
   const live = rows.find((row) => row.status === 'published')
   const content = carryAudio(structuredClone(value.content), (draft ?? live)?.content)
+  const attached = voice ? await attachVoice(content) : 0
   let draftId = draft?.id
   if (!rows.length) {
     if (await db.lessons.findFirst({ where: { slug }, select: { id: true } })) {
@@ -91,7 +106,12 @@ for (const [slug, title, source, status] of LESSONS) {
       })
     ).id
     console.log(`new        ${slug}`)
-  } else if (!draft && strip(live.content) === strip(content) && live.title === title) {
+  } else if (
+    !draft &&
+    !attached &&
+    strip(live.content) === strip(content) &&
+    live.title === title
+  ) {
     console.log(`unchanged  ${slug}`)
     continue
   } else {
@@ -109,7 +129,7 @@ for (const [slug, title, source, status] of LESSONS) {
         diff: { slug }
       })
     })
-    console.log(`draft      ${slug}`)
+    console.log(`draft      ${slug}${attached ? ` (${attached} lines given stored voice)` : ''}`)
   }
   if (publish && status === 'published') {
     const missing = lessonLines(content).filter((line) => !line.audio).length

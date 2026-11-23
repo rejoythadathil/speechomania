@@ -144,6 +144,7 @@ const slugRule = Joi.string()
 const content = Joi.object({
   after: slugRule,
   level: Joi.string().valid(...LESSON_LEVELS),
+  tag: Joi.string().trim().max(30),
   player: Joi.string()
     .valid(...LESSON_PLAYERS)
     .default('story'),

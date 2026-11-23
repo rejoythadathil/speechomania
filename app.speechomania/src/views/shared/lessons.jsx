@@ -249,7 +249,7 @@ export function LessonsView() {
                       <LevelTag id={lesson.level} />
                     </TableCell>
                     <TableCell>
-                      <GameTag player={lesson.player} />
+                      <GameTag player={lesson.player} tag={lesson.tag} />
                     </TableCell>
                     <TableCell>
                       <span className="flex flex-col">

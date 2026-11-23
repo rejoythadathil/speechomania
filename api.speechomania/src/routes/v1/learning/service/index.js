@@ -185,6 +185,7 @@ export async function listShelf(user, id, window) {
         ...lesson,
         player: gamePlayer(content),
         level: content.level ?? null,
+        tag: content.tag ?? null,
         contrast: content.contrast ?? null,
         step_count: content.steps?.length ?? 0,
         cover: coverOf(content),

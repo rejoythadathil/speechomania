@@ -9,12 +9,19 @@ export const voiceReady = Boolean(config.ELEVENLABS_API_KEY && media)
 export const audioKey = (text) =>
   `${audioBase(text, { voiceId: config.ELEVENLABS_VOICE_ID, model: config.ELEVENLABS_MODEL })}.mp3`
 
-export async function speechFor(text) {
-  if (!voiceReady) throw voiceNotConfigured()
+export async function storedSpeech(text) {
+  if (!media) throw voiceNotConfigured()
   const base = audioKey(text).replace(/\.mp3$/, '')
   const timings = media.file(`${base}.json`)
-  if (await timings.exists())
-    return { key: `${base}.mp3`, ...(await timings.json()), generated: false }
+  if (!(await timings.exists())) return null
+  return { key: `${base}.mp3`, ...(await timings.json()) }
+}
+
+export async function speechFor(text) {
+  if (!voiceReady) throw voiceNotConfigured()
+  const stored = await storedSpeech(text)
+  if (stored) return { ...stored, generated: false }
+  const base = audioKey(text).replace(/\.mp3$/, '')
   const response = await fetch(
     `${ELEVENLABS_URL}/${config.ELEVENLABS_VOICE_ID}/with-timestamps?output_format=${OUTPUT_FORMAT}`,
     {
