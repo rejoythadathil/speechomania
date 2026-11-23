@@ -12,7 +12,7 @@ Child profiles. Scoped in the query: admins see every child, mentors their assig
 | PUT | `/children/:id/lessons` | admin, mentor | `slugs` (published lessons, in order) | child |
 | DELETE | `/children/:id` | admin | | 204, archived and soft deleted |
 
-- Mentors never receive the parent's email.
+- Mentors never receive the parent's email or the consent record (`consent_version`, `consent_at`).
 - The learning PIN is hashed into `children.pin_hash`; responses only say `has_pin`.
 - Consent version comes from `CONSENT_VERSION`.
 
