@@ -16,19 +16,22 @@ Versioned lessons. One row per version (`slug` + `version`); at most one draft a
 ## Content
 - `player: 'story'`: `steps: [{ text, image_key?, audio? }]`.
 - Any lesson may set `after: '<slug>'`: when the child also has that lesson, this one stays locked until that one is finished once (part 1 before part 2).
-- `player: 'cards'` (a part 1 flashcard lesson): steps are cards with `text` (read aloud), `art` (1–3 names), optional `keys` (words to colour), `colours` (one per key: `blue`, `orange`, `pink`, `green`, `red`), `layout` (`row` by default; a place word such as `in` or `under` needs `art: [thing, place]` and draws the thing in that spot) and `sizes` (one scale per picture, 0.3–2, for bigger and smaller). The API returns them as `cards`; other players return `cards: []`.
+- `player: 'cards'` (a part 1 flashcard lesson): steps are cards with `text` (read aloud), `art` (1–3 names), optional `keys` (words to colour), `colours` (one per key: `blue`, `orange`, `pink`, `green`, `red`, `yellow`, `brown`, `grey`), `layout` (`row` by default; a place word such as `in` or `under` needs `art: [thing, place]` and draws the thing in that spot) and `sizes` (one scale per picture, 0.3–2, for bigger and smaller). The API returns them as `cards`; other players return `cards: []`.
 - `player: 'pick'`: `contrast` (the coloured word, e.g. `can’t`), `lines` (`intro`, `quiz`, `retry`, `skip`, `outro`, `reward`), and steps with `text` (the question), `choices` (two of `LESSON_CHARACTERS`), `answer`, `actor` (who acts it out), `act` (one of `LESSON_ACTIONS`), `praise`, `teach`.
 - Games (`rounds` 1–20, how many steps one play uses; any step may add `praise` and `sentence` lines):
   - Pictures: `art` (1–3 illustration names, lowercase with hyphens, matching files in the app's OpenMoji library) or `image_key` (an S3 key).
   - `shark`, `balloons` (`PICTURE_PLAYERS`): steps with `word` and a picture; at least three steps, because the others are the wrong options.
   - `yesno`: steps with a picture and `answer` true or false.
   - `match`: opposite pairs with `first`, `second` and two `art`; boards of `PAIRS_PER_BOARD`, so at least that many steps.
+  - `choose` (Which one?): steps with `choices` (2–6 words), one `art` per choice and an `answer`. The lesson may set `ordered: true` (rounds play in the written order, for graded games such as 2, then 3, then 6 pictures) and `labels: false` (no word under the pictures).
   - `bubbles`, `squish` (also `first`, `second`), `compare` (one `art` per choice), `place` (`art` is the thing and the place), `train` (the gap is `…`), `why` (`CHOICE_PLAYERS`): steps with `choices` (2–4 words) and an `answer` that is one of them.
-- Any line may carry `audio: { key, duration, words }`, filled by `bun run audio <slug>` into a draft.
+- Any line may carry `audio: { key, duration, words }`, filled by `bun run audio <slug>` into a draft. `lines.rest` is spoken on the break between sets.
+- Publishing needs at least `MIN_ACTIVITIES` (5) steps. The child plays any lesson in sets of 5 with a short celebration between sets; a short last set joins the one before (12 plays as 5 + 7).
+- `editedInAdmin(slug)` (service) is true once any version was changed through `PATCH /lessons/:id`; `bun run lessons:sync` then leaves that lesson alone unless run with `--force`.
 
 ## Errors (`exception/index.js`)
 - `lessonNotFound` 404
 - `slugTaken`, `onlyDraftsEditable`, `onlyDraftsPublishable`, `alreadyDraft`, `draftExists`, `cannotRemove` 409
-- `noSteps` 400
+- `noSteps`, `tooFewActivities` 400
 
 Files: `route/index.js`, `controller/index.js`, `service/index.js`, `validation/index.js`, `constants/index.js`, `exception/index.js`, `tests/index.test.js`.

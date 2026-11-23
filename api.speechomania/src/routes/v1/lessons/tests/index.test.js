@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 import { db } from '../../../../../common-service/db/service/index.js'
 import { call, makePublishedLesson, makeUser } from '../../../../../test/helpers.js'
+import { editedInAdmin } from '../service/index.js'
 import { learnCards, versionSummary } from '../utils/index.js'
 
 let admin, mentor, parent
@@ -26,15 +27,50 @@ describe('lessons', () => {
     expect((await call(admin, 'POST', `/lessons/${draft.body.id}/publish`)).status).toBe(400)
   })
 
-  test('a lesson needs at least 15 activities to publish', async () => {
-    const draft = await call(admin, 'POST', '/lessons', {
+  test('a lesson needs at least 5 activities to publish', async () => {
+    const steps = (length) => Array.from({ length }, (_, index) => ({ text: `Page ${index}` }))
+    const short = await call(admin, 'POST', '/lessons', {
       slug: `short-${crypto.randomUUID().slice(0, 8)}`,
       title: 'Short',
-      content: { steps: Array.from({ length: 14 }, (_, index) => ({ text: `Page ${index}` })) }
+      content: { steps: steps(4) }
     })
-    const refused = await call(admin, 'POST', `/lessons/${draft.body.id}/publish`)
+    const refused = await call(admin, 'POST', `/lessons/${short.body.id}/publish`)
     expect(refused.status).toBe(400)
-    expect(refused.body.error.message).toContain('at least 15 activities')
+    expect(refused.body.error.message).toContain('at least 5 activities')
+    const twelve = await call(admin, 'POST', '/lessons', {
+      slug: `twelve-${crypto.randomUUID().slice(0, 8)}`,
+      title: 'Twelve',
+      content: { steps: steps(12) }
+    })
+    expect((await call(admin, 'POST', `/lessons/${twelve.body.id}/publish`)).status).toBe(200)
+  })
+
+  test('a Which one? game takes up to six pictures, in a fixed order and without labels', async () => {
+    const step = (count) => ({
+      text: 'Find the red one.',
+      choices: ['red', 'yellow', 'green', 'blue', 'orange', 'pink', 'grey'].slice(0, count),
+      art: ['apple', 'banana', 'frog', 'car', 'blowfish', 'pig', 'elephant'].slice(0, count),
+      answer: 'red'
+    })
+    const create = (count) =>
+      call(admin, 'POST', '/lessons', {
+        slug: `colours-${crypto.randomUUID().slice(0, 8)}`,
+        title: 'Colours',
+        content: { player: 'choose', ordered: true, labels: false, steps: [step(count)] }
+      })
+    const six = await create(6)
+    expect(six.status).toBe(201)
+    expect(six.body.content).toMatchObject({ ordered: true, labels: false })
+    expect((await create(7)).status).toBe(400)
+  })
+
+  test('a lesson edited in the admin screens is marked so the lesson sync keeps it', async () => {
+    const lesson = await makePublishedLesson(admin)
+    expect(await editedInAdmin(lesson.slug)).toBe(false)
+    const draft = await call(admin, 'POST', `/lessons/${lesson.id}/draft`)
+    expect(await editedInAdmin(lesson.slug)).toBe(false)
+    await call(admin, 'PATCH', `/lessons/${draft.body.id}`, { title: 'Chitra’s version' })
+    expect(await editedInAdmin(lesson.slug)).toBe(true)
   })
 
   test('publishing a new version supersedes the old one', async () => {

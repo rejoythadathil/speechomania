@@ -21,7 +21,7 @@ export const LESSON_LEVELS = ['violet', 'indigo', 'blue', 'green', 'yellow', 'or
 
 export const CARD_LAYOUTS = ['row', 'in', 'on', 'under', 'beside', 'behind', 'in front of']
 
-export const CARD_COLOURS = ['blue', 'orange', 'pink', 'green', 'red']
+export const CARD_COLOURS = ['blue', 'orange', 'pink', 'green', 'red', 'yellow', 'brown', 'grey']
 
 export const PICTURE_PLAYERS = ['shark', 'balloons']
 
@@ -74,12 +74,13 @@ export const LESSON_LINES = [
   'outro',
   'reward',
   'medal',
-  'sticker'
+  'sticker',
+  'rest'
 ]
 
 export const MAX_ROUNDS = 40
 
-export const MIN_ACTIVITIES = 15
+export const MIN_ACTIVITIES = 5
 
 export const PAIRS_PER_BOARD = 3
 

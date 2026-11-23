@@ -184,6 +184,18 @@ export function updateLesson(user, id, body, ctx) {
   }, SERIAL)
 }
 
+export async function editedInAdmin(slug) {
+  const versions = await db.lessons.findMany({ where: { slug }, select: { id: true } })
+  const edits = await db.audit_logs.count({
+    where: {
+      entity_type: 'lesson',
+      action: 'lesson.updated',
+      entity_id: { in: versions.map((row) => row.id) }
+    }
+  })
+  return edits > 0
+}
+
 export function publishLesson(user, id, ctx) {
   return db.$transaction(async (tx) => {
     const current = await findRaw(tx, id)

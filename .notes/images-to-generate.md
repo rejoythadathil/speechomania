@@ -2,7 +2,8 @@
 
 Status (2026-11-22):
 - **Done 2026-11-22: Sheets Q, R, S, T and V** (50 pictures) are in the app.
-- **To do now: Sheet X** (one sheet, 19 pictures). It replaces Sheets U and W and the two Sheet R redos: the 12 places (the market looks like a market, the playground shows swings), the hen, a plain bat, proud, excited and calm, and new "shy" and "down" pictures.
+- **To do now: Sheet Y** (2 pictures): up and down still look alike on the slide, so both are redrawn as clear body poses.
+- **Done 2026-11-23: Sheet X** (one sheet, 19 pictures). It replaces Sheets U and W and the two Sheet R redos: the 12 places (the market looks like a market, the playground shows swings), the hen, a plain bat, proud, excited and calm, and new "shy" and "down" pictures.
 
 ## How to send them back
 1. Paste one whole block into Gemini. Each block already includes the style, so every sheet matches the existing pictures.
@@ -13,6 +14,17 @@ Status (2026-11-22):
 The names under each block are what each picture becomes, in grid order. They're for slicing, not for Gemini. I cut each sheet with `.notes/tools/slice-sprites.py`, swap the emoji out in the lessons, and show you every lesson locally before anything is merged.
 
 Three names are new on purpose, because the old ones are also button or tip icons in the app: `happy` replaces `smiling`, `stop-hand` replaces `raised-hand`, and `door`/`door-open` replace `locked`/`open` in Opposites. The lessons will point at the new names, so the Parent lock and the how-to-play tips don't change.
+
+## Sheet Y: Up and down
+Used in: Opposites (cards and Memory cards). Save it as `sheet-y.png`.
+
+```text
+A sprite sheet of 2 items, both the same boy (warm brown skin, short black hair, round friendly face, blue T-shirt, dark trousers), full body, standing on a small patch of grass, the same size: 1) up: he stands tall on tiptoe, both arms stretched straight up above his head, looking up at a red balloon floating just above his hands, 2) down: he bends down low with his knees bent, looking down and touching a red ball that sits on the grass by his feet. No slide, no stairs, no arrows.
+
+Cute 2D cartoon sticker illustrations for a calm learning app for young autistic children, matching one consistent set: soft rounded shapes, a clean dark-brown outline of even thickness, bright but gentle flat colours with one soft shade, simple friendly faces with round eyes, no scary or realistic details. Arrange the items in a grid of 2 columns and 1 rows, in exactly the order listed (left to right, then top to bottom), each item centred in its cell with lots of empty space around it. Items must not touch or overlap, and each item is one single connected object. Plain pure white background (#FFFFFF), no ground shadows, no frames, no text, no letters, no numbers, no watermark. People are friendly children or adults with warm brown skin and black hair.
+```
+
+Names in order: up, down
 
 ## Sheet X: Everything still missing (one sheet)
 Used in: Where questions, Where is it?, Can and can't, Ask me, Feelings and Opposites. Save it as `sheet-x.png`.

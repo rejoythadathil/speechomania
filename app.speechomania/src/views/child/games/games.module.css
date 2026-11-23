@@ -379,6 +379,28 @@
   width: 80%;
 }
 
+.versus.many {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: clamp(10px, 2.5vw, 28px);
+}
+
+.versus.many .versusCard {
+  width: min(26vw, 190px, 22vh);
+  padding: 12px;
+  border-radius: 28px;
+}
+
+@media (max-width: 600px) {
+  .versus.many {
+    grid-template-columns: repeat(2, auto);
+  }
+
+  .versus.many .versusCard {
+    width: min(38vw, 19vh);
+  }
+}
+
 .versusCard.right {
   transform: translateY(-14px);
 }
@@ -910,6 +932,18 @@
   --key: #c8483d;
 }
 
+.learnFront[data-colour='yellow'] {
+  --key: #b88a00;
+}
+
+.learnFront[data-colour='brown'] {
+  --key: #8a5a2b;
+}
+
+.learnFront[data-colour='grey'] {
+  --key: #6f7782;
+}
+
 .learnArt {
   display: flex;
   flex: 1;
@@ -969,6 +1003,18 @@
 
 .learnKey[data-colour='red'] {
   color: #c8483d;
+}
+
+.learnKey[data-colour='yellow'] {
+  color: #b88a00;
+}
+
+.learnKey[data-colour='brown'] {
+  color: #8a5a2b;
+}
+
+.learnKey[data-colour='grey'] {
+  color: #6f7782;
 }
 
 .learnPlace {

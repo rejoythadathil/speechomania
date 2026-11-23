@@ -10,7 +10,8 @@ const play = {
   outro: line('You did it!'),
   reward: line('You earned a trophy!'),
   medal: line('You earned a medal!'),
-  sticker: line('You earned a star! Let’s play again.')
+  sticker: line('You earned a star! Let’s play again.'),
+  rest: line('Well done! Take a little rest.')
 }
 
 const names = { swimmer: 'big boy' }
@@ -383,19 +384,36 @@ const questions = [
   ['frog', 'rabbit', false, 'No. This is a rabbit.'],
   ['apple', 'apple', true],
   ['car', 'car', true],
-  ['fish', 'bird', false, 'No. This is a bird.']
+  ['fish', 'bird', false, 'No. This is a bird.'],
+  ['cup', 'plate', false, 'No. This is a plate.'],
+  ['shoe', 'hat', false, 'No. This is a hat.'],
+  ['cow', 'pig', false, 'No. This is a pig.'],
+  ['bed', 'sofa', false, 'No. This is a sofa.']
 ]
 const article = (word) => (/^[aeiou]/.test(word) ? 'an' : 'a')
-const askMe = {
+const askStep = ([thing, art, answer, no]) => ({
+  text: `Is this a ${thing}?`,
+  art: [art],
+  answer,
+  sentence: line(answer ? `Yes. This is ${article(thing)} ${thing}.` : no)
+})
+const askGame = (rows, intro, extra = {}) => ({
   player: 'yesno',
-  lines: { ...play, intro: line('Look and listen. Say yes or no.') },
-  steps: questions.map(([thing, art, answer, no]) => ({
-    text: `Is this a ${thing}?`,
-    art: [art],
-    answer,
-    sentence: line(answer ? `Yes. This is ${article(thing)} ${thing}.` : no)
-  }))
-}
+  lines: { ...play, intro: line(intro) },
+  steps: rows.map(askStep),
+  ...extra
+})
+const sayNo = askGame(
+  questions.filter((row) => !row[2]),
+  'Look and listen. Is it the right picture?',
+  { tag: 'Say no' }
+)
+const sayYes = askGame(
+  questions.filter((row) => row[2]),
+  'Look and listen. Is it the right picture?',
+  { tag: 'Say yes' }
+)
+const askMe = askGame(questions, 'Look and listen. Say yes or no.', { rounds: 15 })
 
 const reasons = [
   [
@@ -917,6 +935,88 @@ const pronounCards = (game) =>
     )
   )
 
+const COLOUR_OF = {
+  apple: 'red',
+  balloon: 'red',
+  crayon: 'red',
+  banana: 'yellow',
+  lemon: 'yellow',
+  frog: 'green',
+  leaf: 'green',
+  broccoli: 'green',
+  'blue-heart': 'blue',
+  car: 'blue',
+  't-shirt': 'blue',
+  blowfish: 'orange',
+  basketball: 'orange',
+  pig: 'pink',
+  'ice-cream': 'pink',
+  bear: 'brown',
+  elephant: 'grey'
+}
+const thingName = {
+  'blue-heart': 'heart',
+  't-shirt': 'shirt',
+  'ice-cream': 'ice cream',
+  blowfish: 'fish',
+  basketball: 'ball'
+}
+const colourName = (art) => thingName[art] ?? art
+const coloursCards = cards(
+  [
+    'apple',
+    'banana',
+    'frog',
+    'blue-heart',
+    'blowfish',
+    'pig',
+    'bear',
+    'elephant',
+    'balloon',
+    'lemon',
+    'leaf',
+    'car',
+    'basketball',
+    'ice-cream',
+    'crayon'
+  ].map((art) =>
+    card(`This ${colourName(art)} is ${COLOUR_OF[art]}.`, [art], [COLOUR_OF[art]], {
+      colours: [COLOUR_OF[art]]
+    })
+  )
+)
+const colourRounds = [
+  [0, 'apple', 'banana'],
+  [1, 'frog', 'car'],
+  [0, 'lemon', 'pig'],
+  [1, 'basketball', 'leaf'],
+  [0, 'ice-cream', 'balloon'],
+  [1, 'blue-heart', 'blowfish', 'crayon'],
+  [0, 'broccoli', 'banana', 'pig'],
+  [2, 'lemon', 't-shirt', 'apple'],
+  [1, 'frog', 'ice-cream', 'basketball'],
+  [2, 'balloon', 'banana', 'car'],
+  [1, 'apple', 'lemon', 'frog', 'car', 'blowfish', 'pig'],
+  [3, 'leaf', 'ice-cream', 'blue-heart', 'crayon', 'banana', 'basketball'],
+  [4, 'pig', 'car', 'balloon', 'lemon', 'blowfish', 'broccoli'],
+  [0, 'ice-cream', 'frog', 'basketball', 'apple', 't-shirt', 'banana'],
+  [5, 'blue-heart', 'crayon', 'lemon', 'pig', 'blowfish', 'leaf']
+]
+const findColour = {
+  player: 'choose',
+  ordered: true,
+  labels: false,
+  tag: 'Find the colour',
+  lines: { ...play, intro: line('Listen to the colour. Tap the right one.') },
+  steps: colourRounds.map(([answer, ...art]) => ({
+    text: `Find the ${COLOUR_OF[art[answer]]} one.`,
+    choices: art.map((name) => COLOUR_OF[name]),
+    art,
+    answer: COLOUR_OF[art[answer]],
+    praise: line(`Yes! The ${colourName(art[answer])} is ${COLOUR_OF[art[answer]]}.`)
+  }))
+}
+
 const parts = (slug, title, flash, game, gameName, status = 'published', after = null) => [
   [`${slug}-cards`, `${title}, part 1: flashcards`, after ? { ...flash, after } : flash, status],
   [slug, `${title}, part 2: ${gameName}`, { ...game, after: `${slug}-cards` }, status]
@@ -929,6 +1029,8 @@ const LEVELS = {
   'where-questions': 'indigo',
   'who-does-it': 'blue',
   'ask-me': 'indigo',
+  'ask-me-no': 'indigo',
+  'ask-me-yes': 'indigo',
   colours: 'indigo',
   'can-and-cant': 'indigo',
   'morning-routine': 'indigo',
@@ -976,7 +1078,10 @@ const LESSON_LIST = [
     'published',
     'a-or-an'
   ),
-  ...parts('ask-me', 'Ask me', askCards, askMe, 'Yes or no'),
+  ['ask-me-cards', 'Ask me, part 1: flashcards', askCards, 'published'],
+  ['ask-me-no', 'Ask me, part 2: Say no', { ...sayNo, after: 'ask-me-cards' }, 'published'],
+  ['ask-me-yes', 'Ask me, part 3: Say yes', { ...sayYes, after: 'ask-me-no' }, 'published'],
+  ['ask-me', 'Ask me, part 4: Yes or no', { ...askMe, after: 'ask-me-yes' }, 'published'],
   ...parts('why', 'Why?', whyCards, why, 'Find the reason'),
   ...parts('objects-by-use', 'Objects by use', usesCards, objectsByUse, 'Which one?'),
   ...parts(
@@ -996,28 +1101,7 @@ const LESSON_LIST = [
   ...parts('this-these', 'This and these', thisTheseCards, thisOrThese, 'Word bubbles'),
   ...parts('he-she', 'He and she', pronounCards(heOrShe), heOrShe, 'Word bubbles'),
   ...parts('they', 'He, she and they', pronounCards(they), they, 'Word bubbles'),
-  [
-    'colours',
-    'Colours around us',
-    story(
-      ['This apple is red.', 'apple'],
-      ['This banana is yellow.', 'banana'],
-      ['This frog is green.', 'frog'],
-      ['This heart is blue.', 'blue-heart'],
-      ['This fish is orange.', 'blowfish'],
-      ['This leaf is green.', 'leaf'],
-      ['This car is blue.', 'car'],
-      ['This elephant is grey.', 'elephant'],
-      ['This bear is brown.', 'bear'],
-      ['This lemon is yellow.', 'lemon'],
-      ['This cloud is white.', 'cloud'],
-      ['This cake is pink.', 'cake'],
-      ['This balloon is red.', 'balloon'],
-      ['This ice cream is pink.', 'ice-cream'],
-      ['This shirt is blue.', 't-shirt']
-    ),
-    'published'
-  ],
+  ...parts('colours', 'Colours', coloursCards, findColour, 'Find the colour'),
   [
     'morning-routine',
     'My morning routine',
