@@ -24,6 +24,13 @@ export function shuffle(list) {
   return copy
 }
 
+export function sample(list, count, keepOrder = false) {
+  if (count == null || count >= list.length) return keepOrder ? list : shuffle(list)
+  const picked = new Set(shuffle(list.map((_, index) => index)).slice(0, count))
+  const chosen = list.filter((_, index) => picked.has(index))
+  return keepOrder ? chosen : shuffle(chosen)
+}
+
 export function useRound({ page, step, lines, voice, celebrate, tally, onDone }) {
   const [phase, setPhase] = useState('asking')
   const [wrongs, setWrongs] = useState(0)

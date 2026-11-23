@@ -9,7 +9,7 @@ import { Scenery } from '@/components/child/scenery.jsx'
 import child from '@/components/child/child.module.css'
 import { cx } from '@/utils/cx'
 import { GAMES, shuffle } from './games/index.js'
-import { tallyOf } from './games/use-round.js'
+import { sample, tallyOf } from './games/use-round.js'
 import styles from './lesson-player.module.css'
 import { RewardReveal } from './reward-reveal.jsx'
 import { inSets } from './sets.js'
@@ -81,7 +81,7 @@ export function lessonPages(content, lines, { cards = [], check = null } = {}) {
     pages = indexes.map((index) => ({ step: 'story', index }))
   } else if (player === 'pick') {
     const round = (step) => {
-      const order = shuffle(indexes)
+      const order = sample(indexes, content.rounds)
       const sides = balancedSides(order.length)
       return order.map((index, position) => ({ step, index, side: sides[position] }))
     }
@@ -94,12 +94,13 @@ export function lessonPages(content, lines, { cards = [], check = null } = {}) {
       return { step: 'play', index: group[0], group }
     })
   } else {
-    pages = (content.ordered ? indexes : shuffle(indexes))
-      .slice(0, Math.min(content.rounds ?? indexes.length, indexes.length))
-      .map((index) => ({ step: 'play', index }))
+    pages = sample(indexes, content.rounds, content.ordered).map((index) => ({
+      step: 'play',
+      index
+    }))
   }
   if (pages.length && lines.intro) pages[0] = { ...pages[0], intro: lines.intro }
-  const learning = cards.map((card, index) => ({
+  const learning = sample(cards, content.rounds, true).map((card, index) => ({
     step: 'card',
     index,
     player: 'card',

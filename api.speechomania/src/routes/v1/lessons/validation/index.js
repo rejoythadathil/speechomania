@@ -32,7 +32,8 @@ const audio = Joi.object({
       })
     )
     .max(300)
-    .required()
+    .required(),
+  url: Joi.any().strip()
 }).allow(null)
 
 const line = Joi.object({ text: text.required(), audio })
@@ -44,6 +45,7 @@ const storyStep = Joi.object({
   text: text.required(),
   art,
   image_key: Joi.string().max(300).allow(null, ''),
+  image_url: Joi.any().strip(),
   audio_key: Joi.string().max(300).allow(null, ''),
   audio
 })

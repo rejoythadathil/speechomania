@@ -33,3 +33,6 @@ export async function remove(c) {
   await service.removeLesson(c.get('user'), c.get('valid').params.id, requestCtx(c))
   return c.body(null, 204)
 }
+
+export const voice = async (c) =>
+  c.json(await service.voiceLesson(c.get('user'), c.get('valid').params.id, requestCtx(c)))

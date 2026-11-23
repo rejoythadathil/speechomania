@@ -1078,7 +1078,7 @@ const LESSON_LIST = [
     'published',
     'a-or-an'
   ),
-  ['ask-me-cards', 'Ask me, part 1: flashcards', askCards, 'published'],
+  ['ask-me-cards', 'Ask me, part 1: flashcards', { ...askCards, rounds: 15 }, 'published'],
   ['ask-me-no', 'Ask me, part 2: Say no', { ...sayNo, after: 'ask-me-cards' }, 'published'],
   ['ask-me-yes', 'Ask me, part 3: Say yes', { ...sayYes, after: 'ask-me-no' }, 'published'],
   ['ask-me', 'Ask me, part 4: Yes or no', { ...askMe, after: 'ask-me-yes' }, 'published'],
@@ -1087,7 +1087,7 @@ const LESSON_LIST = [
   ...parts(
     'where-questions',
     'Where questions',
-    chooseCards(whereQuestions),
+    { ...chooseCards(whereQuestions), rounds: 15 },
     { ...whereQuestions, tag: 'Find the place' },
     'Find the place'
   ),

@@ -2,7 +2,7 @@
 
 Status (2026-11-22):
 - **Done 2026-11-22: Sheets Q, R, S, T and V** (50 pictures) are in the app.
-- **To do now: Sheet Y** (2 pictures): up and down still look alike on the slide, so both are redrawn as clear body poses.
+- **Done 2026-11-23: Sheet Y** (2 pictures): up and down as clear body poses (balloon above, ball on the grass); down is scaled to match the boy in up.
 - **Done 2026-11-23: Sheet X** (one sheet, 19 pictures). It replaces Sheets U and W and the two Sheet R redos: the 12 places (the market looks like a market, the playground shows swings), the hen, a plain bat, proud, excited and calm, and new "shy" and "down" pictures.
 
 ## How to send them back

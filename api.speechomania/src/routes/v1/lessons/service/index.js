@@ -1,7 +1,13 @@
 import { audit } from '../../../../../common-service/audit/service/index.js'
 import { SERIAL } from '../../../../../common-service/db/constants/index.js'
 import { db } from '../../../../../common-service/db/service/index.js'
-import { signAudio } from '../../../../../common-service/voice/service/index.js'
+import {
+  audioKey,
+  signAudio,
+  speechFor,
+  voiceReady
+} from '../../../../../common-service/voice/service/index.js'
+import { lessonLines } from '../../../../../common-service/voice/utils/index.js'
 import { containsText, pageOf } from '../../../../../common-service/http/utils/index.js'
 import {
   alreadyDraft,
@@ -13,10 +19,11 @@ import {
   tooFewActivities,
   onlyDraftsEditable,
   onlyDraftsPublishable,
-  slugTaken
+  slugTaken,
+  voiceUnavailable
 } from '../exception/index.js'
 import { MIN_ACTIVITIES } from '../constants/index.js'
-import { assignedSlugs, lessonView, stepCount, versionSummary } from '../utils/index.js'
+import { assignedSlugs, lessonView, perPlay, stepCount, versionSummary } from '../utils/index.js'
 
 const fields = {
   id: true,
@@ -103,6 +110,7 @@ export async function listLessons(user, { status, level, q, ...window }) {
       level: content?.level ?? null,
       tag: content?.tag ?? null,
       step_count: stepCount(content),
+      per_play: perPlay(content),
       ...versionSummary(counts, lesson.slug)
     }))
   }
@@ -184,6 +192,41 @@ export function updateLesson(user, id, body, ctx) {
   }, SERIAL)
 }
 
+export async function voiceLesson(user, id, ctx) {
+  if (!voiceReady) throw voiceUnavailable()
+  const current = await findRaw(db, id)
+  if (current.status !== 'draft') throw onlyDraftsEditable()
+  const recorded = new Map()
+  let generated = 0
+  for (const line of lessonLines(current.content)) {
+    if (line.audio?.key === audioKey(line.text) || recorded.has(line.text)) continue
+    const { generated: fresh, ...audio } = await speechFor(line.text)
+    recorded.set(line.text, audio)
+    if (fresh) generated += 1
+  }
+  return db.$transaction(async (tx) => {
+    const draft = await findRaw(tx, id)
+    if (draft.status !== 'draft') throw onlyDraftsEditable()
+    const content = structuredClone(draft.content)
+    for (const line of lessonLines(content)) {
+      if (recorded.has(line.text)) line.audio = recorded.get(line.text)
+    }
+    await tx.lessons.update({ where: { id }, data: { content } })
+    await audit(tx, {
+      actor: user,
+      action: 'lesson.audio_generated',
+      entityType: 'lesson',
+      entityId: id,
+      diff: { lines: recorded.size, generated },
+      ctx
+    })
+    return {
+      ...(await findLesson(tx, user, id)),
+      voiced: { lines: recorded.size, generated }
+    }
+  }, SERIAL)
+}
+
 export async function editedInAdmin(slug) {
   const versions = await db.lessons.findMany({ where: { slug }, select: { id: true } })
   const edits = await db.audit_logs.count({
@@ -202,7 +245,8 @@ export function publishLesson(user, id, ctx) {
     if (current.status !== 'draft') throw onlyDraftsPublishable()
     const steps = stepCount(current.content)
     if (!steps) throw noSteps()
-    if (steps < MIN_ACTIVITIES) throw tooFewActivities(steps, MIN_ACTIVITIES)
+    if (perPlay(current.content) < MIN_ACTIVITIES)
+      throw tooFewActivities(perPlay(current.content), MIN_ACTIVITIES)
     await tx.lessons.updateMany({
       where: { slug: current.slug, status: 'published' },
       data: { status: 'superseded' }

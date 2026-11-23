@@ -1,6 +1,17 @@
-import { CHECK_QUESTIONS } from '../constants/index.js'
+import { CHECK_QUESTIONS, PAIRS_PER_BOARD } from '../constants/index.js'
 
 export const stepCount = (content) => content?.steps?.length ?? 0
+
+export function perPlay(content) {
+  const pool = stepCount(content)
+  const player = content?.player ?? 'story'
+  if (player === 'story') return pool
+  if (player === 'match') {
+    const boards = Math.floor(pool / PAIRS_PER_BOARD)
+    return Math.min(content.rounds ?? boards, boards) * PAIRS_PER_BOARD
+  }
+  return Math.min(content.rounds ?? pool, pool)
+}
 
 export const assignedSlugs = (children) => [
   ...new Set(children.flatMap((child) => child.assigned_lessons ?? []))
@@ -10,6 +21,7 @@ export function lessonView({ creator, publisher, ...lesson }) {
   return {
     ...lesson,
     step_count: stepCount(lesson.content),
+    per_play: perPlay(lesson.content),
     cards: learnCards(lesson.content),
     check: checkOf(lesson.metadata),
     created_by_name: creator.full_name,

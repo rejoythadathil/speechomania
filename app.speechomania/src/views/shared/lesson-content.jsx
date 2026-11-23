@@ -25,12 +25,19 @@ export function roundsLabel(content) {
   const player = playerOf(content)
   const steps = content.steps?.length ?? 0
   if (player === 'story') return `${steps} pages`
-  if (player === 'cards') return `${steps} flashcards`
-  if (player === 'pick') return `${steps} questions`
+  if (player === 'cards' || player === 'pick') {
+    const shown = Math.min(content.rounds ?? steps, steps)
+    const unit = player === 'cards' ? 'flashcards' : 'questions'
+    return shown < steps
+      ? `${shown} ${unit} each play, picked from ${steps} (${steps - shown} spare)`
+      : `${steps} ${unit}`
+  }
   const pool = player === 'match' ? Math.floor(steps / PAIRS_PER_BOARD) : steps
   const rounds = Math.min(content.rounds ?? pool, pool)
   const unit = player === 'match' ? 'boards' : 'rounds'
-  return rounds < pool ? `${rounds} ${unit} picked from ${pool}` : `${rounds} ${unit}`
+  return rounds < pool
+    ? `${rounds} ${unit} each play, picked from ${pool} (${pool - rounds} spare)`
+    : `${rounds} ${unit}`
 }
 
 function Voice({ line }) {
