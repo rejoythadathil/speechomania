@@ -22,6 +22,7 @@ import { sceneFor } from '@/components/child/scenes.js'
 import { ChildPicker } from '@/components/shared/child-picker.jsx'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog.jsx'
 import { DataState } from '@/components/shared/data-state.jsx'
+import { ExportButton } from '@/components/shared/export-button.jsx'
 import { EmptyState } from '@/components/shared/empty-state.jsx'
 import { FormAlert } from '@/components/shared/form-alert.jsx'
 import { ListFooter } from '@/components/shared/list-footer.jsx'
@@ -34,6 +35,7 @@ import { useToast } from '@/components/shared/toast.jsx'
 import { useDebounced } from '@/hooks/use-debounced.js'
 import { useResource } from '@/hooks/use-resource.js'
 import { api } from '@/services/api.js'
+import { dateCell, exportFileName, fetchAllPages, label, sheetOf } from '@/utils/export.js'
 import { formatDate, formatDateTime } from '@/utils/format'
 
 const RESULT_OPTIONS = [
@@ -233,6 +235,55 @@ function ChildResults({ assessment, onChanged }) {
     page_size: pageSize
   })
 
+  async function exportResults() {
+    const filters = { q, status: status === 'all' ? undefined : status }
+    const [all, summary] = await Promise.all([
+      fetchAllPages((page, size) =>
+        api(`/assessments/${assessment.id}/results`, {
+          query: { ...filters, page, page_size: size }
+        })
+      ),
+      api(`/assessments/${assessment.id}/summary`)
+    ])
+    const hidden = (row) => row.latest && row.latest.score === undefined
+    const children = [
+      { label: 'Child', width: 26, value: (row) => row.display_name },
+      { label: 'Mentor', width: 24, value: (row) => row.mentor_name ?? 'No mentor' },
+      { label: 'Status', width: 14, value: (row) => label(row.status) },
+      { label: 'Score', width: 10, value: (row) => (hidden(row) ? 'Hidden' : row.latest?.score) },
+      { label: 'Out of', width: 10, value: (row) => (hidden(row) ? null : row.latest?.max_score) },
+      { label: 'Percent', width: 10, value: (row) => (hidden(row) ? null : row.latest?.percent) },
+      {
+        label: 'Passed',
+        width: 10,
+        value: (row) =>
+          row.latest?.passed === true ? 'Yes' : row.latest?.passed === false ? 'No' : null
+      },
+      { label: 'Attempts', width: 10, value: (row) => row.attempts },
+      { label: 'Due', width: 14, value: (row) => dateCell(row.due_on) }
+    ]
+    const questions = [
+      { label: 'No.', width: 6, value: (question) => question.index + 1 },
+      { label: 'Question', width: 44, value: (question) => question.text },
+      { label: 'From lesson', width: 30, value: (question) => question.lesson_title },
+      { label: 'Right first time (%)', width: 18, value: (question) => question.accuracy },
+      { label: 'Answered', width: 10, value: (question) => question.answered }
+    ]
+    return {
+      fileName: exportFileName('assessment-results', [
+        assessment.title,
+        filters.status?.replace('_', '-'),
+        q && `search-${q}`
+      ]),
+      sheets: [
+        sheetOf('Children', children, all.items),
+        sheetOf('Questions', questions, summary.questions ?? [])
+      ],
+      rows: all.items.length,
+      complete: all.complete
+    }
+  }
+
   return (
     <Panel
       title="Children"
@@ -262,6 +313,11 @@ function ChildResults({ assessment, onChanged }) {
               setPage(1)
             }}
           />
+          {results.data?.total ? (
+            <span className="ml-auto">
+              <ExportButton build={exportResults} />
+            </span>
+          ) : null}
         </>
       }
       footer={
