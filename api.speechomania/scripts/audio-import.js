@@ -17,7 +17,7 @@ if (
   )
   process.exit(1)
 }
-await ensureMediaBucket()
+if (config.APP_ENV === 'local') await ensureMediaBucket()
 
 let uploaded = 0
 let present = 0
