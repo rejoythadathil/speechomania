@@ -1,0 +1,94 @@
+{
+  "pageSize": "A4",
+  "pageMargins": [36, 40, 36, 48],
+  "info": { "title": <%- json(`${lesson.title} · flashcards for ${child.name}`) %> },
+  "watermark": { "text": <%- json(watermark) %>, "opacity": 0.035, "angle": -36, "fontSize": 20, "color": "#136197", "font": "JakartaSemi" },
+  "defaultStyle": { "font": "Jakarta", "fontSize": 10, "color": "#243142", "lineHeight": 1.25 },
+  "content": [
+    { "canvas": [
+        { "type": "rect", "x": 0, "y": 0, "w": 595.28, "h": 190, "color": "#136197" },
+        { "type": "rect", "x": 0, "y": 186, "w": 595.28, "h": 4, "color": "#1479bb" }
+      ], "absolutePosition": { "x": 0, "y": 0 } },
+    { "text": "SPEECHOMANIA · FLASHCARDS", "font": "JakartaSemi", "fontSize": 8, "characterSpacing": 2.4, "color": "#bcdcf2", "absolutePosition": { "x": 44, "y": 44 } },
+    { "text": <%- json(lesson.title) %>, "font": "Bricolage", "fontSize": 28, "color": "#ffffff", "absolutePosition": { "x": 44, "y": 62 } },
+    { "text": <%- json(`${cards.length} cards for ${child.name} · prepared for ${parent.name} on ${today}`) %>, "fontSize": 9.5, "color": "#d6eaf8", "absolutePosition": { "x": 44, "y": 140 } },
+    { "text": "", "margin": [0, 170, 0, 0] },
+    { "text": "How to use these cards", "font": "Bricolage", "fontSize": 15, "color": "#10324d", "margin": [8, 0, 0, 8] },
+    {
+      "margin": [8, 0, 8, 0],
+      "table": {
+        "widths": [22, "*"],
+        "body": [
+<% tips.forEach((tip, index) => { %>
+          <%- index ? ',' : '' %> [
+            { "text": <%- json(String(index + 1)) %>, "font": "Bricolage", "fontSize": 13, "color": "#1479bb" },
+            { "text": <%- json(tip) %>, "margin": [0, 1.5, 0, 0] }
+          ]
+<% }) %>
+        ]
+      },
+      "layout": "rows"
+    }
+<% const shown = index.filter((item) => item.art) %>
+<% if (shown.length) { %>
+    , { "text": "In this set", "font": "Bricolage", "fontSize": 15, "color": "#10324d", "margin": [8, 26, 0, 10] }
+<% for (let start = 0; start < shown.length; start += 6) { %>
+    , { "margin": [8, 0, 8, 12], "columns": [
+<% for (let at = start; at < start + 6; at++) { const item = shown[at] %>
+        <%- at > start ? ',' : '' %>
+<% if (item) { %>
+        { "width": "*", "stack": [
+            { "image": <%- json(item.art) %>, "fit": [52, 52], "alignment": "center" },
+            { "text": <%- json(item.word ?? '') %>, "alignment": "center", "font": "JakartaSemi", "fontSize": 8.5, "color": "#425062", "margin": [0, 4, 0, 0] }
+          ] }
+<% } else { %>
+        { "width": "*", "text": "" }
+<% } %>
+<% } %>
+      ] }
+<% } %>
+<% } %>
+<% pages.forEach((page) => { %>
+    , {
+      "pageBreak": "before",
+      "table": {
+        "widths": ["*", "*"],
+        "heights": 220,
+        "dontBreakRows": true,
+        "body": [
+<% page.forEach((row, rowIndex) => { %>
+          <%- rowIndex ? ',' : '' %> [
+<% row.forEach((card, cellIndex) => { %>
+            <%- cellIndex ? ',' : '' %>
+<% if (!card) { %>
+            { "text": "" }
+<% } else { %>
+            { "stack": [
+                { "text": <%- json(`${card.number} / ${cards.length}`) %>, "font": "JakartaSemi", "fontSize": 7, "color": "#9aa6b3", "alignment": "right" },
+                { "margin": [0, 6, 0, 0], "columns": [
+                    { "width": "*", "text": "" },
+                    { "width": <%- json(card.box.width) %>, "stack": [
+                        { "canvas": [{ "type": "rect", "x": 0, "y": 0, "w": <%- json(card.box.width) %>, "h": <%- json(card.box.height) %>, "color": "#ffffff" }] }
+<% for (const picture of card.box.pictures) { %>
+                        , { "image": <%- json(picture.name) %>, "fit": [<%- json(picture.width) %>, <%- json(picture.width) %>], "relativePosition": { "x": <%- json(picture.x) %>, "y": <%- json(picture.y - card.box.height) %> } }
+<% } %>
+                      ] },
+                    { "width": "*", "text": "" }
+                  ] },
+                { "margin": [0, <%- json(Math.max(8, 150 - card.box.height)) %>, 0, 0], "alignment": "center", "font": "Bricolage", "fontSize": 15, "lineHeight": 1.15, "color": "#243142", "text": [
+<% card.words.forEach((word, wordIndex) => { %>
+                  <%- wordIndex ? ',' : '' %> { "text": <%- json(word.text) %><% if (word.key) { %>, "color": <%- json(word.colour) %><% } %> }
+<% }) %>
+                ] }
+              ] }
+<% } %>
+<% }) %>
+          ]
+<% }) %>
+        ]
+      },
+      "layout": "cut"
+    }
+<% }) %>
+  ]
+}

@@ -9,7 +9,8 @@ export function ExportButton({
   query,
   label = 'Export to Excel',
   icon = RiFileExcel2Line,
-  size = 'small'
+  size = 'small',
+  iconOnly = false
 }) {
   const notify = useToast()
   const [pending, setPending] = useState(false)
@@ -26,7 +27,16 @@ export function ExportButton({
   }
 
   return (
-    <Button variant="secondary" size={size} leadingIcon={icon} onClick={run} disabled={pending}>
+    <Button
+      variant="secondary"
+      size={size}
+      leadingIcon={icon}
+      iconOnly={iconOnly}
+      aria-label={iconOnly ? label : undefined}
+      title={iconOnly ? label : undefined}
+      onClick={run}
+      disabled={pending}
+    >
       {pending ? 'Preparing…' : label}
     </Button>
   )

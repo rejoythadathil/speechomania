@@ -23,6 +23,7 @@ import { PrivacyView, TermsView } from '@/views/public/legal.jsx'
 import { WelcomeView } from '@/views/public/welcome.jsx'
 import { StartView } from '@/views/public/start.jsx'
 import { TryView } from '@/views/public/try.jsx'
+import { VerifyView } from '@/views/public/verify.jsx'
 import { NotFoundView } from '@/views/shared/not-found.jsx'
 import { SettingsView } from '@/views/shared/settings.jsx'
 
@@ -67,6 +68,8 @@ export const router = createBrowserRouter([
   { path: '/welcome', element: <WelcomeView /> },
   { path: '/privacy', element: <PrivacyView /> },
   { path: '/terms', element: <TermsView /> },
+  { path: '/verify', element: <VerifyView /> },
+  { path: '/verify/:code', element: <VerifyView /> },
   {
     element: <RequireAuth />,
     children: [
