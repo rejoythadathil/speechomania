@@ -16,10 +16,12 @@ import { lessonsRoute } from './lessons/route/index.js'
 import { remarksRoute } from './remarks/route/index.js'
 import { reportsRoute } from './reports/route/index.js'
 import { usersRoute } from './users/route/index.js'
+import { verifyRoute } from './verify/route/index.js'
 
 export const v1 = new Hono()
   .route('/showcase', showcaseRoute)
   .route('/signup', signupRoute)
+  .route('/verify', verifyRoute)
   .use(requireAuth)
   .route('/auth', authRoute)
   .route('/account', accountRoute)

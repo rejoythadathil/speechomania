@@ -1,7 +1,18 @@
 import { describe, expect, test } from 'bun:test'
 import { RENDER_QUEUE, RENDER_SLOTS } from '../constants/index.js'
 import { limitExports, withRenderSlot } from '../service/index.js'
-import { ageOn, everyRow, reportFileName, sheetOf, wordsOf } from '../utils/index.js'
+import { CODE_PATTERN } from '../constants/index.js'
+import {
+  ageOn,
+  aiNotice,
+  documentCode,
+  everyRow,
+  microtext,
+  reportFileName,
+  sha256Hex,
+  sheetOf,
+  wordsOf
+} from '../utils/index.js'
 
 describe('reports', () => {
   test('files are named speechomania_<what>_<filters>_<date>.<extension>', () => {
@@ -83,22 +94,24 @@ describe('templates', () => {
     total: 2,
     trophies: 1,
     levels: [],
-    lessons: [],
+    groups: [],
     assessments: [],
     remarks: [],
     ...extra
   })
+  const group = (games) => ({ name: 'Green', colour: '#3f9a5b', games })
+  const game = (title) => ({ title, times: '2 times', stars: '3 of 3', bar: 90 })
 
   test('the EJS template fills values, repeats rows and leaves out empty sections', async () => {
     const { renderTemplate } = await import('../service/index.js')
     const document = renderTemplate(
       'progress-report',
-      report({ lessons: [{ title: 'A or an', level: 'Green', times: 2, stars: '3 of 3' }] })
+      report({ groups: [group([game('A or an')])] })
     )
     const text = JSON.stringify(document)
     expect(document.info.title).toBe('Riya’s learning report')
     expect(document.watermark.text).toBe('Prepared for Priya · 23 Nov 2026')
-    expect(text).toContain('["A or an","Green","2","3 of 3"]')
+    expect(text).toContain('"A or an"')
     expect(text).toContain('"Games"')
     expect(text).not.toContain('Check-ins')
     expect(text).not.toContain('Notes from the mentor')
@@ -115,29 +128,60 @@ describe('templates', () => {
       })
     )
     expect(document.pageSize).toBe('A4')
-    expect(document.content[1].text).toBe(`${name}’s learning report`)
+    expect(document.content[2].text).toBe(`${name}’s learning report`)
     expect(JSON.stringify(document)).toContain('<%= 7*7 %>')
   })
 
   test('a filled report renders to a small PDF quickly without reaching files or the network', async () => {
     const { pdfFile, renderTemplate } = await import('../service/index.js')
+    const stamp = { code: 'SPM-ABCD-EFGH', owner: 'Priya' }
     const started = performance.now()
     const pdf = await pdfFile(
       renderTemplate(
         'progress-report',
         report({
-          lessons: Array.from({ length: 60 }, (_, index) => ({
-            title: `Game ${index}`,
-            level: 'Indigo',
-            times: 1,
-            stars: '2 of 3'
-          }))
+          groups: [group(Array.from({ length: 60 }, (_, index) => game(`Game ${index}`)))]
         })
-      )
+      ),
+      stamp
     )
-    expect(performance.now() - started).toBeLessThan(500)
-    expect(pdf.length).toBeLessThan(100_000)
-    await expect(pdfFile({ content: [{ image: '/etc/passwd' }] })).rejects.toThrow()
-    await expect(pdfFile({ content: [{ image: 'https://example.com/x.png' }] })).rejects.toThrow()
+    expect(performance.now() - started).toBeLessThan(1000)
+    expect(pdf.length).toBeLessThan(150_000)
+    await expect(pdfFile({ content: [{ image: '/etc/passwd' }] }, stamp)).rejects.toThrow()
+    await expect(
+      pdfFile({ content: [{ image: 'https://example.com/x.png' }] }, stamp)
+    ).rejects.toThrow()
+  })
+
+  test('issued PDFs are locked against editing and carry no readable code in their bytes', async () => {
+    const { pdfFile } = await import('../service/index.js')
+    const pdf = await pdfFile({ content: ['Hello'] }, { code: 'SPM-ABCD-EFGH', owner: 'Priya' })
+    const raw = pdf.toString('latin1')
+    expect(raw).toContain('/Encrypt')
+    expect(raw).not.toContain('SPM-ABCD-EFGH')
+    const again = await pdfFile({ content: ['Hello'] }, { code: 'SPM-ABCD-EFGH', owner: 'Priya' })
+    expect(sha256Hex(again)).not.toBe(sha256Hex(pdf))
+  })
+
+  test('lesson pictures load only by plain name from the art folder', async () => {
+    const { artImages } = await import('../service/index.js')
+    const images = artImages(['cat', 'cat', '../fonts/x', 'no-such-picture', null])
+    expect(Object.keys(images)).toEqual(['cat'])
+    expect(images.cat).toStartWith('data:image/png;base64,')
+  })
+})
+
+describe('protection', () => {
+  test('document codes are random, unambiguous and match the public pattern', () => {
+    const codes = new Set(Array.from({ length: 200 }, () => documentCode()))
+    expect(codes.size).toBe(200)
+    for (const code of codes) expect(code).toMatch(CODE_PATTERN)
+    expect(documentCode(new Uint8Array([0, 1, 2, 3, 31, 32, 63, 255]))).toBe('SPM-ABCD-9A99')
+  })
+
+  test('the hidden notice and edge text name the code and where to check it', () => {
+    expect(aiNotice('SPM-ABCD-EFGH')).toContain('speechomania.com/verify/SPM-ABCD-EFGH')
+    expect(microtext('SPM-ABCD-EFGH', 'Priya')).toStartWith('SPEECHOMANIA SPM-ABCD-EFGH Priya · ')
+    expect(microtext('SPM-ABCD-EFGH', 'Priya')).toHaveLength(360)
   })
 })

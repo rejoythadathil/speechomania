@@ -4,7 +4,8 @@ import {
   RiFilePdf2Line,
   RiLockLine,
   RiPencilLine,
-  RiPlayLine
+  RiPlayLine,
+  RiPrinterLine
 } from '@remixicon/react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
@@ -403,6 +404,16 @@ export function ChildDetailView() {
                                 {titleFor(slug)}
                               </span>
                             )}
+                            {lessonFor(slug)?.player === 'cards' &&
+                            user.role === 'parent' &&
+                            data.status === 'active' ? (
+                              <ExportButton
+                                path={`/reports/children/${data.id}/lessons/${lessonFor(slug).id}/cards`}
+                                label={`Print ${titleFor(slug)}`}
+                                icon={RiPrinterLine}
+                                iconOnly
+                              />
+                            ) : null}
                           </li>
                         ))}
                     </ol>

@@ -8,3 +8,11 @@ export const progress = async (c) =>
     ...(await service.progressReport(c.get('user'), c.get('valid').params.id, requestCtx(c))),
     type: PDF_TYPE
   })
+
+export const cards = async (c) => {
+  const { id, lessonId } = c.get('valid').params
+  return fileResponse(c, {
+    ...(await service.lessonCards(c.get('user'), id, lessonId, requestCtx(c))),
+    type: PDF_TYPE
+  })
+}
