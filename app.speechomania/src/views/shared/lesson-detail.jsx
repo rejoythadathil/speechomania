@@ -616,7 +616,7 @@ export function LessonDetailView() {
               isOpen={modal === 'delete'}
               onOpenChange={() => setModal(null)}
               title="Delete this draft?"
-              message="The draft and its unsaved steps are removed. Published versions are not affected."
+              message="Published versions are not affected. It moves to Backup, where an admin can restore it until the backup period ends; then it is deleted for good."
               confirmLabel="Delete draft"
               onConfirm={async () => {
                 await api(`/lessons/${data.id}`, { method: 'DELETE' })

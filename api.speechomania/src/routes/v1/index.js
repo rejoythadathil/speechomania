@@ -4,6 +4,7 @@ import { accountRoute } from './account/route/index.js'
 import { assessmentsRoute } from './assessments/route/index.js'
 import { auditRoute } from './audit/route/index.js'
 import { authRoute } from './auth/route/index.js'
+import { backupRoute } from './backup/route/index.js'
 import { changeRequestsRoute } from './change-requests/route/index.js'
 import { childrenRoute } from './children/route/index.js'
 import { dashboardRoute } from './dashboard/route/index.js'
@@ -35,5 +36,6 @@ export const v1 = new Hono()
   .route('/learning', learningRoute)
   .route('/change-requests', changeRequestsRoute)
   .route('/audit', auditRoute)
+  .route('/backup', backupRoute)
   .route('/exports', exportsRoute)
   .route('/reports', reportsRoute)

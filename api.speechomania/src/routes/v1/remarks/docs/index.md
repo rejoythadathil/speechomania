@@ -7,7 +7,7 @@ Notes about a child from mentors and admins, internal or shared with the parent.
 | GET | `/children/:childId/remarks` | all | `page`, `page_size` | page of remarks, newest first; parents get `shared` only |
 | POST | `/children/:childId/remarks` | admin, mentor | `body`, `visibility` (`internal` default, `shared`), `metadata` | remark |
 | PATCH | `/remarks/:id` | admin, mentor | `body`, `visibility` | remark (authors only) |
-| DELETE | `/remarks/:id` | admin, mentor | | 204 (author or admin) |
+| DELETE | `/remarks/:id` | admin, mentor | | 204 (author or admin); moves the note to Backup, see `backup` |
 | GET | `/remarks/unread` | admin | `page`, `page_size` | page of unseen remarks |
 | POST | `/remarks/:id/seen` | admin | | remark marked seen |
 

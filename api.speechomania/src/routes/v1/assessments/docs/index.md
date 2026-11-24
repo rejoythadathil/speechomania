@@ -9,7 +9,7 @@ Assessments built from lesson questions. Admins create, edit (drafts only), publ
 | GET | `/assessments/:id` | admin, mentor | | the assessment with `items` (signed audio), `settings` with defaults filled in |
 | PATCH | `/assessments/:id` | admin | `title`, `description`, `settings` (replaces the whole object), `items` | the draft; 409 when not a draft |
 | POST | `/assessments/:id/publish` | admin | | published; 400 without questions |
-| DELETE | `/assessments/:id` | admin | | 204: deletes a draft or archives a published assessment |
+| DELETE | `/assessments/:id` | admin | | 204: moves a draft to Backup (`status: soft_deleted`, hidden everywhere) or archives a published assessment |
 | POST | `/assessments/:id/assignments` | admin, mentor | `child_ids` (1–100), `due_on` | `{ assessment_id, assigned }`; each child must be in scope (404 otherwise); 409 when not published |
 | DELETE | `/assessments/:id/assignments/:childId` | admin, mentor | | 204; past results are kept |
 | GET | `/assessments/:id/results` | admin, mentor | `status` (`not_started`, `in_progress`, `completed`), `q`, `page`, `page_size` | page of assigned children in scope with `status`, `attempts`, `latest` score |

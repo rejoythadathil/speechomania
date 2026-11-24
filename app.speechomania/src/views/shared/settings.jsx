@@ -8,6 +8,7 @@ import {
   RiUserHeartLine
 } from '@remixicon/react'
 import { useState } from 'react'
+import { SelectField } from '@/components/shared/select-field.jsx'
 import { Button } from '@/components/base/buttons/button'
 import { Input } from '@/components/base/input/input'
 import { DataState } from '@/components/shared/data-state.jsx'
@@ -136,6 +137,62 @@ function AvatarPicker({ profile, onSaved }) {
           )
         })}
       </div>
+    </Panel>
+  )
+}
+
+const RETENTION_OPTIONS = [
+  { id: '60', label: '60 days' },
+  { id: '90', label: '90 days' }
+]
+
+function BackupSettings() {
+  const notify = useToast()
+  const current = useResource('/backup/settings')
+  const [choice, setChoice] = useState(null)
+  const [pending, setPending] = useState(false)
+  const saved = current.data ? String(current.data.retention_days) : null
+  const value = choice ?? saved
+
+  async function save() {
+    setPending(true)
+    try {
+      await api('/backup/settings', {
+        method: 'PUT',
+        body: { retention_days: Number(value) }
+      })
+      notify(`Deleted items are now kept for ${value} days`)
+      setChoice(null)
+      current.reload()
+    } catch (error) {
+      notify(error.message, { status: 'error' })
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <Panel
+      title="Backup"
+      description="How long deleted children, people, notes and drafts wait in Backup before they are deleted for good."
+    >
+      <div className="flex flex-wrap items-end gap-3">
+        <SelectField
+          label="Keep deleted items for"
+          className="flex w-52 flex-col gap-1"
+          options={RETENTION_OPTIONS}
+          value={value}
+          onChange={setChoice}
+        />
+        <Button size="small" onClick={save} disabled={pending || !value || value === saved}>
+          {pending ? 'Saving…' : 'Save'}
+        </Button>
+      </div>
+      {value && saved && Number(value) < Number(saved) ? (
+        <p className="mt-2 text-body-2-medium text-text-secondary">
+          Items deleted more than {value} days ago will be deleted for good within the hour.
+        </p>
+      ) : null}
     </Panel>
   )
 }
@@ -307,6 +364,7 @@ export function SettingsView() {
             <AvatarPicker profile={data} onSaved={saved} />
             <DetailsForm key={data.full_name + data.phone} profile={data} onSaved={saved} />
             <Security email={data.email} />
+            {data.role === 'admin' ? <BackupSettings /> : null}
           </>
         ) : null}
       </DataState>

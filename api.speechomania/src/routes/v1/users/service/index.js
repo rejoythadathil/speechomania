@@ -1,3 +1,4 @@
+import { deletedMark } from '../../backup/utils/index.js'
 import { audit } from '../../../../../common-service/audit/service/index.js'
 import { SERIAL } from '../../../../../common-service/db/constants/index.js'
 import { db } from '../../../../../common-service/db/service/index.js'
@@ -137,7 +138,18 @@ export async function deleteUser(actor, id, ctx) {
       })
     await tx.users.update({
       where: { id },
-      data: { deleted_at: new Date(), status: 'disabled', updated_at: new Date() }
+      data: {
+        deleted_at: new Date(),
+        status: 'disabled',
+        metadata: {
+          ...current.metadata,
+          deleted: deletedMark(actor, {
+            status: current.status,
+            unassigned_children: unassigned.map((row) => row.id)
+          })
+        },
+        updated_at: new Date()
+      }
     })
     await audit(tx, {
       actor,

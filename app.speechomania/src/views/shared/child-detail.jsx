@@ -330,7 +330,7 @@ export function ChildDetailView() {
                 ) : null}
                 {user.role === 'admin' && data.status !== 'archived' ? (
                   <Button variant="secondary" onClick={() => setModal('remove')}>
-                    Archive
+                    Delete
                   </Button>
                 ) : null}
               </div>
@@ -471,12 +471,12 @@ export function ChildDetailView() {
             <ConfirmDialog
               isOpen={modal === 'remove'}
               onOpenChange={() => setModal(null)}
-              title={`Archive ${data.display_name}?`}
-              message="The child is hidden from mentors and the parent. Their records are kept for the retention period."
-              confirmLabel="Archive child"
+              title={`Delete ${data.display_name}?`}
+              message="The child is hidden from mentors and the parent. It moves to Backup, where an admin can restore it until the backup period ends; then it is deleted for good. Their games and notes go with them."
+              confirmLabel="Delete child"
               onConfirm={async () => {
                 await api(`/children/${data.id}`, { method: 'DELETE' })
-                notify(`${data.display_name} was archived`)
+                notify(`${data.display_name} was moved to Backup`)
                 navigate('/children')
               }}
             />

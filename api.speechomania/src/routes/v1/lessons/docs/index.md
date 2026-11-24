@@ -12,7 +12,7 @@ Versioned lessons. One row per version (`slug` + `version`); at most one draft a
 | PATCH | `/lessons/:id` | admin | `title`, `content`, `metadata` | the draft |
 | POST | `/lessons/:id/publish` | admin | | published; the previous one becomes `superseded` |
 | POST | `/lessons/:id/draft` | admin | | new draft version copied from this one |
-| DELETE | `/lessons/:id` | admin | | 204: deletes a draft or archives a published lesson |
+| DELETE | `/lessons/:id` | admin | | 204: moves a draft to Backup (`status: soft_deleted`, hidden everywhere) or archives a published lesson |
 
 ## Content
 - `player: 'story'`: `steps: [{ text, image_key?, audio? }]`.

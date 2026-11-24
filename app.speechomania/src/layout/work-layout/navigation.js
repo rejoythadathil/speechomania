@@ -1,4 +1,5 @@
 import {
+  RiArchiveDrawerLine,
   RiBookOpenLine,
   RiClipboardLine,
   RiDashboardLine,
@@ -31,7 +32,13 @@ export const NAVIGATION = {
         { to: '/change-requests', label: 'Suggestions', icon: RiEditBoxLine }
       ]
     },
-    { label: 'System', items: [{ to: '/audit', label: 'Activity history', icon: RiFileListLine }] }
+    {
+      label: 'System',
+      items: [
+        { to: '/audit', label: 'Activity history', icon: RiFileListLine },
+        { to: '/backup', label: 'Backup', icon: RiArchiveDrawerLine }
+      ]
+    }
   ],
   mentor: [
     { label: 'Overview', items: [{ to: '/dashboard', label: 'Dashboard', icon: RiDashboardLine }] },
