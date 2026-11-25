@@ -3,6 +3,7 @@ import { homeFor, useAuth } from '@/hooks/use-auth.jsx'
 import { LearningLayout } from '@/layout/learning-layout/learning-layout.jsx'
 import { WorkLayout } from '@/layout/work-layout/work-layout.jsx'
 import { AuditView } from '@/views/admin/audit.jsx'
+import { BackupView } from '@/views/admin/backup.jsx'
 import { PeopleView } from '@/views/admin/people.jsx'
 import { LoginView } from '@/views/auth/login.jsx'
 import { AssessmentPlayerView } from '@/views/child/assessment-player.jsx'
@@ -113,7 +114,8 @@ export const router = createBrowserRouter([
             element: <RequireRole roles={['admin']} />,
             children: [
               { path: 'people/:role', element: <PeopleView /> },
-              { path: 'audit', element: <AuditView /> }
+              { path: 'audit', element: <AuditView /> },
+              { path: 'backup', element: <BackupView /> }
             ]
           },
           { path: '*', element: <NotFoundView /> }

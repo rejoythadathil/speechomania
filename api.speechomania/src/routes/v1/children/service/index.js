@@ -1,3 +1,4 @@
+import { deletedMark } from '../../backup/utils/index.js'
 import { audit } from '../../../../../common-service/audit/service/index.js'
 import { SERIAL } from '../../../../../common-service/db/constants/index.js'
 import { db } from '../../../../../common-service/db/service/index.js'
@@ -198,9 +199,15 @@ export function assignLessons(user, id, slugs, ctx) {
 export async function deleteChild(user, id, ctx) {
   await db.$transaction(async (tx) => {
     await findScopedChild(tx, user, id)
+    const current = await tx.children.findUnique({ where: { id } })
     await tx.children.update({
       where: { id },
-      data: { deleted_at: new Date(), status: 'archived', updated_at: new Date() }
+      data: {
+        deleted_at: new Date(),
+        status: 'archived',
+        metadata: { ...current.metadata, deleted: deletedMark(user, { status: current.status }) },
+        updated_at: new Date()
+      }
     })
     await audit(tx, {
       actor: user,

@@ -2,12 +2,15 @@ import { db } from './common-service/db/service/index.js'
 import { logger } from './common-service/logger/service/index.js'
 import { config } from './config/index.js'
 import { app } from './src/app.js'
+import { startPurgeSchedule } from './src/routes/v1/backup/service/index.js'
 
 const server = Bun.serve({ port: config.PORT, fetch: app.fetch })
 logger.info({ port: server.port }, 'api listening')
+const purging = startPurgeSchedule()
 
 async function shutdown(signal) {
   logger.info({ signal }, 'shutting down')
+  clearInterval(purging)
   await server.stop()
   await db.$disconnect()
   process.exit(0)

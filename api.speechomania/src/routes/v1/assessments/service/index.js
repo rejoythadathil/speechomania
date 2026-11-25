@@ -1,3 +1,5 @@
+import { SOFT_DELETED } from '../../backup/constants/index.js'
+import { deletedMark } from '../../backup/utils/index.js'
 import { audit } from '../../../../../common-service/audit/service/index.js'
 import { SERIAL } from '../../../../../common-service/db/constants/index.js'
 import { db } from '../../../../../common-service/db/service/index.js'
@@ -33,7 +35,9 @@ const people = {
 }
 
 const visible = (user) =>
-  user.role === 'admin' ? {} : { status: { in: ['published', 'archived'] } }
+  user.role === 'admin'
+    ? { status: { not: SOFT_DELETED } }
+    : { status: { in: ['published', 'archived'] } }
 
 const assignedTo = (id) => ({ assigned_assessments: { array_contains: [{ assessment_id: id }] } })
 
@@ -188,7 +192,7 @@ export function createAssessment(user, body, ctx) {
 
 async function findDraft(tx, id) {
   const assessment = await tx.assessments.findUnique({ where: { id } })
-  if (!assessment) throw assessmentNotFound()
+  if (!assessment || assessment.status === SOFT_DELETED) throw assessmentNotFound()
   return assessment
 }
 
@@ -248,7 +252,14 @@ export async function removeAssessment(user, id, ctx) {
   await db.$transaction(async (tx) => {
     const current = await findDraft(tx, id)
     if (current.status === 'draft') {
-      await tx.assessments.delete({ where: { id } })
+      await tx.assessments.update({
+        where: { id },
+        data: {
+          status: SOFT_DELETED,
+          metadata: { ...current.metadata, deleted: deletedMark(user, { status: 'draft' }) },
+          updated_at: new Date()
+        }
+      })
     } else if (current.status === 'published') {
       await tx.assessments.update({
         where: { id },

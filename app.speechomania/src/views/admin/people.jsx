@@ -519,13 +519,13 @@ export function PeopleView() {
         title={`Remove ${modal?.person?.full_name}?`}
         message={
           role === 'mentor'
-            ? 'They can no longer sign in, and their children become unassigned. Their remarks stay on each child’s record.'
-            : 'They can no longer sign in. Their history stays in the activity history.'
+            ? 'They can no longer sign in, and their children become unassigned. It moves to Backup, where an admin can restore it until the backup period ends; then it is deleted for good. Restoring them gives back the children who still have no mentor.'
+            : 'They can no longer sign in. It moves to Backup, where an admin can restore it until the backup period ends; then it is deleted for good.'
         }
         confirmLabel="Remove"
         onConfirm={async () => {
           await api(`/users/${modal.person.id}`, { method: 'DELETE' })
-          notify(`${modal.person.full_name} was removed`)
+          notify(`${modal.person.full_name} was moved to Backup`)
           people.reload()
         }}
       />

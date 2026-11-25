@@ -1,3 +1,5 @@
+import { SOFT_DELETED } from '../../backup/constants/index.js'
+import { deletedMark } from '../../backup/utils/index.js'
 import { audit } from '../../../../../common-service/audit/service/index.js'
 import { SERIAL } from '../../../../../common-service/db/constants/index.js'
 import { db } from '../../../../../common-service/db/service/index.js'
@@ -40,7 +42,7 @@ const fields = {
 }
 
 async function visible(tx, user) {
-  if (user.role === 'admin') return {}
+  if (user.role === 'admin') return { status: { not: SOFT_DELETED } }
   if (user.role === 'mentor') return { status: 'published' }
   const children = await tx.children.findMany({
     where: { parent_id: user.id, deleted_at: null },
@@ -164,7 +166,7 @@ export function createLesson(user, body, ctx) {
 
 async function findRaw(tx, id) {
   const lesson = await tx.lessons.findUnique({ where: { id } })
-  if (!lesson) throw lessonNotFound()
+  if (!lesson || lesson.status === SOFT_DELETED) throw lessonNotFound()
   return lesson
 }
 
@@ -333,7 +335,13 @@ export async function removeLesson(user, id, ctx) {
   await db.$transaction(async (tx) => {
     const current = await findRaw(tx, id)
     if (current.status === 'draft') {
-      await tx.lessons.delete({ where: { id } })
+      await tx.lessons.update({
+        where: { id },
+        data: {
+          status: SOFT_DELETED,
+          metadata: { ...current.metadata, deleted: deletedMark(user, { status: 'draft' }) }
+        }
+      })
     } else if (current.status === 'published') {
       await tx.lessons.update({ where: { id }, data: { status: 'archived' } })
     } else {

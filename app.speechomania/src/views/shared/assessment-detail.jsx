@@ -247,7 +247,7 @@ export function AssessmentDetailView() {
               isOpen={modal === 'delete'}
               onOpenChange={() => setModal(null)}
               title="Delete this draft?"
-              message="The draft and its questions are removed."
+              message="The draft and its questions are removed from the list. It moves to Backup, where an admin can restore it until the backup period ends; then it is deleted for good."
               confirmLabel="Delete draft"
               onConfirm={async () => {
                 await api(`/assessments/${data.id}`, { method: 'DELETE' })

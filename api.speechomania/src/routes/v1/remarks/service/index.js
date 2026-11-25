@@ -1,3 +1,4 @@
+import { deletedMark } from '../../backup/utils/index.js'
 import { audit } from '../../../../../common-service/audit/service/index.js'
 import { SERIAL } from '../../../../../common-service/db/constants/index.js'
 import { db } from '../../../../../common-service/db/service/index.js'
@@ -100,7 +101,13 @@ export async function deleteRemark(user, id, ctx) {
   await db.$transaction(async (tx) => {
     const current = await findRemark(tx, user, id)
     if (current.author_id !== user.id && user.role !== 'admin') throw forbidden()
-    await tx.remarks.update({ where: { id }, data: { deleted_at: new Date() } })
+    await tx.remarks.update({
+      where: { id },
+      data: {
+        deleted_at: new Date(),
+        metadata: { ...current.metadata, deleted: deletedMark(user) }
+      }
+    })
     await audit(tx, {
       actor: user,
       action: 'remark.deleted',
